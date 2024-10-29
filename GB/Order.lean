@@ -4,17 +4,37 @@ import Mathlib.Data.Finsupp.Pointwise
 import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Finsupp.Lex
 
+section Monomial
+
 def MonomialType (σ : Type) : Type := σ  →₀ ℕ
 
-noncomputable instance MonomialType.instMul {σ : Type} : Mul (@MonomialType σ) :=
-  Finsupp.instMul
+noncomputable instance MonomialType.instMul {σ : Type} : Mul (MonomialType σ) where
+  mul := Finsupp.instAdd.add
 
-class MonomialOrder (σ : Type) extends (LinearOrder (@MonomialType σ)) where
+-- noncomputable instance : CoeFun (MonomialType σ) (λ_ => σ -> ℕ) where
+--   coe :=  fun f => f.toFun
+-- noncomputable instance : Coe (MonomialType σ) (σ  →₀ ℕ) where
+--   coe :=  fun f => f
+-- noncomputable instance : CoeFun (σ  →₀ ℕ) (λ_ => σ -> ℕ) where
+--   coe :=  fun f => f.toFun
+noncomputable instance : FunLike (MonomialType σ) σ ℕ :=
+  ⟨Finsupp.toFun, by
+    rintro ⟨s, f, hf⟩ ⟨t, g, hg⟩ (rfl : f = g)
+    congr
+    ext a
+    exact (hf _).trans (hg _).symm ⟩
+
+lemma add_apply (a b: MonomialType σ) (x: σ) : (a * b) x = a x + b x := by rfl
+
+class MonomialOrder (σ : Type) extends (LinearOrder (MonomialType σ)) where
   respect : ∀(u v w : @MonomialType σ),  u < v -> u*w < v*w
+  isWellOrder : IsWellOrder (MonomialType σ) (fun x y => x < y)
 
 -- lexicographic order in monomial order
-def lexHelp (σ : Type) [LinearOrder σ] : LinearOrder (@MonomialType σ) :=
+def lexHelp (σ : Type) [LinearOrder σ] : LinearOrder (MonomialType σ) :=
   @Finsupp.Lex.linearOrder σ Nat _ _ Nat.instLinearOrder
+
+def lex_refl (u: MonomialType σ) : ofLex u = u := by rfl
 
 def lex (σ : Type) [LinearOrder σ] : MonomialOrder σ where
   le := (lexHelp σ).le
@@ -26,14 +46,18 @@ def lex (σ : Type) [LinearOrder σ] : MonomialOrder σ where
   respect := by (
     intro u v w uvlt
     rcases uvlt with ⟨x₁, h1, h2⟩
-    -- dsimp [mul]
-    -- rw [Finsupp.toFun] at h2
-    -- rw [ofLex, Equiv.refl] at h2; simp at h2
+    rw [lex_refl, lex_refl] at h1
+    rw [lex_refl, lex_refl] at h2
     constructor; constructor
     any_goals exact x₁
-    -- intro x₂ h1; rw [ofLex, Finsupp.mul_apply]
-    sorry
-    sorry
+    . intro x₂ h3
+      rw [lex_refl, lex_refl]
+      have h4 := h1 x₂ h3
+      rw [add_apply, add_apply]
+      rw [h4]
+    . rw [lex_refl, lex_refl]; simp
+      rw [add_apply, add_apply]
+      exact Nat.add_lt_add_right h2 (w x₁)
   )
   compare := (lexHelp σ).compare
   decidableEq := (lexHelp σ).decidableEq
