@@ -36,15 +36,9 @@ def lexHelp (σ : Type) [LinearOrder σ] : LinearOrder (MonomialType σ) :=
 
 def lex_refl (u: MonomialType σ) : ofLex u = u := by rfl
 
-def lex (σ : Type) [LinearOrder σ] : MonomialOrder σ where
-  le := (lexHelp σ).le
-  le_refl := (lexHelp σ).le_refl
-  le_trans := (lexHelp σ).le_trans
-  le_antisymm := (lexHelp σ).le_antisymm
-  le_total := (lexHelp σ).le_total
-  decidableLE := (lexHelp σ).decidableLE
-  respect := by (
-    intro u v w uvlt
+lemma lex_ord_respect [LinearOrder σ] (u v w : MonomialType σ) :
+  (lexHelp σ).lt u v → (lexHelp σ).lt (u * w) (v * w) := by
+    intro uvlt
     rcases uvlt with ⟨x₁, h1, h2⟩
     rw [lex_refl, lex_refl] at h1
     rw [lex_refl, lex_refl] at h2
@@ -58,9 +52,27 @@ def lex (σ : Type) [LinearOrder σ] : MonomialOrder σ where
     . rw [lex_refl, lex_refl]; simp
       rw [add_apply, add_apply]
       exact Nat.add_lt_add_right h2 (w x₁)
-  )
+
+instance lex_isWellOrder [LinearOrder σ] : IsWellOrder (MonomialType σ) fun x y ↦ (lexHelp σ).lt x y := by
+  sorry
+
+def lex (σ : Type) [LinearOrder σ] : MonomialOrder σ where
+  le := (lexHelp σ).le
+  le_refl := (lexHelp σ).le_refl
+  le_trans := (lexHelp σ).le_trans
+  le_antisymm := (lexHelp σ).le_antisymm
+  le_total := (lexHelp σ).le_total
+  decidableLE := (lexHelp σ).decidableLE
+  respect := lex_ord_respect
   compare := (lexHelp σ).compare
   decidableEq := (lexHelp σ).decidableEq
+  isWellOrder := lex_isWellOrder
+  lt_iff_le_not_le := by
+    intros a b
+    exact (lexHelp σ).lt_iff_le_not_le a b
+  compare_eq_compareOfLessAndEq := by
+    intros a b
+    exact (lexHelp σ).compare_eq_compareOfLessAndEq a b
 
 def monomials [Field R] (p : MvPolynomial σ R) : Finset (MonomialType σ) :=
   p.support
