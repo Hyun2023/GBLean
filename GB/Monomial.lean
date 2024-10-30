@@ -43,6 +43,9 @@ structure FiniteVarPoly [Field F] (n : ℕ) where
   mon := (Finset (vars -> ℕ))
   poly : mon -> ℕ
 
--- Polyomial with finite variable is polynomial. But why it doesn't work?
-instance [Field F]: Coe (@FiniteVarPoly F _ n) (MvPolynomial ℕ F) where
-  coe := sorry
+noncomputable instance {F : Type} (n : ℕ) [Field F]: CoeOut (@FiniteVarPoly F _ n) (MvPolynomial ℕ F) where
+  coe := fun f => {
+    support := sorry
+    toFun := sorry
+    mem_support_toFun := sorry
+  }
