@@ -36,16 +36,3 @@ def leading_monomial {R} [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomia
 
 def leading_coeff {R} [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): R :=
   MvPolynomial.coeff (leading_monomial p p_nonzero) p
-
--- Polynomial with specified n variables on Field F
-structure FiniteVarPoly [Field F] (n : ℕ) where
-  vars := Finset.range n
-  mon := (Finset (vars -> ℕ))
-  poly : mon -> ℕ
-
-noncomputable instance {F : Type} (n : ℕ) [Field F]: CoeOut (@FiniteVarPoly F _ n) (MvPolynomial ℕ F) where
-  coe := fun f => {
-    support := sorry
-    toFun := sorry
-    mem_support_toFun := sorry
-  }
