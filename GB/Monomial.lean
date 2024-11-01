@@ -53,9 +53,31 @@ structure FinteVarPoly [CommRing R] (n : ℕ) where
   poly : monomials -> R
 
 
-def FinsetSuppIsFinsupp [DecidableEq A] [Zero B] (A' : Finset A) (f : A' -> B) : Finsupp A B:=
+def FinsetSuppIsFinsupp [DecidableEq A] [DecidableEq B] [Zero B] (A' : Finset A) (f : A' -> B) : Finsupp A B:=
+  let lift := fun x :A => if h: x ∈ A' then f ⟨x,h⟩ else 0
   {
-    support := A'
-    toFun := fun x :A => if h: x ∈ A' then f ⟨ x,h⟩ else 0
-    mem_support_toFun := sorry
+    support := A'.filter (fun x : A => lift x ≠ 0 )
+    toFun := lift
+    mem_support_toFun := by
+    {
+      intros x
+      constructor
+      simp
+      {
+        simp
+        intros lftx
+        constructor
+        {
+          by_cases h: x ∈ A'
+          { exact h }
+          {
+            have hh : lift x =0 := by simp [h, lift]
+            exfalso;apply lftx;exact hh
+          }
+        }
+        {
+          exact lftx
+        }
+      }
+    }
   }
