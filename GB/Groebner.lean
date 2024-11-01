@@ -19,9 +19,8 @@ def leading_monomial_set [Finite σ] [Field R] [MonomialOrder σ ] (P : Set (MvP
   let monomial_set := Set.image (leading_monomial_unsafe) (P_nonzero)
   monomial_set
 
-structure GroebnerBasis (σ R : Type) [Finite σ] [fr: Field R] [MonomialOrder σ]  where
+structure GroebnerBasis [Finite σ] [Field R] [MonomialOrder σ] (I : Ideal (MvPolynomial σ R))   where
   G : Finset (MvPolynomial σ R)
-  I : Ideal (MvPolynomial σ R)
   G_spans_I : Ideal.span G = I
   -- leading_monomial : MvPolynomial σ R -> Monomial σ
   initial_spans_initial : Ideal.span (leading_monomial_set (Finset.toSet G))

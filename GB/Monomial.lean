@@ -44,3 +44,18 @@ def leading_monomial_unsafe {R} [CommRing R] [ord : MonomialOrder σ ] (p : MvPo
 
 def leading_coeff {R} [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): R :=
   MvPolynomial.coeff (leading_monomial p p_nonzero) p
+
+
+-- Finite Variable Polynomial
+structure FinteVarPoly [CommRing R] (n : ℕ) where
+  vars := Finset.range n
+  monomials : Finset (vars -> ℕ)
+  poly : monomials -> R
+
+
+def FinsetSuppIsFinsupp [DecidableEq A] [Zero B] (A' : Finset A) (f : A' -> B) : Finsupp A B:=
+  {
+    support := A'
+    toFun := fun x :A => if h: x ∈ A' then f ⟨ x,h⟩ else 0
+    mem_support_toFun := sorry
+  }
