@@ -34,29 +34,52 @@ class MonomialOrder (σ : Type) extends (LinearOrder (MonomialType σ)) where
 def lexHelp (σ : Type) [LinearOrder σ] : LinearOrder (MonomialType σ) :=
   @Finsupp.Lex.linearOrder σ Nat _ _ Nat.instLinearOrder
 
-def lex_refl (u: MonomialType σ) : ofLex u = u := by rfl
+lemma lex_refl (u: MonomialType σ) : ofLex u = u := by rfl
 
 lemma lex_ord_respect [LinearOrder σ] (u v w : MonomialType σ) :
   (lexHelp σ).lt u v → (lexHelp σ).lt (u * w) (v * w) := by
     intro uvlt
     rcases uvlt with ⟨x₁, h1, h2⟩
-    rw [lex_refl, lex_refl] at h1
-    rw [lex_refl, lex_refl] at h2
-    constructor; constructor
+    rw [lex_refl, lex_refl] at *
+    constructor; constructor <;>
+    try rw [lex_refl, lex_refl]
     any_goals exact x₁
     . intro x₂ h3
-      rw [lex_refl, lex_refl]
       have h4 := h1 x₂ h3
       rw [add_apply, add_apply]
       rw [h4]
-    . rw [lex_refl, lex_refl]; simp
-      rw [add_apply, add_apply]
+    . simp; rw [add_apply, add_apply]
       exact Nat.add_lt_add_right h2 (w x₁)
 
-instance lex_isWellOrder [LinearOrder σ] : IsWellOrder (MonomialType σ) fun x y ↦ (lexHelp σ).lt x y := by
-  sorry
+-- Prod.lexAccessible is usefull only for finite σ.
+-- If σ is infinite, (1,0...) < (1,1,0...) < (1,1,1,0...) is a infinite decreasing chain i.e. lex is not well founded.
+def Finite.max σ [Finite σ] [PartialOrder σ] :
+  (m:σ) ×' (∀ x : σ, x ≤ m) := sorry
 
-def lex (σ : Type) [LinearOrder σ] : MonomialOrder σ where
+instance lex_isWellOrder [LinearOrder σ] [Finite σ] [IsStrictOrder ℕ Nat.lt_wfRel.1] :
+    IsWellOrder (MonomialType σ) fun x y ↦ (lexHelp σ).lt x y where
+  wf := by
+    -- have rank : MonomialType σ → ℕ := by sorry
+    -- apply Subrelation.wf
+    -- any_goals apply InvImage.wf rank Nat.lt_wfRel.2
+    -- intro a b h
+    -- rcases h with ⟨x₁, h1, h2⟩
+    -- rw [lex_refl, lex_refl] at *
+    -- dsimp [InvImage]; rw [WellFoundedRelation.rel]; dsimp [Nat.lt_wfRel]
+    rw [RelEmbedding.wellFounded_iff_no_descending_seq]
+    constructor; intro h
+    rcases h with ⟨α, h⟩
+    have nat_wf : ∀(s: ℕ → ℕ), ∃k, ∀ i≥k, s i = s (i+1):= by
+      have nat_wf := Nat.lt_wfRel.2
+      rw [RelEmbedding.wellFounded_iff_no_descending_seq] at nat_wf
+      rw [isEmpty_iff] at nat_wf
+      simp [RelEmbedding] at nat_wf
+      sorry
+    have xₘ := (Finite.max σ).1
+    rcases nat_wf (fun n => α n xₘ) with ⟨k, h⟩
+    sorry
+
+def lex (σ : Type) [LinearOrder σ] [Finite σ] : MonomialOrder σ where
   le := (lexHelp σ).le
   le_refl := (lexHelp σ).le_refl
   le_trans := (lexHelp σ).le_trans
