@@ -8,6 +8,10 @@ import Mathlib.Data.Finset.Basic
 -- Definition of Monomial and related operation
 def Monomial (σ : Type) : Type := σ  →₀ ℕ
 
+def MonomialExists : (Inhabited (Monomial σ)) :=
+  Finsupp.instInhabited
+
+
 noncomputable instance Monomial.instMul : Mul (Monomial σ) where
   mul := fun f g => Finsupp.instAdd.add f g
 
@@ -33,6 +37,10 @@ def term_exists [CommRing R] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : p.s
 
 def leading_monomial {R} [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): Monomial σ :=
   @Finset.max' _ ord.toLinearOrder p.support (term_exists p p_nonzero)
+
+-- If p is zero, it gives runtime error. Wait, runtime error in proof assistant?
+def leading_monomial_unsafe {R} [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
+  @Option.get! _ MonomialExists (@Finset.max _ ord.toLinearOrder p.support)
 
 def leading_coeff {R} [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): R :=
   MvPolynomial.coeff (leading_monomial p p_nonzero) p
