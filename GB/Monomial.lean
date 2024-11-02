@@ -48,23 +48,28 @@ instance Monomial.instMul [DecidableEq σ] : Mul (Monomial σ) where
       . rcases infg <;> contradiction
   ⟩
 
--- def Finset.ofSet (A : Finset (Finset T)) : Finset T := by
---   rcases A with ⟨A,P⟩
---   rcases A
---   constructor
+instance [DecidableEq σ] : Coe (Monomial σ) (σ →₀ ℕ) where
+  coe := fun m => ⟨
+    m.support,
+    fun x => if p: x ∈ m.support then m.toFun ⟨x,p⟩  else 0,
+    by
+      intro x; constructor <;> intro h
+      . simp; exists h
+        apply m.nonzero
+      . simp at h; exact h.1
+    ⟩
 
--- def asdfdsf (x: Set (Finset T)) : Finset T := by apply? using x
+instance [DecidableEq σ] : Coe (σ →₀ ℕ) (Monomial σ) where
+  coe := fun m => ⟨
+    m.support,
+    fun x => m.toFun x.1,
+    by
+      rintro ⟨x,p⟩; simp
+      apply (m.mem_support_toFun x).mp
+      assumption
+    ⟩
 
--- instance setFintypeSet (m : Monomial σ) : Fintype ↑(m ⁻¹' fun x ↦ x ≠ 1) := by sorry
-
-noncomputable instance : Coe (Monomial σ) (σ →₀ ℕ) where
-  -- coe := fun m => ⟨@Set.toFinset (Finset σ) (m ⁻¹' (fun x => x≠1)) (setFintypeSet m), sorry, sorry⟩
-  coe := fun m => ⟨sorry, sorry, sorry⟩
-
-noncomputable instance : Coe (σ →₀ ℕ) (Monomial σ) where
-  coe := fun m x => Finsupp.toFun m x
-
-noncomputable instance [CommRing R] : Coe (Monomial σ) (MvPolynomial σ R) where
+noncomputable instance [DecidableEq σ] [CommRing R] : Coe (Monomial σ) (MvPolynomial σ R) where
   coe := fun m => MvPolynomial.monomial m 1
 
 noncomputable def LCM (f g :Monomial σ) : (Monomial σ) := fun x => Nat.max (f x) (g x)
