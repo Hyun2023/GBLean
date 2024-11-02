@@ -3,7 +3,7 @@ import Mathlib.Algebra.Ring.Defs
 import Mathlib.Data.Finsupp.Pointwise
 import Mathlib.Data.Finset.Basic
 
-
+section Monomial
 
 -- Definition of Monomial and related operation
 structure Monomial (σ : Type) : Type where
@@ -71,6 +71,39 @@ instance [DecidableEq σ] : Coe (σ →₀ ℕ) (Monomial σ) where
 
 noncomputable instance [DecidableEq σ] [CommRing R] : Coe (Monomial σ) (MvPolynomial σ R) where
   coe := fun m => MvPolynomial.monomial m 1
+
+lemma funEq (f₁ f₂: A → B) :
+    (f₁=f₂) -> ∀x, f₁ x = f₂ x := by
+  intro EQ _; rw [EQ]
+
+instance [DecidableEq σ] : FunLike (Monomial σ) σ ℕ :=
+  ⟨fun m x =>
+    if p: x ∈ m.support then m.toFun ⟨x,p⟩ else 0,
+  by
+    rintro ⟨A₁,p₁,nonzero₁⟩ ⟨A₂,p₂,nonzero₂⟩ h; simp at h
+    apply funEq at h
+    have G1: A₁ = A₂ := by
+      apply (@Finset.instIsAntisymmSubset σ).antisymm
+      . intro x inA
+        have h2 := h x; simp [inA] at h2
+        rcases em (x∈A₂) with _|p; assumption
+        simp [p] at h2
+        exfalso; exact nonzero₁ ⟨x,inA⟩ h2
+      . intro x inA
+        have h2 := h x; simp [inA] at h2
+        rcases em (x∈A₁) with _|p; assumption
+        simp [p] at h2
+        exfalso; apply nonzero₂ ⟨x,inA⟩; rw[h2]
+    -- rw [G1] at p₁
+    have G1' : ({ x // x ∈ A₁ } → ℕ) = ({ x // x ∈ A₂ } → ℕ) := by rw [G1]
+    have G2: Equiv.cast G1' p₁ = p₂ := by
+      ext x; have h2 := h x
+      rcases x with ⟨x,inA⟩; simp [inA] at h2
+      rw [← G1] at inA; simp [inA] at h2
+      rw [← h2]; simp; sorry
+    congr!
+    sorry
+    ⟩
 
 noncomputable def LCM (f g :Monomial σ) : (Monomial σ) := fun x => Nat.max (f x) (g x)
 
