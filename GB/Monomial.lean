@@ -6,31 +6,46 @@ import Mathlib.Data.Finset.Basic
 
 
 -- Definition of Monomial and related operation
-def Monomial (σ : Type) : Type := (X: Finset σ) × (X → ℕ)
+structure Monomial (σ : Type) : Type where
+  support : Finset σ
+  toFun : support → ℕ
+  nonzero : ∀x, toFun x ≠ 0
 
-def MonomialExists : (Inhabited (Monomial σ)) := ⟨Finset.empty, fun _ => 0⟩
+def MonomialExists : (Inhabited (Monomial σ)) :=
+  ⟨Finset.empty, fun _ => 0, by
+    rintro ⟨x,_,_⟩
+  ⟩
+
+lemma Finset.union_contradiction [DecidableEq σ] {A B : Finset σ} :
+    (x ∉ A) -> (x ∉ B) -> x ∉ (A ∪ B) := by
+  intro h1 h2
+  apply Finset.not_mem_union.mpr
+  constructor <;> assumption
 
 instance Monomial.instMul [DecidableEq σ] : Mul (Monomial σ) where
-  mul f g := ⟨f.1 ∪ g.1, by
-    intros x; rcases x with ⟨x, infg⟩
-    have ite (f: Monomial σ) (v1 : (x∈f.1) → ℕ) (v2 : (x∉f.1) → ℕ) : ℕ :=
-      Decidable.casesOn (Finset.decidableMem x f.1) v2 v1
-    apply (ite f) <;> intro pf
-    . apply (ite g) <;> intro pg
-      -- x∈f.1 && x∈g.1, return f.2 x + g.2 x
-      . apply Nat.add
-        . apply f.2; constructor; exact pf
-        . apply g.2; constructor; exact pg
-      -- x∈f.1 && x∉g.1, return f.2 x
-      . apply f.2; constructor; exact pf
-    . apply (ite g) <;> intro pg
-      -- x∉f.1 && x∈g.1, return g.2 x
-      . apply g.2; constructor; exact pg
-      -- x∉f.1 && x∉g.1, contradicton
-      . have : x ∉ f.fst ∪ g.fst := by
-          refine Finset.not_mem_union.mpr ?_
-          constructor <;> assumption
+  mul f g := ⟨
+    f.1 ∪ g.1,
+    fun ⟨x, infg⟩ =>
+      if pf: x∈f.1 then
+        if pg: x∈g.1 then (f.2 ⟨x, pf⟩ + g.2 ⟨x, pg⟩)
+        else (f.2 ⟨x, pf⟩)
+      else
+        if pg: x∈g.1 then g.2 ⟨x, pg⟩
+        else by
+          have := Finset.union_contradiction pf pg
+          contradiction,
+    by
+      simp; intro x infg G
+      rcases em (x∈f.1) with pf|pf <;>
+      rcases em (x∈g.1) with pg|pg <;>
+      simp [pf, pg] at G
+      . have nonzeroF := f.nonzero ⟨x,pf⟩
+        rcases G; contradiction
+      . have nonzeroF := f.nonzero ⟨x,pf⟩
         contradiction
+      . have nonzeroG := g.nonzero ⟨x,pg⟩
+        contradiction
+      . rcases infg <;> contradiction
   ⟩
 
 -- def Finset.ofSet (A : Finset (Finset T)) : Finset T := by
