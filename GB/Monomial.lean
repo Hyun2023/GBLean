@@ -94,41 +94,71 @@ instance [DecidableEq σ] : FunLike (Monomial σ) σ ℕ :=
         rcases em (x∈A₁) with _|p; assumption
         simp [p] at h2
         exfalso; apply nonzero₂ ⟨x,inA⟩; rw[h2]
-    -- rw [G1] at p₁
-    have G1' : ({ x // x ∈ A₁ } → ℕ) = ({ x // x ∈ A₂ } → ℕ) := by rw [G1]
-    have G2: Equiv.cast G1' p₁ = p₂ := by
+    -- here "rw [G1] at p₁" gives p₁✝ at goal leaving p₁ at hyp
+    -- which is just rejected tactic in coq (error: p₁ appears in the goal!)
+    have G2: Equiv.cast (by rw [G1]) p₁ = p₂ := by
       ext x; have h2 := h x
       rcases x with ⟨x,inA⟩; simp [inA] at h2
       rw [← G1] at inA; simp [inA] at h2
       rw [← h2]; simp; sorry
     congr!
+    -- congr! tactic leaves subgoal of Heq, which is almost impossible to solve.
+    -- see https://proofassistants.stackexchange.com/questions/3856/lean4-how-to-construct-an-heq-between-dependent-functions
+    -- can we use Equiv.cast to construct object of dependent sum type?
     sorry
     ⟩
 
-noncomputable def LCM (f g :Monomial σ) : (Monomial σ) := fun x => Nat.max (f x) (g x)
+-- almost same as Monomial.instMul. maybe defining general binary operation (and use it to define Monomial.instMul and LCM) might be better.
+noncomputable def LCM [DecidableEq σ] (f g :Monomial σ) : (Monomial σ) where
+  support := f.1 ∪ g.1
+  toFun :=
+    fun ⟨x, infg⟩ =>
+      if pf: x∈f.1 then
+        if pg: x∈g.1 then Nat.max (f.2 ⟨x, pf⟩) (g.2 ⟨x, pg⟩)
+        else (f.2 ⟨x, pf⟩)
+      else
+        if pg: x∈g.1 then g.2 ⟨x, pg⟩
+        else by
+          have := Finset.union_contradiction pf pg
+          contradiction
+  nonzero := by
+      simp; intro x infg G
+      rcases em (x∈f.1) with pf|pf <;>
+      rcases em (x∈g.1) with pg|pg <;>
+      simp [pf, pg] at G
+      . have nonzeroF := f.nonzero ⟨x,pf⟩
+        rcases G; contradiction
+      . have nonzeroF := f.nonzero ⟨x,pf⟩
+        contradiction
+      . have nonzeroG := g.nonzero ⟨x,pg⟩
+        contradiction
+      . rcases infg <;> contradiction
 
 
 -- Monomial Order
-class MonomialOrder (σ : Type) extends (LinearOrder (Monomial σ)) where
+class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial σ)) where
   respect : ∀(u v w : @Monomial σ),  u < v -> u*w < v*w
   isWellOrder : IsWellOrder (Monomial σ) (fun x y => x < y)
 
-def monomials [CommRing R] (p : MvPolynomial σ R) : Finset (Monomial σ) :=
-  p.support
+def monomials [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) : Finset (Monomial σ) :=
+  -- p.support
+  sorry
 
 
 -- Leading Monomial and Term
-def term_exists [CommRing R] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : p.support.Nonempty := by
+def term_exists [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : p.support.Nonempty := by
   exact (Finsupp.support_nonempty_iff.mpr p_nonzero)
 
-def leading_monomial {R} [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): Monomial σ :=
-  @Finset.max' _ ord.toLinearOrder p.support (term_exists p p_nonzero)
+def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): Monomial σ :=
+  @Finset.max' _ ord.toLinearOrder (monomials p)
+  -- (term_exists p p_nonzero)
+  sorry
 
 -- If p is zero, it gives runtime error. Wait, runtime error in proof assistant?
-def leading_monomial_unsafe {R} [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
-  @Option.get! _ MonomialExists (@Finset.max _ ord.toLinearOrder p.support)
+def leading_monomial_unsafe [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
+  @Option.get! _ MonomialExists (@Finset.max _ ord.toLinearOrder (monomials p))
 
-def leading_coeff {R} [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): R :=
+def leading_coeff [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): R :=
   MvPolynomial.coeff (leading_monomial p p_nonzero) p
 
 
