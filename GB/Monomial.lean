@@ -113,6 +113,15 @@ def toMonomial_emb [DecidableEq σ] : (σ →₀ ℕ) ↪ (Monomial σ) where
   toFun := (@toMonomial σ _).coe
   inj' := toMonomial_injective
 
+lemma toMonomial_ofMonomial_inverse [DecidableEq σ] : ∀ x, (@toMonomial σ _).coe (ofMonomial.coe x) = x := by
+  intro x; rw [Coe.coe, Coe.coe, toMonomial, ofMonomial]; simp
+
+lemma ofMonomial_toMonomial_inverse [DecidableEq σ] : ∀ x, (@ofMonomial σ _).coe (toMonomial.coe x) = x := by
+  rintro ⟨A,p,h⟩ ; rw [Coe.coe, Coe.coe, toMonomial, ofMonomial]; simp
+  ext x; have h' := h x
+  rcases em (x ∈ A) with inA|inA <;> simp [inA]
+  symm; by_contra!; rw [← h'] at this; contradiction
+
 noncomputable instance [DecidableEq σ] [CommRing R] : Coe (Monomial σ) (MvPolynomial σ R) where
   coe := fun m => MvPolynomial.monomial m 1
 
@@ -157,16 +166,19 @@ def monomials [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) : Finset (Mo
 
 
 -- Leading Monomial and Term
-def term_exists [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : p.support.Nonempty := by
-  exact (Finsupp.support_nonempty_iff.mpr p_nonzero)
+def term_exists [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : (monomials p).Nonempty := by
+  have exM : exists m, MvPolynomial.coeff m p ≠ 0 := by
+    rw [MvPolynomial.ne_zero_iff] at p_nonzero
+    exact p_nonzero
+  rcases exM with ⟨m, mcond⟩
+  constructor; any_goals exact (toMonomial.coe m)
+  rw [monomials, toMonomial_emb]
+  apply Finset.mem_map.mpr; simp
+  exists (m)
 
 def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): Monomial σ :=
   @Finset.max' _ ord.toLinearOrder (monomials p)
-  (by
-    rcases @MonomialExists σ with ⟨mex⟩
-    constructor; any_goals exact mex
-    rw [monomials]
-    sorry)
+  (term_exists p p_nonzero)
 
 -- If p is zero, it gives runtime error. Wait, runtime error in proof assistant?
 def leading_monomial_unsafe [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
