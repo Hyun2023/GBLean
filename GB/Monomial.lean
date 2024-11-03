@@ -48,7 +48,7 @@ instance Monomial.instMul [DecidableEq σ] : Mul (Monomial σ) where
       . rcases infg <;> contradiction
   ⟩
 
-instance [DecidableEq σ] : Coe (Monomial σ) (σ →₀ ℕ) where
+instance ofMonomial [DecidableEq σ] : Coe (Monomial σ) (σ →₀ ℕ) where
   coe := fun m => ⟨
     m.support,
     fun x => if p: x ∈ m.support then m.toFun ⟨x,p⟩  else 0,
@@ -59,28 +59,13 @@ instance [DecidableEq σ] : Coe (Monomial σ) (σ →₀ ℕ) where
       . simp at h; exact h.1
     ⟩
 
-instance [DecidableEq σ] : Coe (σ →₀ ℕ) (Monomial σ) where
-  coe := fun m => ⟨
-    m.support,
-    fun x => m.toFun x.1,
-    by
-      rintro ⟨x,p⟩; simp
-      apply (m.mem_support_toFun x).mp
-      assumption
-    ⟩
-
-noncomputable instance [DecidableEq σ] [CommRing R] : Coe (Monomial σ) (MvPolynomial σ R) where
-  coe := fun m => MvPolynomial.monomial m 1
-
 lemma funEq (f₁ f₂: A → B) :
     (f₁=f₂) -> ∀x, f₁ x = f₂ x := by
   intro EQ _; rw [EQ]
 
-instance [DecidableEq σ] : FunLike (Monomial σ) σ ℕ :=
-  ⟨fun m x =>
-    if p: x ∈ m.support then m.toFun ⟨x,p⟩ else 0,
-  by
-    rintro ⟨A₁,p₁,nonzero₁⟩ ⟨A₂,p₂,nonzero₂⟩ h; simp at h
+lemma Monomial_Funlike_injective [DecidableEq σ] : Function.Injective (fun m => ((@ofMonomial σ _).coe m).toFun) := by
+    rintro ⟨A₁,p₁,nonzero₁⟩ ⟨A₂,p₂,nonzero₂⟩ h
+    rw [Coe.coe, ofMonomial] at h; simp at h
     apply funEq at h
     have G1: A₁ = A₂ := by
       apply (@Finset.instIsAntisymmSubset σ).antisymm
@@ -96,17 +81,44 @@ instance [DecidableEq σ] : FunLike (Monomial σ) σ ℕ :=
         exfalso; apply nonzero₂ ⟨x,inA⟩; rw[h2]
     -- here "rw [G1] at p₁" gives p₁✝ at goal leaving p₁ at hyp
     -- which is just rejected tactic in coq (error: p₁ appears in the goal!)
+    congr!
+    -- congr! tactic leaves subgoal of Heq, which is almost impossible to solve.
+    -- see https://proofassistants.stackexchange.com/questions/3856/lean4-how-to-construct-an-heq-between-dependent-functions
+    -- can we use Equiv.cast to construct object of dependent sum type?
     have G2: Equiv.cast (by rw [G1]) p₁ = p₂ := by
       ext x; have h2 := h x
       rcases x with ⟨x,inA⟩; simp [inA] at h2
       rw [← G1] at inA; simp [inA] at h2
       rw [← h2]; simp; sorry
-    congr!
-    -- congr! tactic leaves subgoal of Heq, which is almost impossible to solve.
-    -- see https://proofassistants.stackexchange.com/questions/3856/lean4-how-to-construct-an-heq-between-dependent-functions
-    -- can we use Equiv.cast to construct object of dependent sum type?
     sorry
+
+instance toMonomial [DecidableEq σ] : Coe (σ →₀ ℕ) (Monomial σ) where
+  coe := fun m => ⟨
+    m.support,
+    fun x => m.toFun x.1,
+    by
+      rintro ⟨x,p⟩; simp
+      apply (m.mem_support_toFun x).mp
+      assumption
     ⟩
+
+lemma toMonomial_injective [DecidableEq σ] : Function.Injective (@toMonomial σ _).coe := by
+  rintro ⟨A₁,p₁,nonzero₁⟩ ⟨A₂,p₂,nonzero₂⟩ h
+  rw [Coe.coe, toMonomial] at h; simp at h
+  rcases h with ⟨h1, h2⟩
+  congr!; ext x
+  sorry
+
+def toMonomial_emb [DecidableEq σ] : (σ →₀ ℕ) ↪ (Monomial σ) where
+  toFun := (@toMonomial σ _).coe
+  inj' := toMonomial_injective
+
+noncomputable instance [DecidableEq σ] [CommRing R] : Coe (Monomial σ) (MvPolynomial σ R) where
+  coe := fun m => MvPolynomial.monomial m 1
+
+instance Monomial.Funlike [DecidableEq σ] : FunLike (Monomial σ) σ ℕ where
+  coe := fun m => ((@ofMonomial σ _).coe m).toFun
+  coe_injective' := Monomial_Funlike_injective
 
 -- almost same as Monomial.instMul. maybe defining general binary operation (and use it to define Monomial.instMul and LCM) might be better.
 noncomputable def LCM [DecidableEq σ] (f g :Monomial σ) : (Monomial σ) where
@@ -141,8 +153,7 @@ class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial 
   isWellOrder : IsWellOrder (Monomial σ) (fun x y => x < y)
 
 def monomials [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) : Finset (Monomial σ) :=
-  -- p.support
-  sorry
+  Finset.map toMonomial_emb p.support
 
 
 -- Leading Monomial and Term
@@ -151,8 +162,11 @@ def term_exists [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) (p_nonzero
 
 def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): Monomial σ :=
   @Finset.max' _ ord.toLinearOrder (monomials p)
-  -- (term_exists p p_nonzero)
-  sorry
+  (by
+    rcases @MonomialExists σ with ⟨mex⟩
+    constructor; any_goals exact mex
+    rw [monomials]
+    sorry)
 
 -- If p is zero, it gives runtime error. Wait, runtime error in proof assistant?
 def leading_monomial_unsafe [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
