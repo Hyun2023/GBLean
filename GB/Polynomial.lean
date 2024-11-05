@@ -23,3 +23,7 @@ instance FiniteVarPoly.instAdd [DecidableEq σ] [DecidableEq R] [CommRing R] : A
 
 instance FiniteVarPoly.instSub [DecidableEq σ] [DecidableEq R] [CommRing R] : Sub (FiniteVarPoly σ R) where
   sub := CFinsupp.binop' (fun (x y : R) => x+y)
+
+-- def leading_monomial2 [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : FiniteVarPoly σ R) (p_nonzero : p ≠ 0): Monomial σ :=
+--   @Finset.max' _ ord.toLinearOrder (monomials p)
+--   (term_exists p p_nonzero)

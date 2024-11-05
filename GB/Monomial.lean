@@ -49,6 +49,7 @@ instance Monomial.instDvd [DecidableEq σ] : Dvd (Monomial σ) where
 class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial σ)) where
   respect : ∀(u v w : @Monomial σ),  u < v -> u*w < v*w
   isWellOrder : IsWellOrder (Monomial σ) (fun x y => x < y)
+  decidableOrder : ∀(u v : @Monomial σ), Decidable (u < v)
 
 def monomials [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) : Finset (Monomial σ) :=
   Finset.map toCFinsupp_emb p.support
