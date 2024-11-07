@@ -4,6 +4,9 @@ open Monomial
 -- Finite Variable Polynomial
 def FiniteVarPoly (σ : Type) (R : Type) [CommRing R] := CFinsupp (Monomial σ) R
 
+-- instance FiniteVarPoly_CommRing [CommRing R] : CommRing (FiniteVarPoly σ R) where
+
+
 noncomputable def ofFiniteVarPoly [DecidableEq σ] [CommRing R] : Coe (FiniteVarPoly σ R) (MvPolynomial σ R) where
   coe m := Finsupp.mapDomain ofCFinsupp.coe (ofCFinsupp.coe m)
 
@@ -59,5 +62,3 @@ def leading_coeff2 [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : Finite
     unfold leading_monomial2
     apply Finset.max'_mem
   ⟩
-
-  -- MvPolynomial.coeff (leading_monomial2 p p_nonzero) p
