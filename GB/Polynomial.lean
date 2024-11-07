@@ -45,3 +45,13 @@ def zeropoly [DecidableEq σ] [CommRing R] : FiniteVarPoly σ R :=
 def leading_monomial2 [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : FiniteVarPoly σ R) (p_nonzero : (CFinsupp.support p).Nonempty): Monomial σ :=
   @Finset.max' _ ord.toLinearOrder (CFinsupp.support p)
   p_nonzero
+
+-- def coeff2 [DecidableEq σ] [CommRing R] (p : FiniteVarPoly σ R)
+
+def leading_coeff2 [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : FiniteVarPoly σ R) (p_nonzero : (CFinsupp.support p).Nonempty): R :=
+  p.toFun ⟨leading_monomial2 p p_nonzero, by
+    unfold leading_monomial2
+    apply Finset.max'_mem
+  ⟩
+
+  -- MvPolynomial.coeff (leading_monomial2 p p_nonzero) p
