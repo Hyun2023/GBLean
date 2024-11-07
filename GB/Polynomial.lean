@@ -23,3 +23,8 @@ instance FiniteVarPoly.instAdd [DecidableEq σ] [DecidableEq R] [CommRing R] : A
 
 instance FiniteVarPoly.instSub [DecidableEq σ] [DecidableEq R] [CommRing R] : Sub (FiniteVarPoly σ R) where
   sub := CFinsupp.binop' (fun (x y : R) => x+y)
+
+
+instance MvPolynomial.instFunLike [DecidableEq σ] [CommRing R] : FunLike (MvPolynomial σ R) (σ→₀ℕ) R where
+  coe m := m.toFun
+  coe_injective' := Finsupp.instFunLike.2
