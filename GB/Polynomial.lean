@@ -22,8 +22,16 @@ instance FiniteVarPoly.instAdd [DecidableEq σ] [DecidableEq R] [CommRing R] : A
   add := CFinsupp.binop' (fun (x y : R) => x+y)
 
 instance FiniteVarPoly.instSub [DecidableEq σ] [DecidableEq R] [CommRing R] : Sub (FiniteVarPoly σ R) where
-  sub := CFinsupp.binop' (fun (x y : R) => x+y)
+  sub := CFinsupp.binop' (fun (x y : R) => x-y)
 
--- def leading_monomial2 [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : FiniteVarPoly σ R) (p_nonzero : p ≠ 0): Monomial σ :=
---   @Finset.max' _ ord.toLinearOrder (monomials p)
---   (term_exists p p_nonzero)
+def zeropoly [DecidableEq σ] [CommRing R] : FiniteVarPoly σ R :=
+  ⟨Finset.empty, fun _ => 0, by
+    rintro ⟨x,_,_⟩
+  ⟩
+
+def term_exists2 [DecidableEq σ] [CommRing R] (p : FiniteVarPoly σ R) (p_nonzero : p ≠ zeropoly) : (CFinsupp.support p).Nonempty := by
+  sorry
+
+def leading_monomial2 [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : FiniteVarPoly σ R) (p_nonzero : p ≠ zeropoly): Monomial σ :=
+  @Finset.max' _ ord.toLinearOrder (CFinsupp.support p)
+  (term_exists2 p p_nonzero)
