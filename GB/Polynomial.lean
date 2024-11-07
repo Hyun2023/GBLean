@@ -4,9 +4,6 @@ open Monomial
 -- Finite Variable Polynomial
 def FiniteVarPoly (σ : Type) (R : Type) [CommRing R] := CFinsupp (Monomial σ) R
 
--- instance FiniteVarPoly_CommRing [CommRing R] : CommRing (FiniteVarPoly σ R) where
-
-
 noncomputable def ofFiniteVarPoly [DecidableEq σ] [CommRing R] : Coe (FiniteVarPoly σ R) (MvPolynomial σ R) where
   coe m := Finsupp.mapDomain ofCFinsupp.coe (ofCFinsupp.coe m)
 
@@ -26,6 +23,11 @@ instance FiniteVarPoly.instAdd [DecidableEq σ] [DecidableEq R] [CommRing R] : A
 
 instance FiniteVarPoly.instSub [DecidableEq σ] [DecidableEq R] [CommRing R] : Sub (FiniteVarPoly σ R) where
   sub := CFinsupp.binop' (fun (x y : R) => x-y)
+
+-- instance FiniteVarPoly.instMul [DecidableEq σ] [DecidableEq R] [CommRing R] : Mul (FiniteVarPoly σ R) where
+--   mul :=
+
+-- instance FiniteVarPoly_CommRing [CommRing R] : CommRing (FiniteVarPoly σ R) where
 
 def zeropoly [DecidableEq σ] [CommRing R] : FiniteVarPoly σ R :=
   ⟨Finset.empty, fun _ => 0, by
