@@ -29,14 +29,20 @@ def zeropoly [DecidableEq σ] [CommRing R] : FiniteVarPoly σ R :=
     rintro ⟨x,_,_⟩
   ⟩
 
--- def term_exists2 [DecidableEq σ] [CommRing R] (p : FiniteVarPoly σ R) (p_nonzero : ¬CFinsuppequiv p zeropoly) : (CFinsupp.support p).Nonempty := by
---   by_contra NE
---   apply p_nonzero
---   unfold CFinsuppequiv
---   constructor
---   .
---   .
---   apply funext
+def term_exists2 [DecidableEq σ] [CommRing R] (p : FiniteVarPoly σ R) (p_nonzero : ¬CFinsuppequiv p zeropoly) : (CFinsupp.support p).Nonempty := by
+  by_contra NE
+  apply p_nonzero
+  unfold CFinsuppequiv
+  constructor
+  . unfold zeropoly; simp
+    rw [Finset.not_nonempty_iff_eq_empty] at NE
+    rw [NE]
+    rfl
+  . intro a; intro in1; intro in2
+    unfold zeropoly at in2; simp at in2
+    exfalso
+    apply Finset.not_mem_empty at in2
+    apply in2
 
 -- def leading_monomial2 [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : FiniteVarPoly σ R) (p_nonzero : p ≠ zeropoly): Monomial σ :=
 --   @Finset.max' _ ord.toLinearOrder (CFinsupp.support p)
