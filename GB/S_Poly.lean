@@ -1,4 +1,5 @@
 import GB.Monomial
+import GB.Polynomial
 
 open Monomial
 
@@ -8,4 +9,4 @@ open Monomial
 
 
 -- Definition of S-Polynomial
-def S [CommRing R] (f g : Monomial σ) : MvPolynomial σ R := sorry
+def S [CommRing R] (f g : FiniteVarPoly σ R) : FiniteVarPoly σ R := sorry

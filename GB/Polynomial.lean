@@ -23,3 +23,10 @@ instance FiniteVarPoly.instAdd [DecidableEq σ] [DecidableEq R] [CommRing R] : A
 
 instance FiniteVarPoly.instSub [DecidableEq σ] [DecidableEq R] [CommRing R] : Sub (FiniteVarPoly σ R) where
   sub := CFinsupp.binop' (fun (x y : R) => x+y)
+
+instance FiniteVarPoly.commRing [DecidableEq σ] [CommRing R]: CommRing (FiniteVarPoly σ R) :=
+  sorry
+
+instance FiniteVarPoly.decidableEq [DecidableEq σ] [DecidableEq R] [CommRing R]
+  : DecidableEq (FiniteVarPoly σ R) :=
+  sorry
