@@ -46,7 +46,9 @@ lemma coeff_equiv [DecidableEq σ] [CommRing R] :
       rw [Coe.coe, ofCFinsupp]; simp
       rw [dif_neg]
       apply h
-  . sorry
+  . intros f1 f2 EQ; simp at EQ
+    obtain ⟨EQ1, EQ2⟩ := EQ
+    sorry
 
 instance [DecidableEq σ] [CommRing R] [NeZero (1:R)] :
     Coe (Monomial σ) (FiniteVarPoly σ R) where
@@ -67,6 +69,17 @@ instance FiniteVarPoly.instLinearOrder [DecidableEq σ] [DecidableEq R] [CommRin
 
 def FiniteVarPoly.toList [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (s : Finset (FiniteVarPoly σ R)) : List (FiniteVarPoly σ R) :=
   Finset.sort (FiniteVarPoly.instLinearOrder.le) s
+
+def FiniteVarPoly.toList_sound [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (s : Finset (FiniteVarPoly σ R)) : List.toFinset (FiniteVarPoly.toList s) = s := by
+  apply Finset.ext
+  intro a
+  constructor <;> intro H
+  . rw [FiniteVarPoly.toList] at H
+    simp at H
+    apply H
+  . rw [FiniteVarPoly.toList]
+    simp
+    apply H
 
 instance [DecidableEq σ] [DecidableEq R] [CommRing R] : DecidableEq (FiniteVarPoly σ R) := CFinsupp.DecidableEq
 
