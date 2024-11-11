@@ -1,16 +1,15 @@
+import GB.CFinsupp
 import GB.Monomial
 import GB.Polynomial
 import GB.S_Poly
+import Mathlib.Data.Finset.Basic
 import Mathlib.Algebra.MvPolynomial.Basic
 
 -- Reduction Procedure, aka multivariate divison algorithm
-structure Generators (σ R: Type) (size : ℕ) [DecidableEq σ] [CommRing R] : Type where
-  gens : ℕ → (MvPolynomial σ R)
-  bounded : ∀ i ≥ size, gens i = 0
+def Generators (σ R: Type) [DecidableEq σ] [CommRing R] : Type := Finset (MvPolynomial σ R)
 
-instance Generators.FunLike [DecidableEq σ] [Field R] : FunLike (Generators σ R m) ℕ (MvPolynomial σ R) where
-  coe := gens
-  coe_injective' := by rintro ⟨_,_⟩ ⟨_,_⟩ _; congr!
+instance Generators.instMembership (σ R: Type) [DecidableEq σ] [CommRing R] : Membership (MvPolynomial σ R) (Generators σ R) where
+  mem := Finset.instMembership.mem
 
 def MvPolynomial.div [DecidableEq σ] [Field R] (f g : MvPolynomial σ R) (g_nonzero : g ≠ 0) : (MvPolynomial σ R) × (MvPolynomial σ R) := sorry
 
@@ -19,14 +18,14 @@ lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field 
   f = g*h+r ∧
   (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (leading_monomial g g_nonzero) m) := sorry
 
-def Mvpolynomial.multidiv [DecidableEq σ] [Field R] (f : MvPolynomial σ R) (F : Generators σ R s) (F_nonzero : ∀ i < s, F i ≠ 0) :
-    (ℕ → MvPolynomial σ R) × (MvPolynomial σ R) :=
+def Mvpolynomial.multidiv [DecidableEq σ] [Field R] (s : MvPolynomial σ R) (F : Generators σ R) (F_nonzero : ∀ f ∈ F, f ≠ 0) :
+    (CFinsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
   sorry
 
-lemma Mvpolynomial.multidiv_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (f : MvPolynomial σ R) (F : Generators σ R s) (F_nonzero : ∀ i < s, F i ≠ 0):
-    let (a,r) := Mvpolynomial.multidiv f F F_nonzero;
-    ∀ i≥s, a i = 0 /\
-    f = r + (∑ (i : {i | i<s}), (a i.1)*(F i.1)) /\
-    (r = 0 ∨ ∀m ∈ monomials r, ∀ (ilt : i < s), ¬ Monomial.instDvd.dvd (leading_monomial (F i) (F_nonzero i ilt)) m) := sorry
+-- this will be replaced by CFinsupp.DecidableEq as MvPolynomial is replaced by FiniteVarPoly.
+instance [DecidableEq σ] [CommRing R] : DecidableEq (MvPolynomial σ R) := sorry
 
-def red [DecidableEq σ] [Field R] (f : MvPolynomial σ R) : MvPolynomial σ R := sorry
+lemma Mvpolynomial.multidiv_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (f : MvPolynomial σ R) (F : Generators σ R) (F_nonzero : ∀ f ∈ F, f ≠ 0):
+    let (a,r) := Mvpolynomial.multidiv f F F_nonzero;
+    f = r + (∑ (f ∈ F), (a f)*(f)) /\
+    (r = 0 ∨ ∀m ∈ monomials r, ∀ (inF : f ∈ F), ¬ Monomial.instDvd.dvd (leading_monomial f (F_nonzero f inF)) m) := sorry
