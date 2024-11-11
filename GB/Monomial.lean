@@ -18,7 +18,7 @@ instance toMonomial [DecidableEq σ] : Coe (σ →₀ ℕ) (Monomial σ) where
   coe := toCFinsupp.coe
 
 instance Monomial.Funlike [DecidableEq σ] : FunLike (Monomial σ) σ ℕ :=
-  CFinsupp.Funlike
+  CFinsupp.instFunLike
 
 -- noncomputable instance asdf [DecidableEq σ] [CommRing R] : Coe (Monomial σ) (MvPolynomial σ R) where
 --   coe := fun m => MvPolynomial.monomial m 1
@@ -53,28 +53,28 @@ class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial 
 def Monomial_lex [DecidableEq σ] [LinearOrder σ] : LinearOrder (Monomial σ) :=
   CFinsuppInstLinearOrder
 
-def monomials [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) : Finset (Monomial σ) :=
-  Finset.map toCFinsupp_emb p.support
+-- def monomials [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) : Finset (Monomial σ) :=
+--   Finset.map toCFinsupp_emb p.support
 
 
--- Leading Monomial and Term
-def term_exists [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : (monomials p).Nonempty := by
-  have exM : exists m, MvPolynomial.coeff m p ≠ 0 := by
-    rw [MvPolynomial.ne_zero_iff] at p_nonzero
-    exact p_nonzero
-  rcases exM with ⟨m, mcond⟩
-  constructor; any_goals exact (toMonomial.coe m)
-  rw [monomials, toCFinsupp_emb]
-  apply Finset.mem_map.mpr; simp
-  exists (m)
+-- -- Leading Monomial and Term
+-- def term_exists [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : (monomials p).Nonempty := by
+--   have exM : exists m, MvPolynomial.coeff m p ≠ 0 := by
+--     rw [MvPolynomial.ne_zero_iff] at p_nonzero
+--     exact p_nonzero
+--   rcases exM with ⟨m, mcond⟩
+--   constructor; any_goals exact (toMonomial.coe m)
+--   rw [monomials, toCFinsupp_emb]
+--   apply Finset.mem_map.mpr; simp
+--   exists (m)
 
-def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): Monomial σ :=
-  @Finset.max' _ ord.toLinearOrder (monomials p)
-  (term_exists p p_nonzero)
+-- def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): Monomial σ :=
+--   @Finset.max' _ ord.toLinearOrder (monomials p)
+--   (term_exists p p_nonzero)
 
--- If p is zero, it gives runtime error. Wait, runtime error in proof assistant?
-def leading_monomial_unsafe [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
-  @Option.get! _ MonomialExists (@Finset.max _ ord.toLinearOrder (monomials p))
+-- -- If p is zero, it gives runtime error. Wait, runtime error in proof assistant?
+-- def leading_monomial_unsafe [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
+--   @Option.get! _ MonomialExists (@Finset.max _ ord.toLinearOrder (monomials p))
 
-def leading_coeff [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): R :=
-  MvPolynomial.coeff (leading_monomial p p_nonzero) p
+-- def leading_coeff [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): R :=
+--   MvPolynomial.coeff (leading_monomial p p_nonzero) p

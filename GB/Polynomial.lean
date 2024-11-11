@@ -11,6 +11,30 @@ noncomputable instance ofFiniteVarPoly [DecidableEq σ] [CommRing R] : Coe (Fini
 noncomputable instance toFiniteVarPoly [DecidableEq σ] [CommRing R] : Coe (MvPolynomial σ R) (FiniteVarPoly σ R) where
   coe m := toCFinsupp.coe (Finsupp.mapDomain toCFinsupp.coe m)
 
+lemma toFiniteVarPoly_ofFiniteVarPoly_inverse [DecidableEq σ] [CommRing R] : ∀ p, (@toFiniteVarPoly σ R _ _).coe (ofFiniteVarPoly.coe p) = p := by
+  intro p; rw [Coe.coe, Coe.coe, toFiniteVarPoly, ofFiniteVarPoly]; simp
+  rw [Coe.coe, Coe.coe, Coe.coe, Coe.coe]
+  nth_rewrite 2 [← toCFinsupp_ofCFinsupp_inverse p, Coe.coe];
+  rw [Coe.coe];
+  sorry
+
+lemma ofFiniteVarPoly_toFiniteVarPoly_inverse [DecidableEq σ] [CommRing R] : ∀ p, (@ofFiniteVarPoly σ R _ _).coe (toFiniteVarPoly.coe p) = p := by
+  sorry
+
+instance FiniteVarPoly.instFunLike [DecidableEq σ] [CommRing R] : FunLike (FiniteVarPoly σ R) (Monomial σ) R := CFinsupp.instFunLike
+
+instance MvPolynomial.instFunLike [DecidableEq σ] [CommRing R] : FunLike (MvPolynomial σ R) (σ→₀ℕ) R where
+  coe m := m.toFun
+  coe_injective' := Finsupp.instFunLike.2
+
+lemma coeff_equiv [DecidableEq σ] [CommRing R] :
+  ∀ (m : Monomial σ) (p : FiniteVarPoly σ R), @MvPolynomial.coeff R σ _ m p = p m := by
+  intro m p; rw [MvPolynomial.coeff]; rw [Finsupp.mapDomain_apply]
+  . simp; rcases (em (m ∈ p.support)) with h|h <;> simp [h]
+    sorry
+    sorry
+  sorry
+
 instance [DecidableEq σ] [CommRing R] [NeZero (1:R)] :
     Coe (Monomial σ) (FiniteVarPoly σ R) where
   coe := fun m => {
@@ -25,11 +49,6 @@ instance FiniteVarPoly.instAdd [DecidableEq σ] [DecidableEq R] [CommRing R] : A
 instance FiniteVarPoly.instSub [DecidableEq σ] [DecidableEq R] [CommRing R] : Sub (FiniteVarPoly σ R) where
   sub := CFinsupp.binop' (fun (x y : R) => x+y)
 
-
-instance MvPolynomial.instFunLike [DecidableEq σ] [CommRing R] : FunLike (MvPolynomial σ R) (σ→₀ℕ) R where
-  coe m := m.toFun
-  coe_injective' := Finsupp.instFunLike.2
-
 instance FiniteVarPoly.instLinearOrder [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] : LinearOrder (FiniteVarPoly σ R) :=
   @CFinsuppInstLinearOrder (Monomial σ) R _ _ _ Monomial_lex _
 
@@ -39,3 +58,39 @@ def FiniteVarPoly.toList [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOr
 instance [DecidableEq σ] [DecidableEq R] [CommRing R] : DecidableEq (FiniteVarPoly σ R) := CFinsupp.DecidableEq
 
 instance [CommRing R] : CommSemiring (FiniteVarPoly σ R) := sorry
+
+
+def monomials [DecidableEq σ] [CommRing R] (p : FiniteVarPoly σ R) : Finset (Monomial σ) :=
+  p.support
+
+-- Leading Monomial and Term
+def isZeroEquiv [DecidableEq σ] [CommRing R] :
+    ∀ (m : FiniteVarPoly σ R), m = 0 ↔ (m : MvPolynomial σ R) = 0 := by
+  -- intro m; constructor <;> intro h
+  -- . subst h; rw [Coe.coe, ofFiniteVarPoly]; simp
+  --   apply Finsupp.mapDomain_apply
+  --   sorry
+  sorry
+def isNonZeroEquiv [DecidableEq σ] [CommRing R] :
+    ∀ (m : FiniteVarPoly σ R), m ≠ 0 ↔ (m : MvPolynomial σ R) ≠ 0 := by
+  intro m; constructor <;> intro h g <;> apply h
+  rw [isZeroEquiv]; assumption
+  rw [← isZeroEquiv]; assumption
+
+def term_exists [DecidableEq σ] [CommRing R] (p : FiniteVarPoly σ R) (p_nonzero : p ≠ 0) : (monomials p).Nonempty := by
+  -- have exM : exists m, p m ≠ 0 := by
+  --   rw [Ne, isZeroEquiv, ← Ne] at p_nonzero
+  --   rw [MvPolynomial.ne_zero_iff] at p_nonzero
+  --   rcases p_nonzero with ⟨m, p_nonzero⟩
+  --   exists m; simp; rw [coeff_equiv m] at p_nonzero
+  --   exact p_nonzero
+  -- rcases exM with ⟨m, mcond⟩
+  -- constructor; any_goals exact (toMonomial.coe m)
+  -- rw [monomials, toCFinsupp_emb]
+  -- apply Finset.mem_map.mpr; simp
+  -- exists (m)
+  sorry
+
+def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : FiniteVarPoly σ R) (p_nonzero : p ≠ 0): Monomial σ :=
+  @Finset.max' _ ord.toLinearOrder (monomials p)
+  (term_exists p p_nonzero)

@@ -16,7 +16,7 @@ def FiniteVarPoly.div [DecidableEq σ] [Field R] (f g : FiniteVarPoly σ R) (g_n
 lemma FiniteVarPoly.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (f g : FiniteVarPoly σ R) (g_nonzero : g ≠ 0):
   let (h,r) := FiniteVarPoly.div f g g_nonzero;
   f = g*h+r ∧
-  (r = 0 ∨ ∀m ∈ monomials (ofFiniteVarPoly.coe r), ¬ Monomial.instDvd.dvd (leading_monomial (ofFiniteVarPoly.coe g) sorry) m) := sorry
+  (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (leading_monomial g g_nonzero) m) := sorry
 
 def Mvpolynomial.multidiv [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [LinearOrder R] [Field R] (s : FiniteVarPoly σ R) (F : Generators σ R) (F_nonzero : ∀ f ∈ F, f ≠ 0) :
     (CFinsupp (FiniteVarPoly σ R) (FiniteVarPoly σ R)) × (FiniteVarPoly σ R) := by
@@ -27,4 +27,4 @@ def Mvpolynomial.multidiv [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Lin
 lemma Mvpolynomial.multidiv_correct [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [LinearOrder R] [ord : MonomialOrder σ] [Field R] (f : FiniteVarPoly σ R) (F : Generators σ R) (F_nonzero : ∀ f ∈ F, f ≠ 0):
     let (a,r) := Mvpolynomial.multidiv f F F_nonzero;
     f = r + (∑ (f ∈ F), (a f)*(f)) /\
-    (r = 0 ∨ ∀m ∈ monomials (ofFiniteVarPoly.coe r), ∀ (inF : f ∈ F), ¬ Monomial.instDvd.dvd (leading_monomial (ofFiniteVarPoly.coe f) sorry) m) := sorry
+    (r = 0 ∨ ∀m ∈ monomials r, ∀ (inF : f ∈ F), ¬ Monomial.instDvd.dvd (leading_monomial f (F_nonzero f inF)) m) := sorry

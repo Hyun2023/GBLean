@@ -34,7 +34,7 @@ lemma funEq (f₁ f₂: A → B) :
     (f₁=f₂) -> ∀x, f₁ x = f₂ x := by
   intro EQ _; rw [EQ]
 
-lemma CFinsupp_Funlike_injective [DecidableEq A] [Zero B] : Function.Injective (fun m => ((@ofCFinsupp A B _).coe m).toFun) := by
+lemma CFinsupp_instFunLike_injective [DecidableEq A] [Zero B] : Function.Injective (fun m => ((@ofCFinsupp A B _).coe m).toFun) := by
     rintro ⟨A₁,p₁,nonzero₁⟩ ⟨A₂,p₂,nonzero₂⟩ h
     rw [Coe.coe, ofCFinsupp] at h; simp at h
     apply funEq at h
@@ -105,9 +105,9 @@ lemma ofCFinsupp_toCFinsupp_inverse [DecidableEq A] [Zero B] : ∀ x, (@ofCFinsu
   rcases em (x ∈ A) with inA|inA <;> simp [inA]
   symm; by_contra!; rw [← h'] at this; contradiction
 
-instance CFinsupp.Funlike [DecidableEq A] [Zero B] : FunLike (CFinsupp A B) A B where
+instance CFinsupp.instFunLike [DecidableEq A] [Zero B] : FunLike (CFinsupp A B) A B where
   coe := fun m => ((@ofCFinsupp A B _).coe m).toFun
-  coe_injective' := CFinsupp_Funlike_injective
+  coe_injective' := CFinsupp_instFunLike_injective
 
 lemma Finset.union_contradiction [DecidableEq X] {A B : Finset X} :
     (x ∉ A) -> (x ∉ B) -> x ∉ (A ∪ B) := by
