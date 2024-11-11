@@ -13,13 +13,21 @@ noncomputable instance toFiniteVarPoly [DecidableEq σ] [CommRing R] : Coe (MvPo
 
 lemma toFiniteVarPoly_ofFiniteVarPoly_inverse [DecidableEq σ] [CommRing R] : ∀ p, (@toFiniteVarPoly σ R _ _).coe (ofFiniteVarPoly.coe p) = p := by
   intro p; rw [Coe.coe, Coe.coe, toFiniteVarPoly, ofFiniteVarPoly]; simp
-  rw [Coe.coe, Coe.coe, Coe.coe, Coe.coe]
+  rw [← Finsupp.mapDomain_comp]
+  have H : ((@toCFinsupp σ ℕ _ _).coe ∘ (@ofCFinsupp σ ℕ _ _).coe = id) := by
+    ext x; simp; rw [toCFinsupp_ofCFinsupp_inverse]
+  rw [H]; simp
+  rw [Coe.coe, Coe.coe]
   nth_rewrite 2 [← toCFinsupp_ofCFinsupp_inverse p, Coe.coe];
-  rw [Coe.coe];
-  sorry
+  rw [Coe.coe]
 
 lemma ofFiniteVarPoly_toFiniteVarPoly_inverse [DecidableEq σ] [CommRing R] : ∀ p, (@ofFiniteVarPoly σ R _ _).coe (toFiniteVarPoly.coe p) = p := by
-  sorry
+  intro p; rw [Coe.coe, Coe.coe, toFiniteVarPoly, ofFiniteVarPoly]; simp
+  rw [ofCFinsupp_toCFinsupp_inverse]
+  rw [← Finsupp.mapDomain_comp]
+  have H : ((@ofCFinsupp σ ℕ _ _).coe ∘ (@toCFinsupp σ ℕ _ _).coe = id) := by
+    ext x; simp; rw [ofCFinsupp_toCFinsupp_inverse]
+  rw [H]; simp
 
 instance FiniteVarPoly.instFunLike [DecidableEq σ] [CommRing R] : FunLike (FiniteVarPoly σ R) (Monomial σ) R := CFinsupp.instFunLike
 
