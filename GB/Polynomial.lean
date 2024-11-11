@@ -47,7 +47,7 @@ instance FiniteVarPoly.instAdd [DecidableEq σ] [DecidableEq R] [CommRing R] : A
   add := CFinsupp.binop' (fun (x y : R) => x+y)
 
 instance FiniteVarPoly.instSub [DecidableEq σ] [DecidableEq R] [CommRing R] : Sub (FiniteVarPoly σ R) where
-  sub := CFinsupp.binop' (fun (x y : R) => x+y)
+  sub := CFinsupp.binop' (fun (x y : R) => x-y)
 
 instance FiniteVarPoly.instLinearOrder [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] : LinearOrder (FiniteVarPoly σ R) :=
   @CFinsuppInstLinearOrder (Monomial σ) R _ _ _ Monomial_lex _
@@ -94,3 +94,44 @@ def term_exists [DecidableEq σ] [CommRing R] (p : FiniteVarPoly σ R) (p_nonzer
 def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : FiniteVarPoly σ R) (p_nonzero : p ≠ 0): Monomial σ :=
   @Finset.max' _ ord.toLinearOrder (monomials p)
   (term_exists p p_nonzero)
+
+-- instance FiniteVarPoly.instMul [DecidableEq σ] [DecidableEq R] [CommRing R] : Mul (FiniteVarPoly σ R) where
+--   mul :=
+
+-- instance FiniteVarPoly_CommRing [CommRing R] : CommRing (FiniteVarPoly σ R) where
+
+def zeropoly [DecidableEq σ] [CommRing R] : FiniteVarPoly σ R :=
+  ⟨Finset.empty, fun _ => 0, by
+    rintro ⟨x,_,_⟩
+  ⟩
+
+def term_exists2 [DecidableEq σ] [CommRing R] (p : FiniteVarPoly σ R) (p_nonzero : ¬CFinsuppequiv p zeropoly) : (CFinsupp.support p).Nonempty := by
+  by_contra NE
+  apply p_nonzero
+  unfold CFinsuppequiv
+  constructor
+  . unfold zeropoly; simp
+    rw [Finset.not_nonempty_iff_eq_empty] at NE
+    rw [NE]
+    rfl
+  . intro a; intro in1; intro in2
+    unfold zeropoly at in2; simp at in2
+    exfalso
+    apply Finset.not_mem_empty at in2
+    apply in2
+
+-- def leading_monomial2 [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : FiniteVarPoly σ R) (p_nonzero : p ≠ zeropoly): Monomial σ :=
+--   @Finset.max' _ ord.toLinearOrder (CFinsupp.support p)
+--   (term_exists2 p p_nonzero)
+
+def leading_monomial2 [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : FiniteVarPoly σ R) (p_nonzero : (CFinsupp.support p).Nonempty): Monomial σ :=
+  @Finset.max' _ ord.toLinearOrder (CFinsupp.support p)
+  p_nonzero
+
+-- def coeff2 [DecidableEq σ] [CommRing R] (p : FiniteVarPoly σ R)
+
+def leading_coeff2 [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : FiniteVarPoly σ R) (p_nonzero : (CFinsupp.support p).Nonempty): R :=
+  p.toFun ⟨leading_monomial2 p p_nonzero, by
+    unfold leading_monomial2
+    apply Finset.max'_mem
+  ⟩
