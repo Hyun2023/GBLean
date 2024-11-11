@@ -213,3 +213,24 @@ instance CFinsuppInstLinearOrder [DecidableEq A] [DecidableEq B] [Zero B] [Linea
     rw [G]
   le_total := by intros; apply (@Finsupp.Lex.linearOrder A B _ _ _).le_total
   decidableLE := by intro x y; apply (@Finsupp.Lex.linearOrder A B _ _ _).decidableLE
+
+def CFinsupp.empty A B [Zero B] : CFinsupp A B where
+  support := Finset.empty
+  toFun := by rintro ⟨x,h⟩; exfalso; apply Finset.not_mem_empty; assumption
+  nonzero := by rintro ⟨x,h⟩; exfalso; apply Finset.not_mem_empty; assumption
+
+def CFinsupp_add [DecidableEq A] [Zero B] (self: CFinsupp A B) (key: A) (val: B) (nonzero: val ≠ 0) : CFinsupp A B where
+  support := self.support ∪ {key}
+  toFun m := if m==key then val else self m
+  nonzero := by
+    rintro ⟨x,hunion⟩
+    rcases em (x==key) with h|h <;> simp [h]
+    assumption
+    have : x ∈ self.support := by
+      rw [Finset.mem_union] at hunion
+      rcases hunion with _|h2; assumption
+      simp at h2; exfalso; apply h; exact beq_iff_eq.mpr h2
+    intro g; apply self.nonzero ⟨x,this⟩;
+    rw [CFinsupp.instFunLike] at g; simp at g
+    rw [Coe.coe, ofCFinsupp] at g; simp at g
+    apply g
