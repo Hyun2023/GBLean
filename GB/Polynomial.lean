@@ -39,9 +39,14 @@ lemma coeff_equiv [DecidableEq σ] [CommRing R] :
   ∀ (m : Monomial σ) (p : FiniteVarPoly σ R), @MvPolynomial.coeff R σ _ m p = p m := by
   intro m p; rw [MvPolynomial.coeff]; rw [Finsupp.mapDomain_apply]
   . simp; rcases (em (m ∈ p.support)) with h|h <;> simp [h]
-    sorry
-    sorry
-  sorry
+    . rw [CFinsupp.toFun, DFunLike.coe, FiniteVarPoly.instFunLike, CFinsupp.instFunLike]; simp
+      rw [Coe.coe, ofCFinsupp]; simp
+      rw [dif_pos]
+    . rw [DFunLike.coe, FiniteVarPoly.instFunLike, CFinsupp.instFunLike]; simp
+      rw [Coe.coe, ofCFinsupp]; simp
+      rw [dif_neg]
+      apply h
+  . sorry
 
 instance [DecidableEq σ] [CommRing R] [NeZero (1:R)] :
     Coe (Monomial σ) (FiniteVarPoly σ R) where
