@@ -6,3 +6,4 @@ import «GB».Reduction
 import «GB».Groebner
 import «GB».Polynomial
 import «GB».CFinsupp
+import «GB».Finset

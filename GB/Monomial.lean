@@ -7,7 +7,7 @@ import GB.CFinsupp
 section Monomial
 
 -- Definition of Monomial and related operation
-def Monomial (σ : Type) := CFinsupp σ ℕ
+def Monomial (σ : Type)  := CFinsupp σ ℕ
 
 def MonomialExists : (Inhabited (Monomial σ)) := CFinsuppExists
 
@@ -20,8 +20,8 @@ instance toMonomial [DecidableEq σ] : Coe (σ →₀ ℕ) (Monomial σ) where
 instance Monomial.Funlike [DecidableEq σ] : FunLike (Monomial σ) σ ℕ :=
   CFinsupp.Funlike
 
--- noncomputable instance asdf [DecidableEq σ] [CommRing R] : Coe (Monomial σ) (MvPolynomial σ R) where
---   coe := fun m => MvPolynomial.monomial m 1
+noncomputable instance Monomial.toMvPolynomial [DecidableEq σ] [CommRing R] : Coe (Monomial σ) (MvPolynomial σ R) where
+  coe := fun m => MvPolynomial.monomial m 1
 
 instance Monomial_DecidableEq [DecidableEq σ]: DecidableEq (Monomial σ) :=
   CFinsupp.DecidableEq

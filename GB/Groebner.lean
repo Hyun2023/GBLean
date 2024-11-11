@@ -13,34 +13,72 @@ import GB.Reduction
 import GB.S_Poly
 -- import Mathlib.RingTheory.Ideal.Span
 
-instance [DecidableEq σ] [Field R] : Coe (Set (Monomial σ)) (Set (FiniteVarPoly σ R)) where
+def Ideal.Lincomb [DecidableEq R] [CommRing R] (I : Ideal R) (S : Finset R)  (S_Span : Ideal.span S = I) :
+  forall x, x ∈ I → ∃ (c : S → R), x = S.sum  (fun i : R => if sin : i ∈ S then c ⟨ i, sin⟩  else 0) := by
+  sorry
+
+
+section Groebner
+
+variable
+[Finite σ]
+[DecidableEq σ]
+[FieldR : Field R]
+[ord : MonomialOrder σ ]
+[LinearOrder (FiniteVarPoly σ R)]
+
+abbrev Poly := FiniteVarPoly
+abbrev Mon := Monomial
+
+instance : Coe (Set (Monomial σ)) (Set (FiniteVarPoly σ R)) where
   coe := fun a => Set.image (fun m : Monomial σ  => ↑m) a
 
 instance [CommRing R] : CommRing (FiniteVarPoly σ R) := sorry
 
-def leading_monomial_unsafe' [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : FiniteVarPoly σ R) : (Monomial σ) :=
+def leading_monomial_unsafe' (p : FiniteVarPoly σ R) : (Monomial σ) :=
   sorry
 
-def leading_monomial_set [DecidableEq σ] [Finite σ] [Field R] [MonomialOrder σ ] (P : Set (FiniteVarPoly σ R))
+def leading_monomial_set (P : Set (FiniteVarPoly σ R))
   : Set (FiniteVarPoly σ R) :=
   let P_nonzero := {p ∈ P | p ≠ 0}
   let monomial_set := Set.image (leading_monomial_unsafe') (P_nonzero)
   monomial_set
 
+def Groebner (G : Finset (FiniteVarPoly σ R))  (I : Ideal (FiniteVarPoly σ R)) :=
+  Ideal.span G = I
+  ∧
+  Ideal.span (leading_monomial_set (Finset.toSet G))
+  = Ideal.span (leading_monomial_set (I) )
 
-structure GroebnerBasis [DecidableEq σ] [Finite σ] [Field R] [MonomialOrder σ] where
-  G : Finset (FiniteVarPoly σ R)
-  I : Ideal (FiniteVarPoly σ R)
-  G_spans_I : Ideal.span G = I
-  -- leading_monomial : MvPolynomial σ R -> Monomial σ
-  initial_spans_initial : Ideal.span (leading_monomial_set (Finset.toSet G))
-  = Ideal.span (leading_monomial_set I)
+def divisible (A B : Mon σ) : Prop := True
 
-def isGB  [DecidableEq σ] [Finite σ] [Field R] [MonomialOrder σ]
-(G : Finset (FiniteVarPoly σ R)) (I : Ideal (FiniteVarPoly σ R)) :=
-  ∃(GB : GroebnerBasis) , GB.G = G /\ GB.I = I
+instance MonomialSetCoercion2 : Coe (Finset (Monomial σ)) (Set (MvPolynomial σ R)) where
+  coe := fun a => Set.image (fun m : Monomial σ  => Monomial.toMvPolynomial.coe m) a
 
-theorem BuchbergerCriterion [DecidableEq σ] [Finite σ] [Field R] [MonomialOrder σ] :
-  forall (I : Ideal (FiniteVarPoly σ R)) (G : Finset (FiniteVarPoly σ R)),
-    (isGB G I) ↔ (∀ gi gj, gi ≠ gj → red (S gi gj) G = 0) := by
-    sorry
+
+-- lemma MonomialGen (m : Monomial σ) (mons : Finset (Monomial σ)) (m_mem : ↑m ∈ Ideal.span (MonomialSetCoercion2.coe mons)) :
+--   ∃ mi : mons, ∃ k_poly : (MvPolynomial σ R), Monomial.toMvPolynomial.coe m = k_poly * Monomial.toMvPolynomial.coe mi := by
+--   sorry
+
+
+theorem BuchbergerCriterion :
+  forall (G : Finset (FiniteVarPoly σ R))  (I : Ideal (FiniteVarPoly σ R)),
+    ( Groebner G I ) ↔ (∀ fi fj, fi ≠ fj → red (S fi fj) G = 0) := by
+    intros G I
+    constructor
+    {
+      -- (==>)
+      intros GB fi fj neq
+      have ⟨ G_span, GB_prop ⟩ := GB
+      let Rem := red (S fi fj) G
+      have Sin: (S fi fj) ∈ I := by sorry
+      have RemIn: Rem ∈ I := by sorry
+      have : ∃ f :G , divisible (leading_monomial_unsafe' Rem) (@leading_monomial_unsafe' _ _ FieldR f) := by sorry
+      have h := I.Lincomb G G_span Rem RemIn
+      sorry
+    }
+    {
+      sorry
+    }
+
+end Groebner
