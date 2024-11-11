@@ -22,7 +22,12 @@ lemma toFiniteVarPoly_ofFiniteVarPoly_inverse [DecidableEq σ] [CommRing R] : �
   rw [Coe.coe]
 
 lemma ofFiniteVarPoly_toFiniteVarPoly_inverse [DecidableEq σ] [CommRing R] : ∀ p, (@ofFiniteVarPoly σ R _ _).coe (toFiniteVarPoly.coe p) = p := by
-  sorry
+  intro p; rw [Coe.coe, Coe.coe, toFiniteVarPoly, ofFiniteVarPoly]; simp
+  rw [ofCFinsupp_toCFinsupp_inverse]
+  rw [← Finsupp.mapDomain_comp]
+  have H : ((@ofCFinsupp σ ℕ _ _).coe ∘ (@toCFinsupp σ ℕ _ _).coe = id) := by
+    ext x; simp; rw [ofCFinsupp_toCFinsupp_inverse]
+  rw [H]; simp
 
 instance FiniteVarPoly.instFunLike [DecidableEq σ] [CommRing R] : FunLike (FiniteVarPoly σ R) (Monomial σ) R := CFinsupp.instFunLike
 
