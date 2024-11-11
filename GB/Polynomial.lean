@@ -92,10 +92,17 @@ def zeropoly [DecidableEq σ] [CommRing R] : FiniteVarPoly σ R :=
     rintro ⟨x,_,_⟩
   ⟩
 
--- def FiniteVarPoly.List_indiv_mul [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (l : List (Monomial σ × R)) (m : Monomial σ × R) : FiniteVarPoly σ R :=
---   match l with
---   | .nil => zeropoly
---   | .cons m' l' => FiniteVarPoly.List_indiv_mul l' m + ((Prod.fst m) * (Prod.fst m') (Prod.snd m) * (Prod.fst m'))
+def monomial_coeff_poly [DecidableEq σ] [DecidableEq R] [CommRing R] (m : Monomial σ) (c : R) : FiniteVarPoly σ R :=
+  if Ne : c ≠ 0 then
+    ⟨{ m }, fun _ => c, by
+      intro x; simp; apply Ne
+    ⟩
+  else zeropoly
+
+def FiniteVarPoly.List_indiv_mul [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (l : List (Monomial σ × R)) (m : Monomial σ × R) : FiniteVarPoly σ R :=
+  match l with
+  | .nil => zeropoly
+  | .cons m' l' => FiniteVarPoly.List_indiv_mul l' m + monomial_coeff_poly (Prod.fst m * Prod.fst m') (Prod.snd m * Prod.snd m')
 
 -- def FiniteVarPoly.List_List_mul [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (s : FiniteVarPoly σ R) : List (Monomial σ × R) → List (Monomial σ × R) → FiniteVarPoly σ R :=
 --    List.map (fun m => (m, s m)) (FiniteVarPoly.monomial_toList s)
