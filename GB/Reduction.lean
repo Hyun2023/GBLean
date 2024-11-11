@@ -29,15 +29,13 @@ def FiniteVarPoly.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ
 
 def FiniteVarPoly.multidiv [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [LinearOrder R] [Field R] (s : FiniteVarPoly σ R) (F : Generators σ R) (F_nonzero : ∀ f ∈ F, f ≠ 0) :
     (CFinsupp (FiniteVarPoly σ R) (FiniteVarPoly σ R)) × (FiniteVarPoly σ R) := by
-  have FList := toList F
   have mem_sort : ∀ f, f ∈ toList F ↔ f ∈ F := by
     intro f; rw [toList, Finset.mem_sort]
-  have FList_nonzero : FList.all (fun f ↦ f≠0) := by
-    induction' FList with hd tl h
-    . rw [List.all_nil]
-    . rw [List.all_cons, h]; simp; apply F_nonzero; rw [← mem_sort]
-      sorry
-  exact multidiv_help s FList FList_nonzero
+  have FList_nonzero : (toList F).all (fun f ↦ f≠0) := by
+    rw [List.all_eq]
+    rcases em (∀ x ∈ toList F, decide (x ≠ 0) = true) with e1|e1 <;> simp [e1] <;>
+    intro x h <;> rw [mem_sort] at h <;> apply F_nonzero <;> assumption
+  exact multidiv_help s (toList F) FList_nonzero
 
 lemma FiniteVarPoly.multidiv_correct [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [LinearOrder R] [ord : MonomialOrder σ] [Field R] (f : FiniteVarPoly σ R) (F : Generators σ R) (F_nonzero : ∀ f ∈ F, f ≠ 0):
     let (a,r) := FiniteVarPoly.multidiv f F F_nonzero;
