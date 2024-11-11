@@ -55,10 +55,24 @@ def divisible (A B : Mon σ) : Prop := True
 instance MonomialSetCoercion2 : Coe (Finset (Monomial σ)) (Set (MvPolynomial σ R)) where
   coe := fun a => Set.image (fun m : Monomial σ  => Monomial.toMvPolynomial.coe m) a
 
+structure term (σ R : Type) [CommRing R] :=
+  mon : Monomial σ
+  coeff : R
 
--- lemma MonomialGen (m : Monomial σ) (mons : Finset (Monomial σ)) (m_mem : ↑m ∈ Ideal.span (MonomialSetCoercion2.coe mons)) :
---   ∃ mi : mons, ∃ k_poly : (MvPolynomial σ R), Monomial.toMvPolynomial.coe m = k_poly * Monomial.toMvPolynomial.coe mi := by
---   sorry
+instance : Coe (term σ R) (FiniteVarPoly σ R) where
+  coe := fun t => ↑(t.mon)
+
+noncomputable instance : Coe (term σ R) (MvPolynomial σ R) where
+  coe := fun t =>  ofFiniteVarPoly.coe ↑t
+
+instance term_to_poly_set : Coe (Finset (term σ R)) (Set (MvPolynomial σ R)) where
+  coe := fun a => Set.image (fun t : term σ R => ofFiniteVarPoly.coe ↑t) a
+
+lemma MonomialGen (m : term σ R) (mons : Finset (term σ R)) (m_mem : ↑m ∈ Ideal.span (term_to_poly_set.coe mons)) :
+  ∃ mi : mons, ∃ k_poly : (MvPolynomial σ R), m = k_poly * mi := by
+  let p := fun m => ∃ mi : mons, ∃ k_poly : (MvPolynomial σ R), m = k_poly * mi
+  have := @Submodule.span_induction R _ _ _ _ m p
+  sorry
 
 
 theorem BuchbergerCriterion :
