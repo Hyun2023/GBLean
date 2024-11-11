@@ -1,3 +1,4 @@
+import GB.CFinsupp
 import GB.Monomial
 open Monomial
 
@@ -28,3 +29,9 @@ instance FiniteVarPoly.instSub [DecidableEq σ] [DecidableEq R] [CommRing R] : S
 instance MvPolynomial.instFunLike [DecidableEq σ] [CommRing R] : FunLike (MvPolynomial σ R) (σ→₀ℕ) R where
   coe m := m.toFun
   coe_injective' := Finsupp.instFunLike.2
+
+instance FiniteVarPoly.instLinearOrder [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] : LinearOrder (FiniteVarPoly σ R) :=
+  @CFinsuppInstLinearOrder (Monomial σ) R _ _ _ Monomial_lex _
+
+def FiniteVarPoly.toList [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (s : Finset (FiniteVarPoly σ R)) : List (FiniteVarPoly σ R) :=
+  Finset.sort (FiniteVarPoly.instLinearOrder.le) s

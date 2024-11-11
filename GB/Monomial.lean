@@ -50,6 +50,9 @@ class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial 
   respect : ∀(u v w : @Monomial σ),  u < v -> u*w < v*w
   isWellOrder : IsWellOrder (Monomial σ) (fun x y => x < y)
 
+def Monomial_lex [DecidableEq σ] [LinearOrder σ] : LinearOrder (Monomial σ) :=
+  CFinsuppInstLinearOrder
+
 def monomials [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) : Finset (Monomial σ) :=
   Finset.map toCFinsupp_emb p.support
 

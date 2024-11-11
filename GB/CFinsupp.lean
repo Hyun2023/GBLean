@@ -2,6 +2,7 @@ import Mathlib.Algebra.MvPolynomial.Basic
 import Mathlib.Algebra.Ring.Defs
 import Mathlib.Data.Finsupp.Pointwise
 import Mathlib.Data.Finset.Basic
+import Mathlib.Data.Finsupp.Lex
 
 -- Computable version of Finsupp
 
@@ -200,3 +201,15 @@ instance CFinsupp.DecidableEq [DecidableEq A] [DecidableEq B] [Zero B] : Decidab
         rcases c3; intros; rfl)
     else isFalse (by
       by_contra c3; rcases c3; contradiction)
+
+instance CFinsuppInstLinearOrder [DecidableEq A] [DecidableEq B] [Zero B] [LinearOrder A] [LinearOrder B] : LinearOrder (CFinsupp A B) where
+  le x y := (@Finsupp.Lex.linearOrder A B _ _ _).le (toLex x) (toLex y)
+  le_refl := by intros; apply (@Finsupp.Lex.linearOrder A B _ _ _).le_refl
+  le_trans := by intros; apply (@Finsupp.Lex.linearOrder A B _ _ _).le_trans <;> assumption
+  le_antisymm := by
+    intros x y le1 le2;
+    rw [← toCFinsupp_ofCFinsupp_inverse x, ← toCFinsupp_ofCFinsupp_inverse y]
+    have G: ofCFinsupp.coe x = ofCFinsupp.coe y := by apply (@Finsupp.Lex.linearOrder A B _ _ _).le_antisymm <;> assumption
+    rw [G]
+  le_total := by intros; apply (@Finsupp.Lex.linearOrder A B _ _ _).le_total
+  decidableLE := by intro x y; apply (@Finsupp.Lex.linearOrder A B _ _ _).decidableLE
