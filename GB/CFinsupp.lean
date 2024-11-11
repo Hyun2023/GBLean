@@ -14,6 +14,9 @@ structure CFinsupp (A B : Type) [Zero B] : Type where
   toFun : support → B
   nonzero : ∀x, toFun x ≠ 0
 
+def CFinsuppequiv [Zero B] (c1 c2 : CFinsupp A B) :=
+  c1.support = c2.support ∧ ∀a (in1 : a ∈ c1.support) (in2 : a ∈ c2.support), c1.toFun ⟨a, in1⟩ = c2.toFun ⟨a, in2⟩
+
 def CFinsuppExists [Zero B] : (Inhabited (CFinsupp A B)) :=
   ⟨Finset.empty, fun _ => 0, by
     rintro ⟨x,_,_⟩
