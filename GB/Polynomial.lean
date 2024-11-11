@@ -87,6 +87,9 @@ def FiniteVarPoly.monomial_toList [DecidableEq σ] [DecidableEq R] [CommRing R] 
 def FiniteVarPoly.monomial_toList_withR [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (s : FiniteVarPoly σ R) : List (Monomial σ × R) :=
   List.map (fun m => (m, s m)) (FiniteVarPoly.monomial_toList s)
 
+-- def FiniteVarPoly.List_mul [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (s : FiniteVarPoly σ R) : List (Monomial σ × R) → List (Monomial σ × R) → List (Monomial σ × R) :=
+--   List.map (fun m => (m, s m)) (FiniteVarPoly.monomial_toList s)
+
 instance [DecidableEq σ] [DecidableEq R] [CommRing R] : DecidableEq (FiniteVarPoly σ R) := CFinsupp.DecidableEq
 
 instance [CommRing R] : CommSemiring (FiniteVarPoly σ R) := sorry
