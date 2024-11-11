@@ -13,6 +13,19 @@ structure CFinsupp (A B : Type) [Zero B] : Type where
   toFun : support → B
   nonzero : ∀x, toFun x ≠ 0
 
+instance ZeroCFinsupp (A B : Type) [Zero B] : Zero (CFinsupp A B) where
+  zero := {
+    support := Finset.empty
+    toFun := fun _ => 0
+    nonzero := by {
+      intros xin
+      have ⟨ x, xin ⟩ := xin
+      -- have H := Finset.not_mem_empty x
+      contradiction
+    }
+  }
+
+
 def CFinsuppExists [Zero B] : (Inhabited (CFinsupp A B)) :=
   ⟨Finset.empty, fun _ => 0, by
     rintro ⟨x,_,_⟩
