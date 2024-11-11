@@ -81,6 +81,12 @@ def FiniteVarPoly.toList_sound [DecidableEq σ] [DecidableEq R] [CommRing R] [Li
     simp
     apply H
 
+def FiniteVarPoly.monomial_toList [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (s : FiniteVarPoly σ R) : List (Monomial σ) :=
+  Finset.sort (@Monomial_lex σ _ _).le s.support
+
+def FiniteVarPoly.monomial_toList_withR [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (s : FiniteVarPoly σ R) : List (Monomial σ × R) :=
+  List.map (fun m => (m, s m)) (FiniteVarPoly.monomial_toList s)
+
 instance [DecidableEq σ] [DecidableEq R] [CommRing R] : DecidableEq (FiniteVarPoly σ R) := CFinsupp.DecidableEq
 
 instance [CommRing R] : CommSemiring (FiniteVarPoly σ R) := sorry
