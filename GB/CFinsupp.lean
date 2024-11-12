@@ -180,7 +180,10 @@ instance CFinsupp.binop_commutative [DecidableEq A] [DecidableEq B] [Zero B] (op
         have EQ' : x1.1 = x2.1 := by
           -- apply (@Subtype.heq_iff_coe_eq _ (fun x => x ∈ a.support ∪ b.support) (fun x => x ∈ b.support ∪ a.support))
           sorry
-        sorry
+        rw [toFun, toFun]
+        rcases em (x1.1 ∈ a.support ∨ ¬ x1.1 ∈ a.support) with h|h
+        . sorry
+        . sorry
 
 -- general version of CFinsupp.binop
 def CFinsupp.binop' [DecidableEq A] [DecidableEq B] [Zero B] (op : B → B → B) :
