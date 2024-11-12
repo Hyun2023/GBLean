@@ -164,14 +164,19 @@ lemma CFinsupp.binop_correct [DecidableEq A] [DecidableEq B] [Zero B] (op : B �
     sorry
   sorry
 
--- instance CFinsupp.binop_commutative [DecidableEq A] [DecidableEq B] [Zero B] (op : B → B → B) [Std.Commutative op]
---   (preserves_nonzero : ∀ x y, (x≠0) && (y≠0) -> op x y ≠ 0) : Std.Commutative (@CFinsupp.binop A _ _ _ _ op preserves_nonzero) where
---   comm := by
---     intro a b
---     rw [binop, binop]; simp
---     constructor
---     . sorry
---     . ext x
+instance CFinsupp.binop_commutative [DecidableEq A] [DecidableEq B] [Zero B] (op : B → B → B) [Std.Commutative op]
+  (preserves_nonzero : ∀ x y, (x≠0) && (y≠0) -> op x y ≠ 0) : Std.Commutative (@CFinsupp.binop A _ _ _ _ op preserves_nonzero) where
+  comm := by
+    intro a b
+    rw [binop, binop]; simp
+    constructor
+    . rw [Finset.union_comm]
+    . apply Function.hfunext
+      . have H : (a.support ∪ b.support = b.support ∪ a.support) := by
+          rw [Finset.union_comm]
+        rw [H]
+      . intro a a' HEQ
+        sorry
 
 -- general version of CFinsupp.binop
 def CFinsupp.binop' [DecidableEq A] [DecidableEq B] [Zero B] (op : B → B → B) :
