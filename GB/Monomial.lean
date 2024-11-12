@@ -18,6 +18,8 @@ def Monomial (σ : Type)  := Finsupp σ ℕ
 -- instance toMonomial [DecidableEq σ] : Coe (σ →₀ ℕ) (Monomial σ) where
 --   coe := λ x => x
 
+instance Monomial.Zero : Zero (Monomial σ) where
+  zero := Finsupp.instZero.zero
 
 noncomputable instance Monomial.toMvPolynomial [DecidableEq σ] [CommRing R] : Coe (Monomial σ) (MvPolynomial σ R) where
   coe := fun m => MvPolynomial.monomial m 1
