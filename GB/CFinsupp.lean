@@ -164,6 +164,15 @@ lemma CFinsupp.binop_correct [DecidableEq A] [DecidableEq B] [Zero B] (op : B �
     sorry
   sorry
 
+-- instance CFinsupp.binop_commutative [DecidableEq A] [DecidableEq B] [Zero B] (op : B → B → B) [Std.Commutative op]
+--   (preserves_nonzero : ∀ x y, (x≠0) && (y≠0) -> op x y ≠ 0) : Std.Commutative (@CFinsupp.binop A _ _ _ _ op preserves_nonzero) where
+--   comm := by
+--     intro a b
+--     rw [binop, binop]; simp
+--     constructor
+--     . sorry
+--     . ext x
+
 -- general version of CFinsupp.binop
 def CFinsupp.binop' [DecidableEq A] [DecidableEq B] [Zero B] (op : B → B → B) :
     CFinsupp A B → CFinsupp A B → CFinsupp A B :=
