@@ -104,8 +104,10 @@ def FiniteVarPoly.List_indiv_mul [DecidableEq σ] [DecidableEq R] [CommRing R] [
   | .nil => zeropoly
   | .cons m' l' => FiniteVarPoly.List_indiv_mul l' m + monomial_coeff_poly (Prod.fst m * Prod.fst m') (Prod.snd m * Prod.snd m')
 
--- def FiniteVarPoly.List_List_mul [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (s : FiniteVarPoly σ R) : List (Monomial σ × R) → List (Monomial σ × R) → FiniteVarPoly σ R :=
---    List.map (fun m => (m, s m)) (FiniteVarPoly.monomial_toList s)
+def FiniteVarPoly.List_List_mul [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (l1 l2 : List (Monomial σ × R)) : FiniteVarPoly σ R :=
+  match l1 with
+  | .nil => zeropoly
+  | .cons m l1' => FiniteVarPoly.List_indiv_mul l2 m + FiniteVarPoly.List_List_mul l1' l2
 
 instance [DecidableEq σ] [DecidableEq R] [CommRing R] : DecidableEq (FiniteVarPoly σ R) := CFinsupp.DecidableEq
 
