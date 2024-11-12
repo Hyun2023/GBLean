@@ -81,10 +81,10 @@ def FiniteVarPoly.toList_sound [DecidableEq σ] [DecidableEq R] [CommRing R] [Li
     simp
     apply H
 
-def FiniteVarPoly.monomial_toList [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (s : FiniteVarPoly σ R) : List (Monomial σ) :=
+def FiniteVarPoly.monomial_toList [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] (s : FiniteVarPoly σ R) : List (Monomial σ) :=
   Finset.sort (@Monomial_lex σ _ _).le s.support
 
-def FiniteVarPoly.monomial_toList_withR [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (s : FiniteVarPoly σ R) : List (Monomial σ × R) :=
+def FiniteVarPoly.monomial_toList_withR [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] (s : FiniteVarPoly σ R) : List (Monomial σ × R) :=
   List.map (fun m => (m, s m)) (FiniteVarPoly.monomial_toList s)
 
 def zeropoly [DecidableEq σ] [CommRing R] : FiniteVarPoly σ R :=
@@ -99,15 +99,21 @@ def monomial_coeff_poly [DecidableEq σ] [DecidableEq R] [CommRing R] (m : Monom
     ⟩
   else zeropoly
 
-def FiniteVarPoly.List_indiv_mul [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (l : List (Monomial σ × R)) (m : Monomial σ × R) : FiniteVarPoly σ R :=
+def FiniteVarPoly.List_indiv_mul [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] (l : List (Monomial σ × R)) (m : Monomial σ × R) : FiniteVarPoly σ R :=
   match l with
   | .nil => zeropoly
   | .cons m' l' => FiniteVarPoly.List_indiv_mul l' m + monomial_coeff_poly (Prod.fst m * Prod.fst m') (Prod.snd m * Prod.snd m')
 
-def FiniteVarPoly.List_List_mul [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (l1 l2 : List (Monomial σ × R)) : FiniteVarPoly σ R :=
+def FiniteVarPoly.List_List_mul [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] (l1 l2 : List (Monomial σ × R)) : FiniteVarPoly σ R :=
   match l1 with
   | .nil => zeropoly
   | .cons m l1' => FiniteVarPoly.List_indiv_mul l2 m + FiniteVarPoly.List_List_mul l1' l2
+
+def FiniteVarPoly.poly_mul [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] (p1 p2 : FiniteVarPoly σ R) : FiniteVarPoly σ R :=
+  FiniteVarPoly.List_List_mul (FiniteVarPoly.monomial_toList_withR p1) (FiniteVarPoly.monomial_toList_withR p2)
+
+instance FiniteVarPoly.instMul [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] : Mul (FiniteVarPoly σ R) where
+  mul := FiniteVarPoly.poly_mul
 
 instance [DecidableEq σ] [DecidableEq R] [CommRing R] : DecidableEq (FiniteVarPoly σ R) := CFinsupp.DecidableEq
 
