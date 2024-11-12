@@ -249,6 +249,10 @@ def CFinsupp.binop' [DecidableEq A] [DecidableEq B] [Zero B] (op : B → B → B
       . contradiction
   ⟩
 
+instance CFinsupp.binop'_commutative [DecidableEq A] [DecidableEq B] [Zero B] (op : B → B → B) [Std.Commutative op] : Std.Commutative (@CFinsupp.binop' A _ _ _ _ op) where
+  comm := by
+    sorry
+
 instance CFinsupp.DecidableEq [DecidableEq A] [DecidableEq B] [Zero B] : DecidableEq (CFinsupp A B) :=
   fun m₁ m₂ =>
     if c1: m₁.1 = m₂.1 then
