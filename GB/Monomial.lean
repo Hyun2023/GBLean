@@ -47,8 +47,8 @@ class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial 
 -- def Monomial_lex [DecidableEq σ] [LinearOrder σ] : LinearOrder (Monomial σ) :=
 --   CFinsuppInstLinearOrder
 
--- def monomials [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) : Finset (Monomial σ) :=
---   Finset.map toCFinsupp_emb p.support
+def monomials [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) : Finset (Monomial σ) :=
+  p.support
 
 
 -- -- Leading Monomial and Term
@@ -62,9 +62,9 @@ class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial 
 --   apply Finset.mem_map.mpr; simp
 --   exists (m)
 
--- def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): Monomial σ :=
---   @Finset.max' _ ord.toLinearOrder (monomials p)
---   (term_exists p p_nonzero)
+def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): Monomial σ :=
+  @Finset.max' _ ord.toLinearOrder (monomials p)
+  (sorry)
 
 -- -- If p is zero, it gives runtime error. Wait, runtime error in proof assistant?
 -- def leading_monomial_unsafe [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
