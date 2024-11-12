@@ -157,7 +157,7 @@ lemma CFinsupp.binop_correct [DecidableEq A] [DecidableEq B] [Zero B] (op : B �
     m₁ m₂ : A →₀ B) := by
   intro x y; rw [binop, Finsupp.zipWith, Finsupp.onFinset]; congr! <;> simp
   . symm
-    have p := (fun x_1 ↦ ¬op (if p : x_1 ∈ x.support then x.toFun ⟨x_1, p⟩ else 0) (if p : x_1 ∈ y.support then y.toFun ⟨x_1, p⟩ else 0) = 0)
+    let p := (fun x_1 ↦ ¬op (if p : x_1 ∈ x.support then x.toFun ⟨x_1, p⟩ else 0) (if p : x_1 ∈ y.support then y.toFun ⟨x_1, p⟩ else 0) = 0)
     have : DecidablePred p := by intro x_1; sorry
     have := (@Finset.filter_eq_self A p _ (x.support ∪ y.support)).mpr; simp at this
     -- apply this
@@ -284,16 +284,20 @@ instance CFinsupp.binop'_commutative [DecidableEq A] [DecidableEq B] [Zero B] (o
                 obtain ⟨c2, H'''⟩ := H''
                 use c2
                 use c1
-                sorry
+                rw [@Std.Commutative.comm _ op]
+                apply H'''
               . obtain ⟨c1, H''⟩ := H'
                 obtain ⟨c2, H'''⟩ := H''
                 use c2
                 use c1
-                sorry
+                rw [@Std.Commutative.comm _ op]
+                apply H'''
             rw [<- EQ]
             apply H2
       . sorry
-    . sorry
+    . apply Function.hfunext
+      . sorry
+      . sorry
 
 instance CFinsupp.DecidableEq [DecidableEq A] [DecidableEq B] [Zero B] : DecidableEq (CFinsupp A B) :=
   fun m₁ m₂ =>
