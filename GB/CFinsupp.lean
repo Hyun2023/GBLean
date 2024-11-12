@@ -274,7 +274,22 @@ instance CFinsupp.binop'_commutative [DecidableEq A] [DecidableEq B] [Zero B] (o
             rw [Finset.mem_union]
             apply Or.inr
             have EQ : Finset.filter (fun x ↦ ∃ (c1 : x ∈ a.support) (c2 : x ∈ b.support), ¬op (a.toFun ⟨x, c1⟩) (b.toFun ⟨x, c2⟩) = 0) (a.support ∩ b.support) = Finset.filter (fun x ↦ ∃ (c1 : x ∈ b.support) (c2 : x ∈ a.support), ¬op (b.toFun ⟨x, c1⟩) (a.toFun ⟨x, c2⟩) = 0) (b.support ∩ a.support) := by
-              sorry
+              have EQ1 : (a.support ∩ b.support) = (b.support ∩ a.support) := by
+                rw [Finset.inter_comm]
+              rw [EQ1]
+              congr
+              ext x
+              constructor <;> intro H'
+              . obtain ⟨c1, H''⟩ := H'
+                obtain ⟨c2, H'''⟩ := H''
+                use c2
+                use c1
+                sorry
+              . obtain ⟨c1, H''⟩ := H'
+                obtain ⟨c2, H'''⟩ := H''
+                use c2
+                use c1
+                sorry
             rw [<- EQ]
             apply H2
       . sorry
