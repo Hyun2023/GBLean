@@ -181,8 +181,12 @@ instance CFinsupp.binop_commutative [DecidableEq A] [DecidableEq B] [Zero B] (op
           -- apply (@Subtype.heq_iff_coe_eq _ (fun x => x ∈ a.support ∪ b.support) (fun x => x ∈ b.support ∪ a.support))
           sorry
         rw [toFun, toFun]
-        rcases em (x1.1 ∈ a.support ∨ ¬ x1.1 ∈ a.support) with h|h
-        . sorry
+        rcases em (x1.1 ∈ a.support) with INa|nINa
+        . rw [dif_pos INa]
+          rcases em (x1.1 ∈ b.support) with INb|nINb
+          . rw [dif_pos INb]
+            sorry
+          . sorry
         . sorry
 
 -- general version of CFinsupp.binop
