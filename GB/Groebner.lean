@@ -53,47 +53,9 @@ def Groebner (G : Finset (FiniteVarPoly σ R))  (I : Ideal (FiniteVarPoly σ R))
 
 def divisible (A B : Mon σ) : Prop := True
 
-
-
 lemma MonomialGen (m : MvPolynomial σ R) (mons : Finset (Monomial σ))
 (m_mem : m ∈ Ideal.span ((fun a : (Monomial σ) => ↑a) '' mons)) :
-   (is_monomial (toFiniteVarPoly.coe m)) → ∃ mi : mons, ∃ k_poly : (MvPolynomial σ R), m = k_poly * mi := by
-
-
-  let p := fun m : (MvPolynomial σ R) => (is_monomial (toFiniteVarPoly.coe m)) → ∃ mi : mons, ∃ k_poly : (MvPolynomial σ R), m = k_poly * mi
-
-  have : ((is_monomial (toFiniteVarPoly.coe m)) → ∃ mi : mons, ∃ k_poly : (MvPolynomial σ R), m = k_poly * mi)
-  = p m := by rfl
-  rw [this];clear this
-
-  apply @Submodule.span_induction (MvPolynomial σ R) _ _ _ _ _
-  {
-    exact m_mem
-  }
-  {
-    unfold p
-    simp
-    intros a ain ismon
-    exists a; exists ain; exists 1;ring
-  }
-  {
-    unfold p
-    intro is_mon
-    have H : ((@toFiniteVarPoly σ R).coe 0) = 0 := by {
-      rfl
-    }
-    rw [H] at is_mon
-    apply zero_is_not_mon at is_mon
-    contradiction
-  }
-  {
-    intros x y px py
-    unfold p
-    sorry
-  }
-  {
-    sorry
-  }
+   (is_monomial (toFiniteVarPoly.coe m)) → ∃ mi : mons, ∃ k_poly : (MvPolynomial σ R), m = k_poly * mi := by sorry
 
 
 theorem BuchbergerCriterion :
