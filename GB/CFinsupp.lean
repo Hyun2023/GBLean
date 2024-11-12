@@ -251,7 +251,34 @@ def CFinsupp.binop' [DecidableEq A] [DecidableEq B] [Zero B] (op : B → B → B
 
 instance CFinsupp.binop'_commutative [DecidableEq A] [DecidableEq B] [Zero B] (op : B → B → B) [Std.Commutative op] : Std.Commutative (@CFinsupp.binop' A _ _ _ _ op) where
   comm := by
-    sorry
+    intro a b
+    rw [binop', binop']; simp
+    constructor
+    . apply Finset.ext_iff.mpr
+      intro a'
+      constructor <;> intro H
+      . rw [Finset.mem_union] at H
+        rcases H with H1|H1
+        . rw [Finset.mem_union]
+          apply Or.inr
+          rw [Finset.mem_union]
+          apply Or.inl
+          apply H1
+        . rw [Finset.mem_union] at H1
+          rcases H1 with H2|H2
+          . rw [Finset.mem_union]
+            apply Or.inl
+            apply H2
+          . rw [Finset.mem_union]
+            apply Or.inr
+            rw [Finset.mem_union]
+            apply Or.inr
+            have EQ : Finset.filter (fun x ↦ ∃ (c1 : x ∈ a.support) (c2 : x ∈ b.support), ¬op (a.toFun ⟨x, c1⟩) (b.toFun ⟨x, c2⟩) = 0) (a.support ∩ b.support) = Finset.filter (fun x ↦ ∃ (c1 : x ∈ b.support) (c2 : x ∈ a.support), ¬op (b.toFun ⟨x, c1⟩) (a.toFun ⟨x, c2⟩) = 0) (b.support ∩ a.support) := by
+              sorry
+            rw [<- EQ]
+            apply H2
+      . sorry
+    . sorry
 
 instance CFinsupp.DecidableEq [DecidableEq A] [DecidableEq B] [Zero B] : DecidableEq (CFinsupp A B) :=
   fun m₁ m₂ =>
