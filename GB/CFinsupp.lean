@@ -183,11 +183,31 @@ instance CFinsupp.binop_commutative [DecidableEq A] [DecidableEq B] [Zero B] (op
         rw [toFun, toFun]
         rcases em (x1.1 ∈ a.support) with INa|nINa
         . rw [dif_pos INa]
+          have INa' : x2.1 ∈ a.support := by
+            rw [<- EQ']
+            apply INa
           rcases em (x1.1 ∈ b.support) with INb|nINb
           . rw [dif_pos INb]
+            have INb' : x2.1 ∈ b.support := by
+              rw [<- EQ']
+              apply INb
+            rw [dif_pos INb']
+            rw [dif_pos INa']
             sorry
+          . rw [dif_neg nINb]
+            have nINb' : ¬ x2.1 ∈ b.support := by
+              rw [<- EQ']
+              apply nINb
+            rw [dif_neg nINb']
+            rw [dif_pos INa']
+            sorry
+        . rw [dif_neg nINa]
+          have nINa' : ¬ x2.1 ∈ a.support := by
+            rw [<- EQ']
+            apply nINa
+          rcases em (x1.1 ∈ b.support) with INb|nINb
           . sorry
-        . sorry
+          . sorry
 
 -- general version of CFinsupp.binop
 def CFinsupp.binop' [DecidableEq A] [DecidableEq B] [Zero B] (op : B → B → B) :
