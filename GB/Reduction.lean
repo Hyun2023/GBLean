@@ -43,25 +43,38 @@ lemma FiniteVarPoly.multidiv_correct [DecidableEq σ] [DecidableEq R] [LinearOrd
     s = r + (∑ (f ∈ F), (a f)*(f)) /\
     (r = 0 ∨ ∀m ∈ monomials r, ∀ f (inF : f ∈ F), ¬ Monomial.instDvd.dvd (leading_monomial f (F_nonzero f inF)) m) := by
   unfold multidiv; simp
-  constructor
-  . have : ∀ l F F_nonzero, (EQ: l = toList F) -> s = (multidiv_help s l (by rw[EQ]; exact FList_nonzero F F_nonzero)).2 + (∑ (f ∈ F), ((multidiv_help s l (by rw[EQ]; exact FList_nonzero F F_nonzero)).1 f)*(f)) := by
-      clear F F_nonzero
-      intro l; induction' l with f F' IH
-      <;> intro F F_nonzero EQ
-      . unfold multidiv_help; simp
-        have : F = ∅ := by
-          apply Finset.eq_empty_of_forall_not_mem
-          intro f
-          have EQ' : ¬ ∃(f : FiniteVarPoly σ R), f ∈ toList F := by
-            rw [← EQ]
-            rintro ⟨f,h1,h2⟩
-          by_contra G; apply EQ'
-          exists f; unfold toList; rw [Finset.mem_sort]; assumption
-        rw [this, Finset.sum_eq_fold]; simp;
-        clear this EQ F_nonzero F
-        -- FiniteVarPoly is CommRing
-        sorry
-      .
-        sorry
-    apply this; rfl; assumption
+  -- constructor
+  -- .
+  --   -- have F_nonzero' := FList_nonzero F F_nonzero
+  --   have : ∀ l (s : FiniteVarPoly σ R) F F_nonzero (EQ: l = toList F), s = (multidiv_help s l (by rw[EQ]; exact FList_nonzero F F_nonzero)).2 + (∑ (f ∈ F), ((multidiv_help s l (by rw[EQ]; exact FList_nonzero F F_nonzero)).1 f)*(f)) := by
+  --     clear s F F_nonzero
+  --     intro l s F F_nonzero EQ
+  --     have F_nonzero' := FList_nonzero F F_nonzero
+  --     rw [← EQ] at F_nonzero'
+  --     -- replace (FList_nonzero F F_nonzero) := F_nonzero'
+  --     -- clear F_nonzero
+  --     have EQ' : F = l.toFinset := by
+  --       rw [EQ]; symm; unfold toList; apply Finset.sort_toFinset
+  --     -- rw [EQ']
+  --     have G : ∀ l (s : FiniteVarPoly σ R) (l_nonzero := l.all fun f ↦ decide (f ≠ 0)), s = (s.multidiv_help l sorry).2 + (l.map (fun f => (s.multidiv_help l sorry).1 f * f)).sum := by
+  --       intro l; induction' l with f F' IH
+  --       <;> intro s l_nonzero
+  --       . unfold multidiv_help; simp
+  --         rw [@List.sum_nil]
+  --         have : F = ∅ := by
+  --           apply Finset.eq_empty_of_forall_not_mem
+  --           intro f
+  --           have EQ' : ¬ ∃(f : FiniteVarPoly σ R), f ∈ toList F := by
+  --             rw [← EQ]
+  --             rintro ⟨f,h1,h2⟩
+  --           by_contra G; apply EQ'
+  --           exists f; unfold toList; rw [Finset.mem_sort]; assumption
+  --         rw [this, Finset.sum_eq_fold]; simp;
+  --         clear this EQ F_nonzero F
+  --         FiniteVarPoly is CommRing
+  --         sorry
+  --       . simp [multidiv_help]
+  --         have IH' := IH (div s f (by sorry)).2 F'
+  --         sorry
+  --   apply this; rfl; assumption
   . sorry
