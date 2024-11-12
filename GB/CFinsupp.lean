@@ -175,7 +175,11 @@ instance CFinsupp.binop_commutative [DecidableEq A] [DecidableEq B] [Zero B] (op
       . have H : (a.support ∪ b.support = b.support ∪ a.support) := by
           rw [Finset.union_comm]
         rw [H]
-      . intro a a' HEQ
+      . intro x1 x2 HEQ
+        simp
+        have EQ' : x1.1 = x2.1 := by
+          -- apply (@Subtype.heq_iff_coe_eq _ (fun x => x ∈ a.support ∪ b.support) (fun x => x ∈ b.support ∪ a.support))
+          sorry
         sorry
 
 -- general version of CFinsupp.binop
