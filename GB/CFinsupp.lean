@@ -180,7 +180,10 @@ instance CFinsupp.binop_commutative [DecidableEq A] [DecidableEq B] [Zero B] (op
         have EQ' : x1.1 = x2.1 := by
           rw [<- @Subtype.heq_iff_coe_eq _ (fun x => x ∈ a.support ∪ b.support) (fun x => x ∈ b.support ∪ a.support)]
           . apply HEQ
-          . sorry
+          . intro x
+            have H : (a.support ∪ b.support = b.support ∪ a.support) := by
+              rw [Finset.union_comm]
+            rw [H]
         rw [toFun, toFun]
         rcases em (x1.1 ∈ a.support) with INa|nINa
         . rw [dif_pos INa]
