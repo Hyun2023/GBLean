@@ -178,8 +178,9 @@ instance CFinsupp.binop_commutative [DecidableEq A] [DecidableEq B] [Zero B] (op
       . intro x1 x2 HEQ
         simp
         have EQ' : x1.1 = x2.1 := by
-          -- apply (@Subtype.heq_iff_coe_eq _ (fun x => x ∈ a.support ∪ b.support) (fun x => x ∈ b.support ∪ a.support))
-          sorry
+          rw [<- @Subtype.heq_iff_coe_eq _ (fun x => x ∈ a.support ∪ b.support) (fun x => x ∈ b.support ∪ a.support)]
+          . apply HEQ
+          . sorry
         rw [toFun, toFun]
         rcases em (x1.1 ∈ a.support) with INa|nINa
         . rw [dif_pos INa]
@@ -193,7 +194,8 @@ instance CFinsupp.binop_commutative [DecidableEq A] [DecidableEq B] [Zero B] (op
               apply INb
             rw [dif_pos INb']
             rw [dif_pos INa']
-            sorry -- commutative
+            rw [@Std.Commutative.comm _ op]
+            congr
           . rw [dif_neg nINb]
             have nINb' : ¬ x2.1 ∈ b.support := by
               rw [<- EQ']
