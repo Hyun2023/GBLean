@@ -10,7 +10,8 @@ section Monomial
 -- Definition of Monomial and related operation
 def Monomial (σ : Type)  := Finsupp σ ℕ
 
--- def MonomialExists : (Inhabited (Monomial σ)) := FinsuppExists
+def MonomialExists : (Inhabited (Monomial σ)) := by
+  constructor;exact Finsupp.instInhabited.default
 
 -- instance ofMonomial [DecidableEq σ] : Coe (Monomial σ) (Finsupp σ ℕ) where
 --   coe := λ x => x
@@ -44,6 +45,7 @@ class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial 
   isWellOrder : IsWellOrder (Monomial σ) (fun x y => x < y)
   decidableOrder : ∀(u v : @Monomial σ), Decidable (u < v)
 
+
 -- def Monomial_lex [DecidableEq σ] [LinearOrder σ] : LinearOrder (Monomial σ) :=
 --   CFinsuppInstLinearOrder
 
@@ -67,8 +69,8 @@ def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p 
   (sorry)
 
 -- -- If p is zero, it gives runtime error. Wait, runtime error in proof assistant?
--- def leading_monomial_unsafe [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
---   @Option.get! _ MonomialExists (@Finset.max _ ord.toLinearOrder (monomials p))
+def leading_monomial_unsafe [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
+  @Option.get! _ MonomialExists (@Finset.max _ ord.toLinearOrder (monomials p))
 
 -- def leading_coeff [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): R :=
 --   MvPolynomial.coeff (leading_monomial p p_nonzero) p
