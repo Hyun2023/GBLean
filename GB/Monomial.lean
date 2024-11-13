@@ -8,7 +8,7 @@ import GB.CFinsupp
 section Monomial
 
 -- Definition of Monomial and related operation
-def Monomial (σ : Type)  := Finsupp σ ℕ
+def Monomial (σ : Type) := Finsupp σ ℕ
 
 -- def MonomialExists : (Inhabited (Monomial σ)) := FinsuppExists
 
@@ -23,7 +23,6 @@ instance Monomial.Zero : Zero (Monomial σ) where
 
 noncomputable instance Monomial.toMvPolynomial [DecidableEq σ] [CommRing R] : Coe (Monomial σ) (MvPolynomial σ R) where
   coe := fun m => MvPolynomial.monomial m 1
-
 
 noncomputable instance Monomial.instMul [DecidableEq σ] : Mul (Monomial σ) where
   mul := fun m1 m2 => Finsupp.instAdd.add m1 m2
@@ -66,7 +65,12 @@ def term_exists [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) (p_nonzero
   refine Finset.nonempty_iff_ne_empty.mpr ?_
   intro H
   apply p_nonzero
-  sorry
+  apply Finsupp.ext; simp
+  intro f
+  rw [monomials, MvPolynomial.support, Finsupp.support] at H; simp at H
+  exfalso
+  apply p_nonzero
+  apply H
 
 def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): Monomial σ :=
   @Finset.max' _ ord.toLinearOrder (monomials p)
