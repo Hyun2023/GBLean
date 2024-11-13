@@ -62,9 +62,15 @@ def monomials [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) : Finset (Mo
 --   apply Finset.mem_map.mpr; simp
 --   exists (m)
 
+def term_exists [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : (monomials p).Nonempty := by
+  refine Finset.nonempty_iff_ne_empty.mpr ?_
+  intro H
+  apply p_nonzero
+  sorry
+
 def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): Monomial σ :=
   @Finset.max' _ ord.toLinearOrder (monomials p)
-  (sorry)
+  (term_exists p p_nonzero)
 
 -- -- If p is zero, it gives runtime error. Wait, runtime error in proof assistant?
 -- def leading_monomial_unsafe [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
