@@ -1,48 +1,54 @@
-import GB.CFinsupp
+-- import GB.CFinsupp
 import GB.Monomial
 import GB.Polynomial
 import GB.S_Poly
 import Mathlib.Data.Finset.Basic
 import Mathlib.Algebra.MvPolynomial.Basic
 
--- Reduction Procedure, aka multivariate divison algorithm
-def Generators (σ R: Type) [DecidableEq σ] [CommRing R] : Type := Finset (FiniteVarPoly σ R)
 
-instance Generators.instMembership (σ R: Type) [DecidableEq σ] [CommRing R] : Membership (FiniteVarPoly σ R) (Generators σ R) where
+section Reduction
+variable
+[DecidableEq (Monomial σ )]
+
+-- Reduction Procedure, aka multivariate divison algorithm
+def Generators (σ R: Type) [DecidableEq σ] [CommRing R] : Type := Finset (MvPolynomial σ R)
+
+instance Generators.instMembership (σ R: Type) [DecidableEq σ] [CommRing R] : Membership (MvPolynomial σ R) (Generators σ R) where
   mem := Finset.instMembership.mem
 
-def FiniteVarPoly.div [DecidableEq σ] [Field R] (f g : FiniteVarPoly σ R) (g_nonzero : g ≠ 0) : (FiniteVarPoly σ R) × (FiniteVarPoly σ R) := sorry
+-- def MvPolynomial.div [DecidableEq σ] [Field R] (f g : FiniteVarPoly σ R) (g_nonzero : g ≠ 0) : (FiniteVarPoly σ R) × (FiniteVarPoly σ R) := sorry
 
-lemma FiniteVarPoly.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (f g : FiniteVarPoly σ R) (g_nonzero : g ≠ 0):
-  let (h,r) := FiniteVarPoly.div f g g_nonzero;
-  f = g*h+r ∧
-  (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (leading_monomial g g_nonzero) m) := sorry
+-- lemma FiniteVarPoly.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (f g : FiniteVarPoly σ R) (g_nonzero : g ≠ 0):
+--   let (h,r) := FiniteVarPoly.div f g g_nonzero;
+--   f = g*h+r ∧
+--   (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (leading_monomial g g_nonzero) m) := sorry
 
-def FiniteVarPoly.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [LinearOrder R] [Field R] (s : FiniteVarPoly σ R) (F : List (FiniteVarPoly σ R)) (F_nonzero : F.all (fun f ↦ f≠0)): (CFinsupp (FiniteVarPoly σ R) (FiniteVarPoly σ R)) × (FiniteVarPoly σ R) :=
-  match F with
-  | [] => (CFinsupp.empty _ _, s)
-  | f :: F' =>
-    -- simp at F_nonzero; rcases F_nonzero with ⟨nonzero₁, nonzero₂⟩
-    let (h₁,r) := div s f (by simp at F_nonzero; rcases F_nonzero; assumption)
-    let (h₂,r) := multidiv_help r F' (by simp; simp at F_nonzero; rcases F_nonzero; assumption)
-    (if p: h₁≠0 then CFinsupp_add h₂ f h₁ p else h₂, r)
+def MvPolynomial.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] (s : MvPolynomial σ R) (F : List (Monomial σ)) (F_nonzero : F.all (fun f ↦ f≠0)): (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
+  sorry
+  -- match F with
+  -- | [] => (CFinsupp.empty _ _, s)
+  -- | f :: F' =>
+  --   -- simp at F_nonzero; rcases F_nonzero with ⟨nonzero₁, nonzero₂⟩
+  --   let (h₁,r) := div s f (by simp at F_nonzero; rcases F_nonzero; assumption)
+  --   let (h₂,r) := multidiv_help r F' (by simp; simp at F_nonzero; rcases F_nonzero; assumption)
+  --   (if p: h₁≠0 then CFinsupp_add h₂ f h₁ p else h₂, r)
 
-lemma FList_nonzero [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [LinearOrder R] [Field R] (F : Generators σ R) (F_nonzero : ∀ f ∈ F, f ≠ 0) : (FiniteVarPoly.toList F).all (fun f ↦ f≠0) := by
-  have mem_sort : ∀ f, f ∈ FiniteVarPoly.toList F ↔ f ∈ F := by
-    intro f; rw [FiniteVarPoly.toList, Finset.mem_sort]
-  rw [List.all_eq]
-  rcases em (∀ x ∈ FiniteVarPoly.toList F, decide (x ≠ 0) = true) with e1|e1 <;> simp [e1] <;>
-  intro x h <;> rw [mem_sort] at h <;> apply F_nonzero <;> assumption
+lemma FList_nonzero [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] (F : Finset (MvPolynomial σ R)) (F_nonzero : ∀ f ∈ F, f ≠ 0) : (MvPolynomial.toList F).all (fun f ↦ f≠0) := by
+  sorry
+  -- have mem_sort : ∀ f, f ∈ FiniteVarPoly.toList F ↔ f ∈ F := by
+  --   intro f; rw [FiniteVarPoly.toList, Finset.mem_sort]
+  -- rw [List.all_eq]
+  -- rcases em (∀ x ∈ FiniteVarPoly.toList F, decide (x ≠ 0) = true) with e1|e1 <;> simp [e1] <;>
+  -- intro x h <;> rw [mem_sort] at h <;> apply F_nonzero <;> assumption
 
-def FiniteVarPoly.multidiv [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [LinearOrder R] [Field R] (s : FiniteVarPoly σ R) (F : Generators σ R) (F_nonzero : ∀ f ∈ F, f ≠ 0) :
-    (CFinsupp (FiniteVarPoly σ R) (FiniteVarPoly σ R)) × (FiniteVarPoly σ R) :=
-  multidiv_help s (toList F) (FList_nonzero F F_nonzero)
+def MvPolynomial.multidiv [DecidableEq σ] [DecidableEq R] [LinearOrder σ]  [Field R] (s : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_nonzero : ∀ f ∈ F, f ≠ 0) :
+    (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) := by sorry
 
-lemma FiniteVarPoly.multidiv_correct [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [LinearOrder R] [ord : MonomialOrder σ] [Field R] (s : FiniteVarPoly σ R) (F : Generators σ R) (F_nonzero : ∀ f ∈ F, f ≠ 0):
-    let (a,r) := FiniteVarPoly.multidiv s F F_nonzero;
-    s = r + (∑ (f ∈ F), (a f)*(f)) /\
-    (r = 0 ∨ ∀m ∈ monomials r, ∀ f (inF : f ∈ F), ¬ Monomial.instDvd.dvd (leading_monomial f (F_nonzero f inF)) m) := by
-  unfold multidiv; simp
+lemma MvPolynomial.multidiv_correct [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [ord : MonomialOrder σ] [Field R] (s : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_nonzero : ∀ f ∈ F, f ≠ 0):
+    -- let (a,r) := (MvPolynomial.multidiv s F F_nonzero);
+    s = (s.multidiv F F_nonzero).snd + (∑ (f ∈ F), ((s.multidiv F F_nonzero).fst f)*(f)) /\
+    ((s.multidiv F F_nonzero).snd = 0 ∨ ∀m ∈ monomials (s.multidiv F F_nonzero).snd, ∀ f (inF : f ∈ F), ¬ Monomial.instDvd.dvd (leading_monomial f (F_nonzero f inF)) m) := by sorry
+  -- unfold multidiv; simp
   -- constructor
   -- .
   --   -- have F_nonzero' := FList_nonzero F F_nonzero
@@ -77,4 +83,3 @@ lemma FiniteVarPoly.multidiv_correct [DecidableEq σ] [DecidableEq R] [LinearOrd
   --         have IH' := IH (div s f (by sorry)).2 F'
   --         sorry
   --   apply this; rfl; assumption
-  . sorry
