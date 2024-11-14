@@ -37,6 +37,9 @@ instance Monomial.instDvd [DecidableEq σ] : Dvd (Monomial σ) where
   dvd f g :=
     ∃ k, f= g*k
 
+-- def Monomial.instDvd' [DecidableEq σ] (f g : Monomial σ) : Prop :=
+
+
 -- Monomial Order
 class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial σ)) where
   respect : ∀(u v w : @Monomial σ),  u < v -> u*w < v*w

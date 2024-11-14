@@ -16,12 +16,16 @@ def Generators (σ R: Type) [DecidableEq σ] [CommRing R] : Type := Finset (MvPo
 instance Generators.instMembership (σ R: Type) [DecidableEq σ] [CommRing R] : Membership (MvPolynomial σ R) (Generators σ R) where
   mem := Finset.instMembership.mem
 
--- def MvPolynomial.div [DecidableEq σ] [Field R] (f g : FiniteVarPoly σ R) (g_nonzero : g ≠ 0) : (FiniteVarPoly σ R) × (FiniteVarPoly σ R) := sorry
+-- def Monomial.div [DecidableEq σ] [CommRing R] (f : Monomial σ) (g : Monomial σ) (g_nonzero : g ≠ 0) : (Monomial σ) × (Monomial σ) :=
 
--- lemma FiniteVarPoly.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (f g : FiniteVarPoly σ R) (g_nonzero : g ≠ 0):
---   let (h,r) := FiniteVarPoly.div f g g_nonzero;
+
+-- def MvPolynomial.div [DecidableEq σ] [Field R] (f : MvPolynomial σ R) (g : Monomial σ) (g_nonzero : g ≠ 0) : (MvPolynomial σ R) × (MvPolynomial σ R) :=
+--   sorry
+
+-- lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (f : MvPolynomial σ R) (g : Monomial σ) (g_nonzero : g ≠ 0):
+--   let (h,r) := MvPolynomial.div f g g_nonzero;
 --   f = g*h+r ∧
---   (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (leading_monomial g g_nonzero) m) := sorry
+--   (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (@leading_monomial σ _ _ _ ord g g_nonzero) m) := sorry
 
 def FiniteVarPoly.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [LinearOrder R] [Field R] (s : MvPolynomial σ R) (F : List (Monomial σ)) (F_nonzero : F.all (fun f ↦ f≠0)): (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
   sorry
