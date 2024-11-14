@@ -34,6 +34,9 @@ noncomputable instance Monomial.instMul : Mul (Monomial σ) where
 noncomputable def LCM : Monomial σ → Monomial σ → Monomial σ :=
   fun m1 m2 => Finsupp.zipWith (Nat.max) (by rfl) m1 m2
 
+-- def LCM_computable [DecidableEq σ] : Computable₂ (@LCM σ) := by
+--   sorry
+
 noncomputable instance Monomial.instDiv [DecidableEq σ] : Div (Monomial σ) where
   div m1 m2 := Finsupp.zipWith (Nat.sub) (by rfl) m1 m2
 
@@ -45,8 +48,9 @@ instance Monomial.instDvd [DecidableEq σ] : Dvd (Monomial σ) where
 def Monomial.instDvd' [DecidableEq σ] (f g : Monomial σ) : Prop :=
   (g.support ⊆ f.support) ∧ (∀ (x : σ) (GS : x ∈ g.support), g.toFun x <= f.toFun x)
 
-noncomputable instance Monomial.instDvd'_decidable [DecidableEq σ] (f g : Monomial σ) : Decidable (Monomial.instDvd' f g) := by
-  exact Classical.propDecidable (f.instDvd' g)
+instance Monomial.instDvd'_decidable [DecidableEq σ] (f g : Monomial σ) : Decidable (Monomial.instDvd' f g) := by
+  rw [instDvd']
+  apply instDecidableAnd
 
 def Monomial.instDvd'_div [DecidableEq σ] (f g : Monomial σ) (Dvd' : Monomial.instDvd' f g):
   f = g * (f / g) := by
