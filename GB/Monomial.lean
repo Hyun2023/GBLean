@@ -68,6 +68,13 @@ def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
     . intro x H
       apply Nat.le_add_right
   . obtain ⟨H1, H2⟩ := H
+    use (Finsupp.zipWith (Nat.sub) (by rfl) f g)
+    rw [HMul.hMul, instHMul]; simp
+    rw [Mul.mul, instMul]; simp
+    rw [Add.add, Finsupp.instAdd]; simp
+    apply Finsupp.ext
+    intro a; simp
+    have H2' := H2 a
     sorry
 
 -- Monomial Order
