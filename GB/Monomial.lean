@@ -74,8 +74,10 @@ def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
     rw [Add.add, Finsupp.instAdd]; simp
     apply Finsupp.ext
     intro a; simp
-    have H2' := H2 a
-    sorry
+    rcases em (a ∈ g.support) with h|h <;> simp at h
+    . exact Eq.symm (Nat.add_sub_of_le (H2 a h))
+    . rw [h]
+      exact Eq.symm (Nat.zero_add (f.toFun a - 0))
 
 -- Monomial Order
 class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial σ)) where
