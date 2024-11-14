@@ -16,7 +16,7 @@ def Generators (σ R: Type) [DecidableEq σ] [CommRing R] : Type := Finset (MvPo
 instance Generators.instMembership (σ R: Type) [DecidableEq σ] [CommRing R] : Membership (MvPolynomial σ R) (Generators σ R) where
   mem := Finset.instMembership.mem
 
-noncomputable def Monomial.div [DecidableEq σ] [CommRing R] (f : Monomial σ) (g : Monomial σ) (g_nonzero : g ≠ 0) : (Monomial σ) × (Monomial σ) :=
+noncomputable def Monomial.div [DecidableEq σ] (f : Monomial σ) (g : Monomial σ) : (Monomial σ) × (Monomial σ) :=
   if (Monomial.instDvd' f g)
   then (f / g, 0)
   else (0, f)
