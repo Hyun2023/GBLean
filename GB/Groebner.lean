@@ -8,6 +8,7 @@ import Mathlib.Data.Finset.Basic
 import Mathlib.RingTheory.Ideal.Basic
 import Mathlib.Algebra.Ring.Defs
 import Mathlib.Algebra.MvPolynomial.CommRing
+import Mathlib.Data.Multiset.Basic
 import GB.Monomial
 import GB.Polynomial
 import GB.Reduction
@@ -46,7 +47,11 @@ def leading_monomial_set (P : Set (MvPolynomial σ R))
   : Set (MvPolynomial σ R) :=
   { m | ∃ (p : MvPolynomial σ R) (h : p ≠ 0), p ∈ P ∧ m = leading_monomial p h }
 
-
+def leading_monomial_finset (P : Finset (MvPolynomial σ R))
+  : Finset (MvPolynomial σ R) :=
+  let P_underlying := P.val
+  let P_filtered := P_underlying.filterMap (fun p => (leading_monomial_option p).map (fun o => ↑o))
+  P_filtered.toFinset
 
 
 axiom leading_monomial_unwrap (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
@@ -55,7 +60,7 @@ axiom leading_monomial_unwrap (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
 def Groebner (G : Finset (MvPolynomial σ R))  (I : Ideal (MvPolynomial σ R)) :=
   Ideal.span G = I
   ∧
-  Ideal.span (leading_monomial_set (Finset.toSet G))
+  Ideal.span (↑leading_monomial_set (Finset.toSet G))
   = Ideal.span (leading_monomial_set (I) )
 
 -- def divisible (A B : Monomial σ) : Prop := True
@@ -97,6 +102,10 @@ def Reduction_unique  (s : MvPolynomial σ R) (G : Finset (MvPolynomial σ R)) (
         exists (r1-r2);constructor;assumption;exists sub_nonzero
       }
       have H := @MonomialGen _ R _ _ _ _ _ _ (toMvPolynomial (leading_monomial (r1 - r2) sub_nonzero)) (leading_monomial_set G)
+
+    }
+    {
+
     }
   }
 
