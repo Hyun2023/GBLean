@@ -54,8 +54,19 @@ def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
     . rw [Finset.subset_iff]
       intro x GS
       simp
-      sorry
-    . sorry
+      constructor
+      . have SUPP := (Finsupp.mem_support_toFun g x)
+        rw [SUPP] at GS
+        left
+        intro H
+        exact GS H
+      . intro H
+        exfalso
+        have SUPP := (Finsupp.mem_support_toFun g x)
+        rw [SUPP] at GS
+        exact GS H
+    . intro x H
+      apply Nat.le_add_right
   . obtain ⟨H1, H2⟩ := H
     sorry
 
