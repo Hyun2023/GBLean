@@ -26,14 +26,14 @@ noncomputable instance Monomial.toMvPolynomial [DecidableEq σ] [CommRing R] : C
   coe := fun m => MvPolynomial.monomial m 1
 
 
-noncomputable instance Monomial.instMul [DecidableEq σ] : Mul (Monomial σ) where
+noncomputable instance Monomial.instMul : Mul (Monomial σ) where
   mul := fun m1 m2 => Finsupp.instAdd.add m1 m2
 
-noncomputable def LCM [DecidableEq σ] : Monomial σ → Monomial σ → Monomial σ :=
+noncomputable def LCM : Monomial σ → Monomial σ → Monomial σ :=
   fun m1 m2 => Finsupp.zipWith (Nat.max) (by rfl) m1 m2
 
--- instance Monomial.instDiv [DecidableEq σ] : Div (Monomial σ) where
---   div := CFinsupp.binop' Nat.sub
+noncomputable instance Monomial.instDiv [DecidableEq σ] : Div (Monomial σ) where
+  div m1 m2 := Finsupp.zipWith (Nat.sub) (by rfl) m1 m2
 
 instance Monomial.instDvd [DecidableEq σ] : Dvd (Monomial σ) where
   dvd f g :=
@@ -54,19 +54,19 @@ def monomials [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) : Finset (Mo
 
 
 -- -- Leading Monomial and Term
--- def term_exists [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : (monomials p).Nonempty := by
---   have exM : exists m, MvPolynomial.coeff m p ≠ 0 := by
---     rw [MvPolynomial.ne_zero_iff] at p_nonzero
---     exact p_nonzero
---   rcases exM with ⟨m, mcond⟩
---   constructor; any_goals exact (toMonomial.coe m)
---   rw [monomials, toCFinsupp_emb]
---   apply Finset.mem_map.mpr; simp
---   exists (m)
+def term_exists [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : (monomials p).Nonempty := by
+  have exM : exists m, MvPolynomial.coeff m p ≠ 0 := by
+    rw [MvPolynomial.ne_zero_iff] at p_nonzero
+    exact p_nonzero
+  rcases exM with ⟨m, mcond⟩
+  constructor; any_goals exact m
+  rw [monomials]
+  rw [MvPolynomial.coeff] at mcond; simp at mcond
+  apply (p.mem_support_toFun m).mpr mcond
 
 def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): Monomial σ :=
   @Finset.max' _ ord.toLinearOrder (monomials p)
-  (sorry)
+  (term_exists p p_nonzero)
 
 -- -- If p is zero, it gives runtime error. Wait, runtime error in proof assistant?
 def leading_monomial_unsafe [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
