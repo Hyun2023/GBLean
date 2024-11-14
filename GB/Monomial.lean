@@ -45,6 +45,9 @@ instance Monomial.instDvd [DecidableEq σ] : Dvd (Monomial σ) where
 def Monomial.instDvd' [DecidableEq σ] (f g : Monomial σ) : Prop :=
   (g.support ⊆ f.support) ∧ (∀ (x : σ) (GS : x ∈ g.support), g.toFun x <= f.toFun x)
 
+noncomputable instance Monomial.instDvd'_decidable [DecidableEq σ] (f g : Monomial σ) : Decidable (Monomial.instDvd' f g) := by
+  exact Classical.propDecidable (f.instDvd' g)
+
 def Monomial.instDvd'_div [DecidableEq σ] (f g : Monomial σ) (Dvd' : Monomial.instDvd' f g):
   f = g * (f / g) := by
   rw [instDvd'] at Dvd'
