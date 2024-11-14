@@ -45,9 +45,25 @@ instance Monomial.instDvd [DecidableEq σ] : Dvd (Monomial σ) where
 def Monomial.instDvd' [DecidableEq σ] (f g : Monomial σ) : Prop :=
   (g.support ⊆ f.support) ∧ (∀ (x : σ) (GS : x ∈ g.support), g.toFun x <= f.toFun x)
 
+def Monomial.instDvd'_div [DecidableEq σ] (f g : Monomial σ) (Dvd' : Monomial.instDvd' f g):
+  f = g * (f / g) := by
+  rw [instDvd'] at Dvd'
+  obtain ⟨_, H2⟩ := Dvd'
+  rw [HDiv.hDiv, instHDiv]; simp
+  rw [Div.div, instDiv]; simp
+  rw [HMul.hMul, instHMul]; simp
+  rw [Mul.mul, instMul]; simp
+  rw [Add.add, Finsupp.instAdd]; simp
+  apply Finsupp.ext
+  intro a; simp
+  rcases em (a ∈ g.support) with h|h
+  . exact Eq.symm (Nat.add_sub_of_le (H2 a h))
+  . simp at h; rw [h]
+    exact Eq.symm (Nat.zero_add (f.toFun a - 0))
+
 def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
   f ∣ g <-> Monomial.instDvd' f g := by
-  rw [Dvd.dvd, instDvd, Monomial.instDvd']; simp
+  rw [Dvd.dvd, instDvd]; simp
   constructor <;> intro H
   . obtain ⟨k, EQ⟩ := H
     rw [EQ, HMul.hMul, instHMul]; simp
@@ -69,19 +85,11 @@ def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
         have SUPP := (Finsupp.mem_support_toFun g x)
         rw [SUPP] at GS
         exact GS H
-    . intro x H
+    . intro x _
       apply Nat.le_add_right
-  . obtain ⟨H1, H2⟩ := H
-    use (Finsupp.zipWith (Nat.sub) (by rfl) f g)
-    rw [HMul.hMul, instHMul]; simp
-    rw [Mul.mul, instMul]; simp
-    rw [Add.add, Finsupp.instAdd]; simp
-    apply Finsupp.ext
-    intro a; simp
-    rcases em (a ∈ g.support) with h|h <;> simp at h
-    . exact Eq.symm (Nat.add_sub_of_le (H2 a h))
-    . rw [h]
-      exact Eq.symm (Nat.zero_add (f.toFun a - 0))
+  . use (f / g)
+    apply Monomial.instDvd'_div
+    exact H
 
 -- Monomial Order
 class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial σ)) where
