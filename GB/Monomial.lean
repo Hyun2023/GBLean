@@ -43,7 +43,12 @@ def Monomial.instDvd' [DecidableEq σ] (f g : Monomial σ) : Prop :=
 
 def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
   f ∣ g <-> Monomial.instDvd' f g := by
-  sorry
+  rw [Monomial.instDvd']
+  constructor <;> intro H
+  . constructor
+    . sorry
+    . sorry
+  . sorry
 
 -- Monomial Order
 class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial σ)) where
