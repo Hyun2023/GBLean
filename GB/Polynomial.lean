@@ -10,10 +10,15 @@ import GB.Monomial
 --   zero := (0 : (CFinsupp (Monomial σ) R))
 
 def is_monomial  [CommRing R] (p : MvPolynomial σ R)  :=
-  p.support.card =1
+  ∃! m, m ∈ p.support ∧ True
 
-noncomputable def MvPolynomial.instsub  [CommRing R] : Sub (MvPolynomial σ R) where
-  sub := Finsupp.instSub.sub
+
+
+noncomputable def MvPolynomial.instSub  [CommRing R] : Sub (MvPolynomial σ R) where
+  sub := fun a b => Finsupp.instSub.sub a b
+
+def MvPolynomial.toMonomial [CommRing R] (p : MvPolynomial σ R) (h : is_monomial p) :=
+  Finset.choose (fun _ => True) p.support h
 
 
 -- lemma zero_is_not_mon  [CommRing R] : ¬(is_monomial (0 : (FiniteVarPoly σ R) )) := by

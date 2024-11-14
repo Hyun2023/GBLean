@@ -25,6 +25,8 @@ instance Monomial.Zero : Zero (Monomial σ) where
 noncomputable instance Monomial.toMvPolynomial [DecidableEq σ] [CommRing R] : Coe (Monomial σ) (MvPolynomial σ R) where
   coe := fun m => MvPolynomial.monomial m 1
 
+noncomputable def toMvPolynomial [CommRing R] (m : Monomial σ) : (MvPolynomial σ R) :=
+  MvPolynomial.monomial m 1
 
 noncomputable instance Monomial.instMul : Mul (Monomial σ) where
   mul := fun m1 m2 => Finsupp.instAdd.add m1 m2
@@ -63,6 +65,9 @@ def term_exists [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) (p_nonzero
   rw [monomials]
   rw [MvPolynomial.coeff] at mcond; simp at mcond
   apply (p.mem_support_toFun m).mpr mcond
+
+def leading_monomial_option [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : Option (Monomial σ) :=
+  @Finset.max _ ord.toLinearOrder (monomials p)
 
 def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): Monomial σ :=
   @Finset.max' _ ord.toLinearOrder (monomials p)
