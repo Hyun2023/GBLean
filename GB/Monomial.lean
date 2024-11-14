@@ -43,12 +43,21 @@ def Monomial.instDvd' [DecidableEq σ] (f g : Monomial σ) : Prop :=
 
 def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
   f ∣ g <-> Monomial.instDvd' f g := by
-  rw [Monomial.instDvd']
+  rw [Dvd.dvd, instDvd, Monomial.instDvd']; simp
   constructor <;> intro H
-  . constructor
+  . obtain ⟨k, EQ⟩ := H
+    rw [EQ, HMul.hMul, instHMul]; simp
+    rw [Mul.mul, instMul]; simp
+    rw [Add.add, Finsupp.instAdd]; simp
+    rw [Finsupp.zipWith, Finsupp.onFinset]; simp
+    constructor
+    . rw [Finset.subset_iff]
+      intro x GS
+      simp
+      sorry
     . sorry
-    . sorry
-  . sorry
+  . obtain ⟨H1, H2⟩ := H
+    sorry
 
 -- Monomial Order
 class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial σ)) where
