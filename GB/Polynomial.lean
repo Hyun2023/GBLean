@@ -9,8 +9,17 @@ import GB.Monomial
 -- instance (σ : Type) [CommRing R] : Zero (FiniteVarPoly σ R) where
 --   zero := (0 : (CFinsupp (Monomial σ) R))
 
--- def is_monomial  [CommRing R] (p : FiniteVarPoly σ R)  :=
---   p.support.card =1
+def is_monomial  [CommRing R] (p : MvPolynomial σ R)  :=
+  ∃! m, m ∈ p.support ∧ True
+
+
+
+noncomputable def MvPolynomial.instSub  [CommRing R] : Sub (MvPolynomial σ R) where
+  sub := fun a b => Finsupp.instSub.sub a b
+
+def MvPolynomial.toMonomial [CommRing R] (p : MvPolynomial σ R) (h : is_monomial p) :=
+  Finset.choose (fun _ => True) p.support h
+
 
 -- lemma zero_is_not_mon  [CommRing R] : ¬(is_monomial (0 : (FiniteVarPoly σ R) )) := by
 --   intros ismon
@@ -77,11 +86,11 @@ import GB.Monomial
 -- instance FiniteVarPoly.instSub [DecidableEq σ] [DecidableEq R] [CommRing R] : Sub (FiniteVarPoly σ R) where
 --   sub := CFinsupp.binop' (fun (x y : R) => x-y)
 
-instance MvPolynomial.instLinearOrder [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] : LinearOrder (MvPolynomial σ R) :=
+instance MvPolynomial.instLinearOrder [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] : LinearOrder (MvPolynomial σ R) :=
   sorry
   -- @CFinsuppInstLinearOrder (Monomial σ) R _ _ _ Monomial_lex _
 
-def MvPolynomial.toList [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (s : Finset (MvPolynomial σ R)) : List (MvPolynomial σ R) :=
+def MvPolynomial.toList [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] (s : Finset (MvPolynomial σ R)) : List (MvPolynomial σ R) :=
   Finset.sort (MvPolynomial.instLinearOrder.le) s
 
 -- def FiniteVarPoly.toList_sound [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (s : Finset (FiniteVarPoly σ R)) : List.toFinset (FiniteVarPoly.toList s) = s := by
