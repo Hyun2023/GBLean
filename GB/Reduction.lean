@@ -21,8 +21,8 @@ noncomputable def Monomial.div [DecidableEq σ] (f : Monomial σ) (g : Monomial 
   then (f / g, 0)
   else (0, f)
 
--- def MvPolynomial.div [DecidableEq σ] [Field R] (f : MvPolynomial σ R) (g : Monomial σ) (g_nonzero : g ≠ 0) : (MvPolynomial σ R) × (MvPolynomial σ R) :=
---   sorry
+def MvPolynomial.div [DecidableEq σ] [Field R] (f : MvPolynomial σ R) (g : Monomial σ) (g_nonzero : g ≠ 0) : (MvPolynomial σ R) × (MvPolynomial σ R) :=
+  sorry
 
 -- lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (f : MvPolynomial σ R) (g : Monomial σ) (g_nonzero : g ≠ 0):
 --   let (h,r) := MvPolynomial.div f g g_nonzero;
