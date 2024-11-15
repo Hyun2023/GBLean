@@ -1,7 +1,8 @@
 -- import GB.CFinsupp
 import GB.Monomial
 -- open Monomial
-import Mathlib.Order.WellFoundedSet
+-- import Mathlib.Order.WellFoundedSet
+import Mathlib.Algebra.MvPolynomial.Degrees
 
 -- -- Finite Variable Polynomial
 -- def FiniteVarPoly (σ : Type) (R : Type) [CommRing R] := CFinsupp (Monomial σ) R
@@ -9,6 +10,8 @@ import Mathlib.Order.WellFoundedSet
 -- @[simp]
 -- instance (σ : Type) [CommRing R] : Zero (FiniteVarPoly σ R) where
 --   zero := (0 : (CFinsupp (Monomial σ) R))
+
+instance [CommRing R] : FunLike (MvPolynomial σ R) (Monomial σ) R := Finsupp.instFunLike
 
 def is_monomial  [CommRing R] (p : MvPolynomial σ R)  :=
   ∃! m, m ∈ p.support ∧ True
@@ -112,25 +115,35 @@ def MvPolynomial.toMonomial [CommRing R] (p : MvPolynomial σ R) (h : is_monomia
 --   sorry
   -- @CFinsuppInstLinearOrder (Monomial σ) R _ _ _ Monomial_lex _
 
-instance [CommRing R] : Preorder (MvPolynomial σ R) := sorry
+-- Preorder of MvPolynomial based on degree
+instance [CommRing R] : Preorder (MvPolynomial σ R) where
+  le  p₁ p₂ := p₁.totalDegree<= p₂.totalDegree
+  le_refl := by intros; simp
+  le_trans := by intros; simp; transitivity <;> assumption
 
-noncomputable def MvPolynomial.toList [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] (s : Finset (MvPolynomial σ R)) : List (MvPolynomial σ R) :=
-  @WellFoundedLT.fix
-    (Finset (MvPolynomial σ R)) _ Finset.wellFoundedLT
-    (fun _ => List (MvPolynomial σ R))
-    (fun s IH => if c: s.Nonempty then  by
-      simp at IH
-      let p := Set.IsWF.min (Finset.isWF s) c
-      have pIn : p ∈ s := Set.IsWF.min_mem (Finset.isWF s) c
-      have Hsubset : s \ {p} ⊂ s := by
-        refine Finset.sdiff_ssubset ?h ?ht
-        . exact Finset.singleton_subset_iff.mpr pIn
-        . exact Finset.singleton_nonempty p
-      have t := IH (s \ {p}) Hsubset
-      exact p::t
-      else [])
-    s
+-- noncomputable def MvPolynomial.toList [DecidableEq R] [CommRing R] [LinearOrder σ] (s : Finset (MvPolynomial σ R)) : List (MvPolynomial σ R) :=
+--   @WellFoundedLT.fix
+--     (Finset (MvPolynomial σ R)) _ Finset.wellFoundedLT
+--     (fun _ => List (MvPolynomial σ R))
+--     (fun s IH => if c: s.Nonempty then  by
+--       simp at IH
+--       let p := Set.IsWF.min (Finset.isWF s) c
+--       have pIn : p ∈ s := Set.IsWF.min_mem (Finset.isWF s) c
+--       have Hsubset : s \ {p} ⊂ s := by
+--         refine Finset.sdiff_ssubset ?h ?ht
+--         . exact Finset.singleton_subset_iff.mpr pIn
+--         . exact Finset.singleton_nonempty p
+--       have t := IH (s \ {p}) Hsubset
+--       exact p::t
+--       else [])
+--     s
 
+-- lemma MvPolynomial.to_List_sound [DecidableEq R] [CommRing R] [LinearOrder σ] (s : Finset (MvPolynomial σ R)) :
+--   s.toList.toFinset = s := by
+--   -- apply (WellFoundedLT.induction s)
+--   -- clear s; intro s _
+--   -- rcases em s.Nonempty <;>
+--   simp [toList]
 
 -- def FiniteVarPoly.toList_sound [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (s : Finset (FiniteVarPoly σ R)) : List.toFinset (FiniteVarPoly.toList s) = s := by
 --   apply Finset.ext

@@ -25,17 +25,15 @@ lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field 
   f = g*h+r ∧
   (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (@leading_monomial σ _ _ _ ord g (is_monomial_nonzero g_ismon)) m) := sorry
 
-def MvPolynomial.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] (s : MvPolynomial σ R) (F : List (Monomial σ)) (F_nonzero : F.all (fun f ↦ f≠0)): (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
-  sorry
-  -- match F with
-  -- | [] => (CFinsupp.empty _ _, s)
-  -- | f :: F' =>
-  --   -- simp at F_nonzero; rcases F_nonzero with ⟨nonzero₁, nonzero₂⟩
-  --   let (h₁,r) := div s f (by simp at F_nonzero; rcases F_nonzero; assumption)
-  --   let (h₂,r) := multidiv_help r F' (by simp; simp at F_nonzero; rcases F_nonzero; assumption)
-  --   (if p: h₁≠0 then CFinsupp_add h₂ f h₁ p else h₂, r)
+noncomputable def MvPolynomial.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] (s : MvPolynomial σ R) (F : List (MvPolynomial σ R)) (F_nonzero : ∀ f ∈ F, is_monomial f): (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
+  match F with
+  | [] => (0, s)
+  | f :: F' =>
+    let (h₁,r) := div s f (by simp at F_nonzero; rcases F_nonzero; assumption)
+    let (h₂,r) := multidiv_help r F' (by intro f; simp at F_nonzero; rcases F_nonzero with ⟨_,h⟩ ; apply h)
+    (h₂ + Finsupp.single f h₁, r)
 
-lemma FList_nonzero [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] (F : Finset (MvPolynomial σ R)) (F_nonzero : ∀ f ∈ F, is_monomial f) : ∀ f ∈ (MvPolynomial.toList F), is_monomial f := by
+lemma FList_nonzero [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] (F : Finset (MvPolynomial σ R)) (F_nonzero : ∀ f ∈ F, is_monomial f) : ∀ f ∈ F.toList, is_monomial f := by
   sorry
   -- have mem_sort : ∀ f, f ∈ FiniteVarPoly.toList F ↔ f ∈ F := by
   --   intro f; rw [FiniteVarPoly.toList, Finset.mem_sort]
