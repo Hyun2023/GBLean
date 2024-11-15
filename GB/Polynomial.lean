@@ -1,6 +1,7 @@
 -- import GB.CFinsupp
 import GB.Monomial
 -- open Monomial
+import Mathlib.Order.WellFoundedSet
 
 -- -- Finite Variable Polynomial
 -- def FiniteVarPoly (σ : Type) (R : Type) [CommRing R] := CFinsupp (Monomial σ) R
@@ -107,12 +108,29 @@ def MvPolynomial.toMonomial [CommRing R] (p : MvPolynomial σ R) (h : is_monomia
 -- instance FiniteVarPoly.instSub [DecidableEq σ] [DecidableEq R] [CommRing R] : Sub (FiniteVarPoly σ R) where
 --   sub := CFinsupp.binop' (fun (x y : R) => x-y)
 
-instance MvPolynomial.instLinearOrder [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] : LinearOrder (MvPolynomial σ R) :=
-  sorry
+-- instance MvPolynomial.instLinearOrder [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] : LinearOrder (MvPolynomial σ R) :=
+--   sorry
   -- @CFinsuppInstLinearOrder (Monomial σ) R _ _ _ Monomial_lex _
 
-def MvPolynomial.toList [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] (s : Finset (MvPolynomial σ R)) : List (MvPolynomial σ R) :=
-  Finset.sort (MvPolynomial.instLinearOrder.le) s
+instance [CommRing R] : Preorder (MvPolynomial σ R) := sorry
+
+noncomputable def MvPolynomial.toList [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] (s : Finset (MvPolynomial σ R)) : List (MvPolynomial σ R) :=
+  @WellFoundedLT.fix
+    (Finset (MvPolynomial σ R)) _ Finset.wellFoundedLT
+    (fun _ => List (MvPolynomial σ R))
+    (fun s IH => if c: s.Nonempty then  by
+      simp at IH
+      let p := Set.IsWF.min (Finset.isWF s) c
+      have pIn : p ∈ s := Set.IsWF.min_mem (Finset.isWF s) c
+      have Hsubset : s \ {p} ⊂ s := by
+        refine Finset.sdiff_ssubset ?h ?ht
+        . exact Finset.singleton_subset_iff.mpr pIn
+        . exact Finset.singleton_nonempty p
+      have t := IH (s \ {p}) Hsubset
+      exact p::t
+      else [])
+    s
+
 
 -- def FiniteVarPoly.toList_sound [DecidableEq σ] [DecidableEq R] [CommRing R] [LinearOrder σ] [LinearOrder R] (s : Finset (FiniteVarPoly σ R)) : List.toFinset (FiniteVarPoly.toList s) = s := by
 --   apply Finset.ext
