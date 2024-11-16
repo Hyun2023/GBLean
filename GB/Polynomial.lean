@@ -12,7 +12,10 @@ import GB.Monomial
 def is_monomial  [CommRing R] (p : MvPolynomial σ R)  :=
   ∃! m, m ∈ p.support ∧ True
 
-
+def mono_poly_mono [CommRing R] [Nontrivial R] : ∀(m : Monomial σ), is_monomial (@toMvPolynomial R _ _ m) := by {
+  intros m;unfold is_monomial;unfold toMvPolynomial
+  rw [<-MvPolynomial.single_eq_monomial];unfold MvPolynomial.support;unfold Finsupp.single;simp
+}
 
 noncomputable def MvPolynomial.instSub  [CommRing R] : Sub (MvPolynomial σ R) where
   sub := fun a b => Finsupp.instSub.sub a b
@@ -20,6 +23,11 @@ noncomputable def MvPolynomial.instSub  [CommRing R] : Sub (MvPolynomial σ R) w
 def MvPolynomial.toMonomial [CommRing R] (p : MvPolynomial σ R) (h : is_monomial p) :=
   Finset.choose (fun _ => True) p.support h
 
+def Monomial.instMembership [CommRing R] [DecidableEq σ] : Membership (Monomial σ) (Set (MvPolynomial σ R)) where
+  mem := fun s m => (Monomial.toMvPolynomial.coe m) ∈ s
+
+def MvPolynomial.instMembership [CommRing R] [DecidableEq σ] : Membership (MvPolynomial σ R) (Set (Monomial σ)) where
+  mem := fun s p => exists h : (is_monomial p), (MvPolynomial.toMonomial p h) ∈ s
 
 -- lemma zero_is_not_mon  [CommRing R] : ¬(is_monomial (0 : (FiniteVarPoly σ R) )) := by
 --   intros ismon

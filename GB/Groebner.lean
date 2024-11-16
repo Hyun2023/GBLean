@@ -34,21 +34,22 @@ abbrev poly := MvPolynomial σ R
 instance : Coe (Set (Monomial σ)) (Set (MvPolynomial σ R)) where
   coe := fun a => Set.image (fun m : Monomial σ  => ↑m) a
 
--- def leading_monomial_set (P : Set (MvPolynomial σ R))
---   : Set (MvPolynomial σ R) :=
---   let P_nonzero := {p ∈ P | p ≠ 0}
---   let monomial_set := Set.image (
---     fun p:P_nonzero =>
---     leading_monomial p sorry
---     ) (P_nonzero)
---   monomial_set
+def toMvPolynomial_Set (M : Set (Monomial σ)) :
+  Set (MvPolynomial σ R) :=
+  M.image (fun m : Monomial σ  => ↑m)
+
+noncomputable def toMvPolynomial_Finset (M : Finset (Monomial σ)) :
+  Finset (MvPolynomial σ R) :=
+  M.image (fun m : Monomial σ  => ↑m)
+
+
 
 def leading_monomial_set (P : Set (MvPolynomial σ R))
-  : Set (MvPolynomial σ R) :=
+  : Set (Monomial σ) :=
   { m | ∃ (p : MvPolynomial σ R) (h : p ≠ 0), p ∈ P ∧ m = leading_monomial p h }
 
-def leading_monomial_finset (P : Finset (MvPolynomial σ R))
-  : Finset (MvPolynomial σ R) :=
+noncomputable def leading_monomial_finset (P : Finset (MvPolynomial σ R))
+  : Finset (Monomial σ) :=
   let P_underlying := P.val
   let P_filtered := P_underlying.filterMap (fun p => (leading_monomial_option p).map (fun o => ↑o))
   P_filtered.toFinset
@@ -60,10 +61,8 @@ axiom leading_monomial_unwrap (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
 def Groebner (G : Finset (MvPolynomial σ R))  (I : Ideal (MvPolynomial σ R)) :=
   Ideal.span G = I
   ∧
-  Ideal.span (↑leading_monomial_set (Finset.toSet G))
-  = Ideal.span (leading_monomial_set (I) )
-
--- def divisible (A B : Monomial σ) : Prop := True
+  Ideal.span (toMvPolynomial_Finset (leading_monomial_finset G )).toSet
+  = Ideal.span (@toMvPolynomial_Set _ R _ (@leading_monomial_set _ R _ _ ord (I) ))
 
 lemma MonomialGen (m : MvPolynomial σ R) (mons : Finset (Monomial σ))
 (m_mem : m ∈ Ideal.span ((fun a : (Monomial σ) => ↑a) '' mons)) :
@@ -73,41 +72,47 @@ lemma MonomialGen (m : MvPolynomial σ R) (mons : Finset (Monomial σ))
 --   (Finsupp (MvPolynomial σ R) (Monomial σ)) × (MvPolynomial σ R)   := sorry
 
 def ReductionProp (s : MvPolynomial σ R) (G : Finset (MvPolynomial σ R)) (G_nonzero : ∀ g ∈ G, g ≠ 0)
-(I : Ideal (MvPolynomial σ R))(r : MvPolynomial σ R) :=
+(I : Ideal (MvPolynomial σ R)) (r : MvPolynomial σ R) :=
   exists f,
   f ∈ I ∧
   s = r + f /\
     (r = 0 ∨ ∀m ∈ monomials r, ∀ g (inG : g ∈ G), ¬ Monomial.instDvd.dvd (leading_monomial g (G_nonzero g inG)) m)
 
-def multidiv_Reduction (s : MvPolynomial σ R) (G : Finset (MvPolynomial σ R)) (G_nonzero : ∀ g ∈ G, g ≠ 0) :
+def multidiv_reduction (s : MvPolynomial σ R) (G : Finset (MvPolynomial σ R)) (G_nonzero : ∀ g ∈ G, g ≠ 0)
+  (I : Ideal (MvPolynomial σ R)) :
   ReductionProp s G G_nonzero I (s.multidiv G G_nonzero).snd := by sorry
 
 def Reduction_unique  (s : MvPolynomial σ R) (G : Finset (MvPolynomial σ R)) (GB : Groebner G I) (G_nonzero : ∀ g ∈ G, g ≠ 0)
   (H1 : (ReductionProp s G G_nonzero I r1) ) ( H2 : (ReductionProp s G G_nonzero I r2) ):
-  r1 = r2 ∧ (s.multidiv G G_nonzero).snd  = r1 := by {
+  r1 = r2 := by {
     have ⟨G_span , GB⟩ := GB
-    constructor
-    {
-      by_cases eq: r1=r2;assumption
-      have ⟨ f1, ⟨ H11,H12,H13 ⟩ ⟩ := H1
-      have ⟨ f2, ⟨ H21,H22,H23 ⟩ ⟩ := H2
+    by_cases eq: r1=r2;assumption
+    have ⟨ f1, ⟨ H11,H12,H13 ⟩ ⟩ := H1
+    have ⟨ f2, ⟨ H21,H22,H23 ⟩ ⟩ := H2
 
-      have sub_in : r1 - r2 ∈ I := by sorry
-      have sub_nonzero : r1 -r2 ≠ 0 := by {
-        contrapose!;intros;exact sub_ne_zero_of_ne eq
-      }
-      have lm_in : ( @toMvPolynomial R _ _ (leading_monomial (r1 -r2) sub_nonzero) ∈ Ideal.span (leading_monomial_set ↑G) ) := by {
-        rw [GB];apply Ideal.subset_span
-        unfold leading_monomial_set;simp
-        exists (r1-r2);constructor;assumption;exists sub_nonzero
-      }
-      have H := @MonomialGen _ R _ _ _ _ _ _ (toMvPolynomial (leading_monomial (r1 - r2) sub_nonzero)) (leading_monomial_set G)
-
+    have sub_in : r1 - r2 ∈ I := by sorry
+    have sub_nonzero : r1 -r2 ≠ 0 := by {
+      contrapose!;intros;exact sub_ne_zero_of_ne eq
     }
-    {
-
+    have lm_in : ( @toMvPolynomial R _ _ (leading_monomial (r1 -r2) sub_nonzero) ∈ Ideal.span (toMvPolynomial_Finset (leading_monomial_finset G )).toSet ) := by {
+      rw [GB];apply Ideal.subset_span
+      unfold leading_monomial_set;simp
+      unfold toMvPolynomial_Set;simp
+      exists (leading_monomial (r1 -r2) sub_nonzero);constructor
+      exists (r1 -r2);constructor;assumption
+      exists sub_nonzero;rfl
     }
-  }
+
+    have lm_in' : ( @toMvPolynomial R _ _ (leading_monomial (r1 -r2) sub_nonzero) ) ∈
+      Ideal.span ((fun a ↦ (monomial a) 1) '' (leading_monomial_finset G).toSet) := by sorry
+    have ⟨ mi, ⟨ mi_in, mi_dvd⟩  ⟩  := @MonomialGen _ R _ _ _ _ _ _
+      (toMvPolynomial (leading_monomial (r1 - r2) sub_nonzero))
+      (leading_monomial_finset G) lm_in' (mono_poly_mono _)
+
+  -- Now we prove that r1-r2 is divided by some lm(gi). But it's cannot be true because
+  -- no term of r1 is divided by any g except r is 0. Complete proof is left as excercise :)
+    sorry
+}
 
 def S (f g : MvPolynomial σ R) : MvPolynomial σ R := sorry
 
@@ -135,8 +140,8 @@ lemma GB_multidiv (G : Finset (MvPolynomial σ R))  (G_nonzero : ∀ g ∈ G, g 
           apply Ideal.subset_span;assumption
         · apply (f.multidiv_correct G G_nonzero)
       }
-      have ⟨ _, H3⟩ := (Reduction_unique f G GB G_nonzero H H2)
-      assumption
+      have H3 := (Reduction_unique f G GB G_nonzero H H2)
+      exact id (Eq.symm H3)
     }
     {
       intros r_prop
@@ -149,24 +154,21 @@ lemma GB_multidiv (G : Finset (MvPolynomial σ R))  (G_nonzero : ∀ g ∈ G, g 
       apply Ideal.subset_span;assumption
     }
 
--- theorem BuchbergerCriterion :
---   forall (G : Finset (MvPolynomial σ R)) (I : Ideal (MvPolynomial σ R)) (G_nonzero : ∀ g ∈ G, g ≠ 0 ),
---     ( Groebner G I ) ↔ (∀ fi fj, fi ≠ fj → (red (S fi fj) G G_nonzero).2 = (0 : MvPolynomial σ R) ) := by
---     intros G I G_NZ
---     constructor
---     {
---       -- (==>)
---       intros GB fi fj neq
---       have ⟨ G_span, GB_prop ⟩ := GB
---       let (DD , Rem) := red (S fi fj) G sorry
---       have Sin: (S fi fj) ∈ I := by sorry
---       have RemIn: Rem ∈ I := by sorry
---       let DD_set := DD.frange
---       have h := @MonomialGen _ _ _ _ FieldR ord (leading_monomial Rem sorry)
---       have H := h DD_set
---     }
---     {
---       sorry
---     }
+theorem BuchbergerCriterion :
+  forall (G : Finset (MvPolynomial σ R)) (I : Ideal (MvPolynomial σ R)) (G_nonzero : ∀ g ∈ G, g ≠ 0 ),
+    ( Groebner G I ) ↔ (∀ fi fj, fi ≠ fj → ((S fi fj).multidiv G G_nonzero).2 = 0 ) := by
+    intros G I G_NZ
+    constructor
+    {
+      -- (==>)
+      intros GB fi fj neq
+      have Sin: (S fi fj) ∈ I := by sorry
+      exact (GB_multidiv G G_NZ I (S fi fj) GB).mp Sin
+    }
+    {
+      -- (<==)
+      intros cond
+
+    }
 
 end Groebner
