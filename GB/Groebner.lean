@@ -168,7 +168,7 @@ theorem BuchbergerCriterion :
     {
       -- (<==)
       intros cond
-
+      sorry
     }
 
 end Groebner
