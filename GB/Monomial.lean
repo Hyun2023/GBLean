@@ -28,8 +28,11 @@ noncomputable instance Monomial.toMvPolynomial [DecidableEq σ] [CommRing R] : C
 noncomputable def toMvPolynomial [CommRing R] (m : Monomial σ) : (MvPolynomial σ R) :=
   MvPolynomial.monomial m 1
 
-def toMvPolynomial_preserves_nonzero [CommRing R] (m : Monomial σ) (m_nonzero : m ≠ 0) : (@toMvPolynomial R σ _ m) ≠ 0 := by
-  sorry
+-- def toMvPolynomial_preserves_nonzero [CommRing R] (m : Monomial σ) (m_nonzero : m ≠ 0) : (@toMvPolynomial R σ _ m) ≠ 0 := by
+--   intro H
+--   rw [toMvPolynomial, MvPolynomial.monomial] at H
+--   rw [Finsupp.lsingle] at H; dsimp at H
+--   sorry
 
 noncomputable instance Monomial.instMul : Mul (Monomial σ) where
   mul := fun m1 m2 => Finsupp.instAdd.add m1 m2
