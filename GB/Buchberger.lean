@@ -52,12 +52,43 @@ noncomputable def buchberger_step
       else
         buchberger_step rem (G_queue ∪ {S}) G' G'_nonzero
 
+def buchberger_step_keep_nonzero
+  (F G: Finset (MvPolynomial σ R))
+  (G_nonzero : ∀ g ∈ G, g ≠ 0)
+  (G_queue_nonzero : ∀ g ∈ G_queue, g ≠ 0  ) :
+  ∀ g ∈ (buchberger_step (G.product G).toList G_queue G (G_nonzero)), g ≠ 0 := by
+  sorry
+
+
 def buchberger_step_keep_membership
   (F G: Finset (MvPolynomial σ R))
   (G_nonzero : ∀ g ∈ G, g ≠ 0)
-  (Gmember : G.toSet ⊆ SetLike.coe (Ideal.span F) ) :
-  (buchberger_step (G.product G).toList G G (G_nonzero)).toSet ⊆ SetLike.coe (Ideal.span F) :=
-  sorry
+  (Gmember : G_queue.toSet ⊆ SetLike.coe (Ideal.span F) ) :
+  (buchberger_step (G.product G).toList G_queue G (G_nonzero)).toSet ⊆ SetLike.coe (Ideal.span F) := by
+
+  induction (G.product G).toList generalizing G_queue with
+  |nil => unfold buchberger_step;assumption
+  |cons hd tl ih => {
+    have (p,q) := hd
+    by_cases pqeq : p=q
+    {
+      unfold buchberger_step;simp [pqeq]
+      apply ih;assumption
+    }
+    {
+      unfold buchberger_step;simp [pqeq]
+      by_cases red0 : s_red p q G G_nonzero = 0
+      {
+        simp [red0];apply ih;assumption
+      }
+      {
+        simp [red0];apply ih
+        sorry
+      }
+    }
+  }
+
+
 
 noncomputable def buchberger_algorithm
   (F : Finset (MvPolynomial σ R))
