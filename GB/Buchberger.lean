@@ -57,7 +57,11 @@ noncomputable def buchberger_algorithm
   else
     let G := F.filter (fun p => p ≠ 0)
     have G_nonzero : ∀ g ∈ G, g ≠ 0 := by {intros g gin; exact (Finset.mem_filter.mp gin).2 }
-    buchberger_step (G.product G).toList (G) G (G_nonzero)
+    let G_new := buchberger_step (G.product G).toList G G (G_nonzero)
+    if G_new = G then
+      G_new
+    else
+      buchberger_step (G_new.product G_new).toList G_new G_new (sorry)
 
 
 
