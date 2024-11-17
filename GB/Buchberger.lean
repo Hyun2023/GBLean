@@ -3,11 +3,14 @@
 
 import Mathlib.Algebra.MvPolynomial.Basic
 import Mathlib.Data.Finset.Basic
+import Mathlib.RingTheory.Ideal.Basic
+import Mathlib.RingTheory.Ideal.Span
+import Mathlib.Algebra.Module.Submodule.Defs
 import GB.Monomial
 import GB.Polynomial
 import GB.Reduction
 import GB.S_Poly
-
+import GB.Groebner
 open Monomial
 
 -- Handles MvPolynomial, which operations are noncomputable
@@ -48,6 +51,13 @@ noncomputable def buchberger_step
         buchberger_step rem G_queue G' G'_nonzero
       else
         buchberger_step rem (G_queue ∪ {S}) G' G'_nonzero
+
+def buchberger_step_keep_membership
+  (F G: Finset (MvPolynomial σ R))
+  (G_nonzero : ∀ g ∈ G, g ≠ 0)
+  (Gmember : G.toSet ⊆ SetLike.coe (Ideal.span F) ) :
+  (buchberger_step (G.product G).toList G G (G_nonzero)).toSet ⊆ SetLike.coe (Ideal.span F) :=
+  sorry
 
 noncomputable def buchberger_algorithm
   (F : Finset (MvPolynomial σ R))
