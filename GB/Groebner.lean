@@ -13,7 +13,7 @@ import GB.Monomial
 import GB.Polynomial
 import GB.Reduction
 import GB.S_Poly
-import GB.CFinsupp
+-- import GB.CFinsupp
 import Mathlib.LinearAlgebra.Finsupp
 -- import Mathlib.RingTheory.Ideal.Span
 
