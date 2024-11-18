@@ -32,7 +32,6 @@ def MvPolynomial.monomial_equiv [DecidableEq σ] [ord : MonomialOrder σ] [Field
   rw [coeff, coeff]
   rw [monomial, AddMonoidAlgebra.lsingle]
   rw [Finsupp.lsingle]; simp
-  rw [is_monomial] at g_ismon
   have ⟨m0, ⟨m0P1, m0P2⟩⟩ := g_ismon
   simp at m0P1
   rw [DFunLike.coe, DFunLike.coe, Finsupp.instFunLike, LinearMap.instFunLike]; simp
@@ -41,8 +40,21 @@ def MvPolynomial.monomial_equiv [DecidableEq σ] [ord : MonomialOrder σ] [Field
   . have EQ4 : m = m0 := by
       apply m0P2
       exact And.symm ⟨trivial, p⟩
-    rw [Finset.choose, Finset.chooseX, Multiset.chooseX]; simp
-    sorry
+    have EQ5 : (Finset.choose (fun x ↦ True) g.support g_ismon = m) := by
+      have EQ6 := (@Finset.choose_mem _ (fun _ ↦ True) _ g.support g_ismon)
+      rw [EQ4]
+      apply m0P2
+      exact Finset.choose_spec (fun x ↦ True) g.support g_ismon
+    rw [EQ5]
+    have EQ6 := (@Finsupp.single_eq_same _ _ _ m 1)
+    have EQ7 : (@Finsupp.toFun (σ →₀ ℕ) R CommMonoidWithZero.toZero (Finsupp.single m 1) m = 1) := by
+      rw [CommMonoidWithZero.toZero]
+      sorry
+    have EQ8 : g.toFun m = 1 := by
+      sorry
+    rw [EQ8]
+    symm
+    exact EQ7
   . sorry
 
 lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_ismon : is_monomial g):
@@ -62,7 +74,7 @@ lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field 
           ((monomial (g.toMonomial g_ismon)) 1 * f.divMonomial (g.toMonomial g_ismon))
           (f.modMonomial (g.toMonomial g_ismon)) f EQ2 rfl EQ)
   . rw [monomials, leading_monomial]
-    intro m
+    -- intro m
     sorry
 
 noncomputable def MvPolynomial.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] (s : MvPolynomial σ R) (F : List (MvPolynomial σ R)) (F_isMonomial : ∀ f ∈ F, is_monomial f): (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
