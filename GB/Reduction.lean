@@ -87,9 +87,24 @@ lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field 
           (f.modMonomial (g.toMonomial g_ismon))
           ((monomial (g.toMonomial g_ismon)) 1 * f.divMonomial (g.toMonomial g_ismon))
           (f.modMonomial (g.toMonomial g_ismon)) f EQ2 rfl EQ)
-  . rw [monomials, leading_monomial]
-    -- intro m
-    sorry
+  . rw [leading_monomial, monomials]
+    rw [toMonomial]
+    have ⟨m0, ⟨m0P1, m0P2⟩⟩ := g_ismon
+    have EQ4 : (Finset.choose (fun x ↦ True) g.support g_ismon = m0) := by
+      have EQ5 := (@Finset.choose_mem _ (fun _ ↦ True) _ g.support g_ismon)
+      apply m0P2
+      exact Finset.choose_spec (fun x ↦ True) g.support g_ismon
+    rw [EQ4]
+    rcases em (f.modMonomial m0 = 0) with p | p
+    . exact Or.symm (Or.inr p)
+    . right
+      intro m SUP DVD
+      unfold monomials at DVD
+      have LE : (m0 <= m) := by
+        sorry
+      have EQ5 := (@coeff_modMonomial_of_le _ _ _ _ _ f LE)
+      have EQ6 := (Finsupp.mem_support_toFun (f.modMonomial m0) m).mp
+      exact EQ6 SUP EQ5
 
 noncomputable def MvPolynomial.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] (s : MvPolynomial σ R) (F : List (MvPolynomial σ R)) (F_isMonomial : ∀ f ∈ F, is_monomial f): (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
   match F with
