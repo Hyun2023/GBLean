@@ -107,6 +107,21 @@ def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
     apply Monomial.instDvd'_div
     exact H
 
+def Monomial.instDvd_equiv' [DecidableEq σ] (f g : Monomial σ) :
+  Monomial.instDvd' f g <-> Monomial.instDvd'' f g := by
+  rw [instDvd', instDvd'']; simp
+  constructor <;> intro H
+  . apply Pi.le_def.mpr
+    intro x
+    rcases em (f.toFun x = 0) with p|p
+    . exact StrictMono.minimal_preimage_bot (fun ⦃a b⦄ a ↦ a) p (g.toFun x)
+    . obtain ⟨SUP, LE⟩ := H
+      apply LE _ p
+  . constructor
+    . exact Finsupp.support_mono H
+    . intro x H'
+      apply H
+
 -- Monomial Order
 class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial σ)) where
   respect : ∀(u v w : @Monomial σ),  u < v -> u*w < v*w

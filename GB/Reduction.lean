@@ -101,8 +101,11 @@ lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field 
       intro m SUP DVD
       unfold monomials at DVD
       have LE : (m0 <= m) := by
-        -- rw [Dvd.dvd, Monomial.instDvd] at DVD; simp at DVD
-        -- have ⟨k, kP⟩ := DVD
+        rw [Monomial.instDvd_equiv] at DVD
+        rw [Monomial.instDvd_equiv'] at DVD
+        rw [Monomial.instDvd''] at DVD
+        -- have EQ5 : (@Finsupp.toFun σ _ LinearOrderedCommMonoidWithZero.toZero (@Finset.max' (Monomial σ) MonomialOrder.toLinearOrder g.support) = m0) := by
+        --   sorry
         sorry
       have EQ5 := (@coeff_modMonomial_of_le _ _ _ _ _ f LE)
       have EQ6 := (Finsupp.mem_support_toFun (f.modMonomial m0) m).mp

@@ -12,7 +12,7 @@ import Mathlib.Algebra.MvPolynomial.Degrees
 instance [CommRing R] : FunLike (MvPolynomial σ R) (Monomial σ) R := Finsupp.instFunLike
 
 def is_monomial  [CommRing R] (p : MvPolynomial σ R)  :=
-  ∃! m, m ∈ p.support ∧ True
+  ∃! m, m ∈ p.support ∧ True -- p m = 1
 
 def mono_poly_mono [CommRing R] [Nontrivial R] : ∀(m : Monomial σ), is_monomial (@toMvPolynomial R _ _ m) := by {
   intros m;unfold is_monomial;unfold toMvPolynomial
