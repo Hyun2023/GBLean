@@ -48,18 +48,21 @@ noncomputable instance Monomial.instDiv [DecidableEq σ] : Div (Monomial σ) whe
 
 instance Monomial.instDvd [DecidableEq σ] : Dvd (Monomial σ) where
   dvd f g :=
-    ∃ k, f= g*k
+    ∃ k, g= f*k
 
 -- f is divisible by g
 def Monomial.instDvd' [DecidableEq σ] (f g : Monomial σ) : Prop :=
-  (g.support ⊆ f.support) ∧ (∀ (x : σ) (GS : x ∈ g.support), g.toFun x <= f.toFun x)
+  (f.support ⊆ g.support) ∧ (∀ (x : σ) (GS : x ∈ f.support), f.toFun x <= g.toFun x)
+
+def Monomial.instDvd'' [DecidableEq σ] (f g : Monomial σ) : Prop :=
+  f.toFun <= g.toFun
 
 instance Monomial.instDvd'_decidable [DecidableEq σ] (f g : Monomial σ) : Decidable (Monomial.instDvd' f g) := by
   rw [instDvd']
   apply instDecidableAnd
 
 def Monomial.instDvd'_div [DecidableEq σ] (f g : Monomial σ) (Dvd' : Monomial.instDvd' f g):
-  f = g * (f / g) := by
+  g = f * (g / f) := by
   rw [instDvd'] at Dvd'
   obtain ⟨_, H2⟩ := Dvd'
   rw [HDiv.hDiv, instHDiv]; simp
@@ -69,10 +72,10 @@ def Monomial.instDvd'_div [DecidableEq σ] (f g : Monomial σ) (Dvd' : Monomial.
   rw [Add.add, Finsupp.instAdd]; simp
   apply Finsupp.ext
   intro a; simp
-  rcases em (a ∈ g.support) with h|h
+  rcases em (a ∈ f.support) with h|h
   . exact Eq.symm (Nat.add_sub_of_le (H2 a h))
   . simp at h; rw [h]
-    exact Eq.symm (Nat.zero_add (f.toFun a - 0))
+    exact Eq.symm (Nat.zero_add (g.toFun a - 0))
 
 def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
   f ∣ g <-> Monomial.instDvd' f g := by
@@ -88,19 +91,19 @@ def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
       intro x GS
       simp
       constructor
-      . have SUPP := (Finsupp.mem_support_toFun g x)
+      . have SUPP := (Finsupp.mem_support_toFun f x)
         rw [SUPP] at GS
         left
         intro H
         exact GS H
       . intro H
         exfalso
-        have SUPP := (Finsupp.mem_support_toFun g x)
+        have SUPP := (Finsupp.mem_support_toFun f x)
         rw [SUPP] at GS
         exact GS H
     . intro x _
       apply Nat.le_add_right
-  . use (f / g)
+  . use (g / f)
     apply Monomial.instDvd'_div
     exact H
 
