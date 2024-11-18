@@ -23,7 +23,7 @@ variable
 [DecidableEq σ]
 [DecidableEq R]
 [FieldR : Field R]
-[ord : MonomialOrder σ ]
+[ord : MonomialOrder σ]
 -- [LinearOrder ( σ R)]
 
 abbrev poly := MvPolynomial σ R
@@ -47,7 +47,34 @@ def Groebner (G : Finset (MvPolynomial σ R))  (I : Ideal (MvPolynomial σ R)) :
 
 lemma MonomialGen (m : MvPolynomial σ R) (mons : Finset (Monomial σ))
 (m_mem : m ∈ Ideal.span ((fun a : (Monomial σ) => ↑a) '' mons)) :
-   (is_monomial m) → ∃ mi : mons, ∃ k_poly : (MvPolynomial σ R), m = k_poly * mi := by sorry
+  (is_monomial m) → ∃ mi : mons, ∃ k_poly : (MvPolynomial σ R), m = k_poly * mi :=
+  by
+    intro mon; have ismon := mon
+    rw [is_monomial, ← MvPolynomial.finsupp_support_eq_support, Finsupp.card_support_eq_one] at mon
+    rcases mon with ⟨a, ⟨ha1, ha2⟩⟩
+    rw [Ideal.span, Finsupp.mem_span_iff_linearCombination] at m_mem; rcases m_mem with ⟨l, hm⟩
+    have sup := Finsupp.mem_supported_support (MvPolynomial σ R) l
+    rw [Finsupp.linearCombination_apply_of_mem_supported (MvPolynomial σ R) sup] at hm; simp; clear sup
+    rw [Finset.sum_congr rfl] at hm
+    any_goals intros x inx; rw [MvPolynomial.as_sum (l x)]
+
+    case intro.intro.intro =>
+
+    -- rw [MvPolynomial.single_eq_monomial] at ha2; rw [ha2] at hm
+    have hl : ∀ i, i ∈ l.support → m.support = (l i • (↑i : MvPolynomial σ R)).support := by
+    {
+      intro i iin
+      apply Finset.ext; intro am; constructor; intro amin
+      {
+      }
+      rcases (IsTrichotomous.trichotomous m.support (l i • (↑i : MvPolynomial σ R)).support) with h | h
+      { exact h }
+      { sorry }
+    }
+
+
+
+
 
 
 -- def red (s : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_nonzero : ∀ f ∈ F, f ≠ 0) :
