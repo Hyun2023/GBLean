@@ -45,6 +45,25 @@ lemma is_monomial_nonzero [CommRing R] {p : MvPolynomial σ R} :
 noncomputable def MvPolynomial.instSub  [CommRing R] : Sub (MvPolynomial σ R) where
   sub := fun a b => Finsupp.instSub.sub a b
 
+def MvPolynomial.instSub_sound [CommRing R] : ∀ (f t : MvPolynomial σ R), f = t + (MvPolynomial.instSub.sub f t) := by
+  intro f t
+  rw [Sub.sub, instSub]; simp
+  rw [Sub.sub, Finsupp.instSub]; simp
+  rw [HAdd.hAdd, instHAdd]; simp
+  rw [Add.add, Distrib.toAdd, NonUnitalNonAssocSemiring.toDistrib]; simp
+  rw [AddSemigroup.toAdd, AddMonoid.toAddSemigroup, AddCommMonoid.toAddMonoid, NonUnitalNonAssocSemiring.toAddCommMonoid, NonAssocSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonAssocSemiring]; simp
+  rw [NonUnitalSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonUnitalSemiring, CommSemiring.toSemiring, commSemiring, AddMonoidAlgebra.commSemiring]; simp
+  rw [NonUnitalCommSemiring.toNonUnitalSemiring, AddMonoidAlgebra.nonUnitalCommSemiring]; simp
+  rw [AddMonoidAlgebra.nonUnitalSemiring]; simp
+  rw [AddMonoidAlgebra.nonUnitalNonAssocSemiring]; simp
+  rw [AddMonoid.toAddSemigroup, AddCommMonoid.toAddMonoid, Finsupp.instAddCommMonoid]; simp
+  rw [Finsupp.instAddMonoid]; simp
+  rw [AddZeroClass.toAdd]; simp
+  rw [Finsupp.instAdd]; simp
+  ext m
+  rw [coeff, coeff]; simp
+  exact Eq.symm (add_eq_of_eq_sub' rfl)
+
 def MvPolynomial.toMonomial [CommRing R] (p : MvPolynomial σ R) (h : is_monomial p) :=
   Finset.choose (fun _ => True) p.support h
 

@@ -24,12 +24,18 @@ instance Generators.instMembership (σ R: Type) [DecidableEq σ] [CommRing R] : 
   mem := Finset.instMembership.mem
 
 noncomputable def MvPolynomial.div [DecidableEq σ] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_ismon : is_monomial g) : (MvPolynomial σ R) × (MvPolynomial σ R) :=
-  (f.divMonomial (g.toMonomial g_ismon), MvPolynomial.instSub.sub f (f.divMonomial (g.toMonomial g_ismon)))
+  (f.divMonomial (g.toMonomial g_ismon), MvPolynomial.instSub.sub f (g * (f.divMonomial (g.toMonomial g_ismon))))
 
 lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_ismon : is_monomial g):
   let (h,r) := MvPolynomial.div f g g_ismon;
   f = g*h+r ∧
-  (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (@leading_monomial σ _ _ _ ord g (is_monomial_nonzero g_ismon)) m) := sorry
+  (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (@leading_monomial σ _ _ _ ord g (is_monomial_nonzero g_ismon)) m) := by
+  constructor
+  . let t := (g * f.divMonomial (g.toMonomial g_ismon))
+    have EQ : f = t + (MvPolynomial.instSub.sub f t) := by
+      apply MvPolynomial.instSub_sound
+    exact EQ
+  . sorry
 
 noncomputable def MvPolynomial.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] (s : MvPolynomial σ R) (F : List (MvPolynomial σ R)) (F_isMonomial : ∀ f ∈ F, is_monomial f): (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
   match F with
