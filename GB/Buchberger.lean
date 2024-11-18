@@ -60,8 +60,11 @@ noncomputable def buchberger_step
       else
         buchberger_step rem (G_queue ∪ {S}) G' G'_nonzero
 
-
-
+def buchberger_step_monotone
+  (pair_list :  List (MvPolynomial σ R × MvPolynomial σ R))
+  (G_queue : Finset (MvPolynomial σ R))
+  (G' : Finset (MvPolynomial σ R)) (G'_nonzero : ∀ g ∈ G', g ≠ 0)
+  :  G_queue ⊆ (buchberger_step pair_list G_queue G' G'_nonzero) := by sorry
 
 
 def buchberger_step_keep_nonzero
@@ -116,7 +119,7 @@ def buchberger_step_keep_membership
 instance wf : WellFoundedRelation (Ideal (MvPolynomial σ R)) where
   rel := fun x y => x>y
   wf := by {
-    apply IsNoetherian.wf
+    apply IsNoetherian.wf; apply MvPolynomial.isNoetherianRing
   }
 
 noncomputable def buchberger_algorithm
@@ -133,6 +136,7 @@ noncomputable def buchberger_algorithm
     )
   termination_by (Ideal.span (toMvPolynomial_Finset (@leading_monomial_finset σ R _ _ ord G)).toSet : Ideal (MvPolynomial σ R))
   decreasing_by {
+    -- Look at the page 90 Theorem 2
     sorry
   }
 
@@ -175,7 +179,21 @@ def buchberger_correct
       |inl pq => {
         unfold s_red
         simp [pq,pneq,S_zero];
-        intros H;sorry
+        intros H
+        have monotone := buchberger_step_monotone tl (GB ∪ {s_red p q GB GB_nonzero}) GB GB_nonzero
+        unfold s_red at monotone
+        rw [H] at monotone
+        by_cases Sin : ((S p q).multidiv GB GB_nonzero).2 ∈ GB
+        {
+          have : (GB ∪ {((S p q).multidiv GB GB_nonzero).2}) = GB := by {
+          simp [<- Finset.insert_eq];assumption
+          }
+          rw [this] at H;unfold buchberger_step at H; contradiction
+        }
+        {
+          -- Because S is not in GB, GB ∪ S is larger than GB, which is contradict to monotone
+          sorry
+        }
       }
       |inr pq => {
           have (p',q') := hd;simp
