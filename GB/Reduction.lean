@@ -36,26 +36,40 @@ def MvPolynomial.monomial_equiv [DecidableEq σ] [ord : MonomialOrder σ] [Field
   simp at m0P1
   rw [DFunLike.coe, DFunLike.coe, Finsupp.instFunLike, LinearMap.instFunLike]; simp
   rw [LinearMap.instFunLike]; simp
+  have EQ4 : (Finset.choose (fun x ↦ True) g.support g_ismon = m0) := by
+    have EQ5 := (@Finset.choose_mem _ (fun _ ↦ True) _ g.support g_ismon)
+    apply m0P2
+    exact Finset.choose_spec (fun x ↦ True) g.support g_ismon
+  rw [EQ4]
   rcases em (m ∈ g.support) with p | p
-  . have EQ4 : m = m0 := by
+  . have EQ6 : m = m0 := by
       apply m0P2
       exact And.symm ⟨trivial, p⟩
-    have EQ5 : (Finset.choose (fun x ↦ True) g.support g_ismon = m) := by
-      have EQ6 := (@Finset.choose_mem _ (fun _ ↦ True) _ g.support g_ismon)
-      rw [EQ4]
-      apply m0P2
-      exact Finset.choose_spec (fun x ↦ True) g.support g_ismon
-    rw [EQ5]
-    have EQ6 := (@Finsupp.single_eq_same _ _ _ m 1)
-    have EQ7 : (@Finsupp.toFun (σ →₀ ℕ) R CommMonoidWithZero.toZero (Finsupp.single m 1) m = 1) := by
-      rw [CommMonoidWithZero.toZero]
-      sorry
+    rw [<-EQ6]
+    have EQ7 := (@Finsupp.single_eq_same _ _ _ m (@OfNat.ofNat R 1 One.toOfNat1))
     have EQ8 : g.toFun m = 1 := by
       sorry
     rw [EQ8]
     symm
     exact EQ7
-  . sorry
+  . have EQ6 : g m = 0 := by
+      have EQ7 := (Finsupp.mem_support_toFun g m)
+      have EQ8 : ¬ (g m ≠ 0) := by
+        intro H
+        apply p
+        exact mem_support_iff.mpr H
+      exact Function.nmem_support.mp EQ8
+    have NEQ : m0 ≠ m := by
+      intro H
+      apply m0P1
+      rw [coeff]
+      rw [H]
+      exact EQ6
+    have EQ7 := (@Finsupp.single_eq_of_ne _ _ _ m0 m (@OfNat.ofNat R 1 One.toOfNat1) NEQ)
+    have EQ8 : g.toFun m = 0 := by
+      exact EQ6
+    rw [EQ8]
+    exact id (Eq.symm EQ7)
 
 lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_ismon : is_monomial g):
   let (h,r) := MvPolynomial.div f g g_ismon;
