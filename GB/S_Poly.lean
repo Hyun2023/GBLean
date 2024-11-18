@@ -7,4 +7,4 @@ open Monomial
 
 
 -- Definition of S-Polynomial
-def S [CommRing R] (f g : Monomial σ) : FiniteVarPoly σ R := sorry
+def S [CommRing R] (f g : Monomial σ) : MvPolynomial σ R := sorry

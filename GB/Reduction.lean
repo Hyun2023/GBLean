@@ -24,27 +24,44 @@ instance Generators.instMembership (σ R: Type) [DecidableEq σ] [CommRing R] : 
   mem := Finset.instMembership.mem
 
 noncomputable def MvPolynomial.div [DecidableEq σ] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_ismon : is_monomial g) : (MvPolynomial σ R) × (MvPolynomial σ R) :=
-  (f.divMonomial (g.toMonomial g_ismon), MvPolynomial.instSub.sub f (g * (f.divMonomial (g.toMonomial g_ismon))))
+  (f.divMonomial (g.toMonomial g_ismon), f.modMonomial (g.toMonomial g_ismon))
+
+def MvPolynomial.monomial_equiv [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_ismon : is_monomial g) : g = (monomial (g.toMonomial g_ismon)) 1 := by
+  rw [toMonomial]
+  ext m
+  rw [coeff, coeff]
+  rw [monomial, AddMonoidAlgebra.lsingle]
+  rw [Finsupp.lsingle]; simp
+  rw [is_monomial] at g_ismon
+  have ⟨m0, ⟨m0P1, m0P2⟩⟩ := g_ismon
+  simp at m0P1
+  rw [DFunLike.coe, DFunLike.coe, Finsupp.instFunLike, LinearMap.instFunLike]; simp
+  rw [LinearMap.instFunLike]; simp
+  rcases em (m ∈ g.support) with p | p
+  . have EQ4 : m = m0 := by
+      apply m0P2
+      exact And.symm ⟨trivial, p⟩
+    rw [Finset.choose, Finset.chooseX, Multiset.chooseX]; simp
+    sorry
+  . sorry
 
 lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_ismon : is_monomial g):
   let (h,r) := MvPolynomial.div f g g_ismon;
   f = g*h+r ∧
   (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (@leading_monomial σ _ _ _ ord g (is_monomial_nonzero g_ismon)) m) := by
   constructor
-  . let t := (g * f.divMonomial (g.toMonomial g_ismon))
-    have EQ : f = t + (MvPolynomial.instSub.sub f t) := by
-      apply MvPolynomial.instSub_sound
-    exact EQ
-  . rcases em (MvPolynomial.instSub.sub f (g * f.divMonomial (g.toMonomial g_ismon)) = 0) with p|p
-    . exact Or.symm (Or.inr p)
-    . right
-      intro m MON LM
-      rw [monomials] at MON
-      rw [leading_monomial] at LM
-      unfold monomials at LM
-      rw [Sub.sub, instSub] at MON; simp at MON
-      rw [Sub.sub, Finsupp.instSub] at MON; simp at MON
-      sorry
+  . have EQ := (MvPolynomial.divMonomial_add_modMonomial f (g.toMonomial g_ismon))
+    have EQ2 : (g * f.divMonomial (g.toMonomial g_ismon) = (monomial (g.toMonomial g_ismon)) 1 * f.divMonomial (g.toMonomial g_ismon)) := by
+      have EQ3 : g = (monomial (g.toMonomial g_ismon)) 1 := by
+        apply monomial_equiv
+      exact congrFun (congrArg HMul.hMul EQ3) (f.divMonomial (g.toMonomial g_ismon))
+    exact
+      Eq.symm
+        (Mathlib.Tactic.Abel.subst_into_add (g * f.divMonomial (g.toMonomial g_ismon))
+          (f.modMonomial (g.toMonomial g_ismon))
+          ((monomial (g.toMonomial g_ismon)) 1 * f.divMonomial (g.toMonomial g_ismon))
+          (f.modMonomial (g.toMonomial g_ismon)) f EQ2 rfl EQ)
+  . sorry
 
 noncomputable def MvPolynomial.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] (s : MvPolynomial σ R) (F : List (MvPolynomial σ R)) (F_isMonomial : ∀ f ∈ F, is_monomial f): (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
   match F with
