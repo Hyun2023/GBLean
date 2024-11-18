@@ -35,7 +35,12 @@ lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field 
     have EQ : f = t + (MvPolynomial.instSub.sub f t) := by
       apply MvPolynomial.instSub_sound
     exact EQ
-  . sorry
+  . rcases em (MvPolynomial.instSub.sub f (g * f.divMonomial (g.toMonomial g_ismon)) = 0) with p|p
+    . exact Or.symm (Or.inr p)
+    . right
+      intro m MON
+      rw [monomials] at MON
+      sorry
 
 noncomputable def MvPolynomial.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] (s : MvPolynomial σ R) (F : List (MvPolynomial σ R)) (F_isMonomial : ∀ f ∈ F, is_monomial f): (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
   match F with
