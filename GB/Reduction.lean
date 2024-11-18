@@ -33,6 +33,11 @@ noncomputable def MvPolynomial.multidiv_help [DecidableEq σ] [DecidableEq R] [L
     let (h₂,r) := multidiv_help r F' (by intro f; simp at F_nonzero; rcases F_nonzero with ⟨_,h⟩ ; apply h)
     (h₂ + Finsupp.single f h₁, r)
 
+noncomputable def Monomial.div [DecidableEq σ] (f : Monomial σ) (g : Monomial σ) : (Monomial σ) × (Monomial σ) :=
+  if (Monomial.instDvd' f g)
+  then (f / g, 0)
+  else (0, f)
+
 lemma FList_nonzero [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] (F : Finset (MvPolynomial σ R)) (F_nonzero : ∀ f ∈ F, is_monomial f) : ∀ f ∈ F.toList, is_monomial f := by
   sorry
   -- have mem_sort : ∀ f, f ∈ FiniteVarPoly.toList F ↔ f ∈ F := by

@@ -28,11 +28,20 @@ noncomputable instance Monomial.toMvPolynomial [DecidableEq σ] [CommRing R] : C
 noncomputable def toMvPolynomial [CommRing R] (m : Monomial σ) : (MvPolynomial σ R) :=
   MvPolynomial.monomial m 1
 
+-- def toMvPolynomial_preserves_nonzero [CommRing R] (m : Monomial σ) (m_nonzero : m ≠ 0) : (@toMvPolynomial R σ _ m) ≠ 0 := by
+--   intro H
+--   rw [toMvPolynomial, MvPolynomial.monomial] at H
+--   rw [Finsupp.lsingle] at H; dsimp at H
+--   sorry
+
 noncomputable instance Monomial.instMul : Mul (Monomial σ) where
   mul := fun m1 m2 => Finsupp.instAdd.add m1 m2
 
 noncomputable def LCM : Monomial σ → Monomial σ → Monomial σ :=
   fun m1 m2 => Finsupp.zipWith (Nat.max) (by rfl) m1 m2
+
+-- def LCM_computable [DecidableEq σ] : Computable₂ (@LCM σ) := by
+--   sorry
 
 noncomputable instance Monomial.instDiv [DecidableEq σ] : Div (Monomial σ) where
   div m1 m2 := Finsupp.zipWith (Nat.sub) (by rfl) m1 m2
@@ -45,9 +54,29 @@ instance Monomial.instDvd [DecidableEq σ] : Dvd (Monomial σ) where
 def Monomial.instDvd' [DecidableEq σ] (f g : Monomial σ) : Prop :=
   (g.support ⊆ f.support) ∧ (∀ (x : σ) (GS : x ∈ g.support), g.toFun x <= f.toFun x)
 
+instance Monomial.instDvd'_decidable [DecidableEq σ] (f g : Monomial σ) : Decidable (Monomial.instDvd' f g) := by
+  rw [instDvd']
+  apply instDecidableAnd
+
+def Monomial.instDvd'_div [DecidableEq σ] (f g : Monomial σ) (Dvd' : Monomial.instDvd' f g):
+  f = g * (f / g) := by
+  rw [instDvd'] at Dvd'
+  obtain ⟨_, H2⟩ := Dvd'
+  rw [HDiv.hDiv, instHDiv]; simp
+  rw [Div.div, instDiv]; simp
+  rw [HMul.hMul, instHMul]; simp
+  rw [Mul.mul, instMul]; simp
+  rw [Add.add, Finsupp.instAdd]; simp
+  apply Finsupp.ext
+  intro a; simp
+  rcases em (a ∈ g.support) with h|h
+  . exact Eq.symm (Nat.add_sub_of_le (H2 a h))
+  . simp at h; rw [h]
+    exact Eq.symm (Nat.zero_add (f.toFun a - 0))
+
 def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
   f ∣ g <-> Monomial.instDvd' f g := by
-  rw [Dvd.dvd, instDvd, Monomial.instDvd']; simp
+  rw [Dvd.dvd, instDvd]; simp
   constructor <;> intro H
   . obtain ⟨k, EQ⟩ := H
     rw [EQ, HMul.hMul, instHMul]; simp
@@ -69,19 +98,11 @@ def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
         have SUPP := (Finsupp.mem_support_toFun g x)
         rw [SUPP] at GS
         exact GS H
-    . intro x H
+    . intro x _
       apply Nat.le_add_right
-  . obtain ⟨H1, H2⟩ := H
-    use (Finsupp.zipWith (Nat.sub) (by rfl) f g)
-    rw [HMul.hMul, instHMul]; simp
-    rw [Mul.mul, instMul]; simp
-    rw [Add.add, Finsupp.instAdd]; simp
-    apply Finsupp.ext
-    intro a; simp
-    rcases em (a ∈ g.support) with h|h <;> simp at h
-    . exact Eq.symm (Nat.add_sub_of_le (H2 a h))
-    . rw [h]
-      exact Eq.symm (Nat.zero_add (f.toFun a - 0))
+  . use (f / g)
+    apply Monomial.instDvd'_div
+    exact H
 
 -- Monomial Order
 class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial σ)) where
@@ -107,6 +128,9 @@ def term_exists [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) (p_nonzero
   rw [monomials]
   rw [MvPolynomial.coeff] at mcond; simp at mcond
   apply (p.mem_support_toFun m).mpr mcond
+
+def leading_monomial_option [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : Option (Monomial σ) :=
+  @Finset.max _ ord.toLinearOrder (monomials p)
 
 def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): Monomial σ :=
   @Finset.max' _ ord.toLinearOrder (monomials p)
