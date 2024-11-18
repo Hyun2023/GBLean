@@ -1,7 +1,5 @@
 -- import GB.CFinsupp
 import GB.Monomial
--- open Monomial
--- import Mathlib.Order.WellFoundedSet
 import Mathlib.Algebra.MvPolynomial.Degrees
 
 -- -- Finite Variable Polynomial
@@ -16,6 +14,11 @@ instance [CommRing R] : FunLike (MvPolynomial σ R) (Monomial σ) R := Finsupp.i
 def is_monomial  [CommRing R] (p : MvPolynomial σ R)  :=
   ∃! m, m ∈ p.support ∧ True
 
+def mono_poly_mono [CommRing R] [Nontrivial R] : ∀(m : Monomial σ), is_monomial (@toMvPolynomial R _ _ m) := by {
+  intros m;unfold is_monomial;unfold toMvPolynomial
+  rw [<-MvPolynomial.single_eq_monomial];unfold MvPolynomial.support;unfold Finsupp.single;simp
+}
+
 lemma is_monomial_nonzero [CommRing R] {p : MvPolynomial σ R} :
     is_monomial p -> p ≠ 0 := by
   intro p_ismon
@@ -23,21 +26,21 @@ lemma is_monomial_nonzero [CommRing R] {p : MvPolynomial σ R} :
   exists p'; rw[MvPolynomial.coeff];
   apply (p.mem_support_toFun p').mp; assumption
 
-lemma is_monomial_true [CommRing R] (m : σ →₀ ℕ) :
-    is_monomial (@MvPolynomial.monomial R σ _ m 1) := by
-  constructor; any_goals exact m
-  constructor
-  . simp; apply ((MvPolynomial.monomial m 1).mem_support_toFun m).mp
-    have := @MvPolynomial.support_monomial _ _ 1 m _ (by apply isFalse; linarith)
-    simp at this;
-    -- rw [this]
-    -- have G: m∈{m} := sorry
-    sorry
-  . intro y h
-    have := @MvPolynomial.support_monomial _ _ 1 m _ (by apply isFalse; linarith)
-    simp at this;
-    -- rw [this] at h
-    sorry
+-- lemma is_monomial_true [CommRing R] (m : σ →₀ ℕ) :
+--     is_monomial (@MvPolynomial.monomial R σ _ m 1) := by
+--   constructor; any_goals exact m
+--   constructor
+--   . simp; apply ((MvPolynomial.monomial m 1).mem_support_toFun m).mp
+--     have := @MvPolynomial.support_monomial _ _ 1 m _ (by apply isFalse; linarith)
+--     simp at this;
+--     -- rw [this]
+--     -- have G: m∈{m} := sorry
+--     sorry
+--   . intro y h
+--     have := @MvPolynomial.support_monomial _ _ 1 m _ (by apply isFalse; linarith)
+--     simp at this;
+--     -- rw [this] at h
+--     sorry
 
 noncomputable def MvPolynomial.instSub  [CommRing R] : Sub (MvPolynomial σ R) where
   sub := fun a b => Finsupp.instSub.sub a b
@@ -45,6 +48,11 @@ noncomputable def MvPolynomial.instSub  [CommRing R] : Sub (MvPolynomial σ R) w
 def MvPolynomial.toMonomial [CommRing R] (p : MvPolynomial σ R) (h : is_monomial p) :=
   Finset.choose (fun _ => True) p.support h
 
+def Monomial.instMembership [CommRing R] [DecidableEq σ] : Membership (Monomial σ) (Set (MvPolynomial σ R)) where
+  mem := fun s m => (Monomial.toMvPolynomial.coe m) ∈ s
+
+def MvPolynomial.instMembership [CommRing R] [DecidableEq σ] : Membership (MvPolynomial σ R) (Set (Monomial σ)) where
+  mem := fun s p => exists h : (is_monomial p), (MvPolynomial.toMonomial p h) ∈ s
 
 -- lemma zero_is_not_mon  [CommRing R] : ¬(is_monomial (0 : (FiniteVarPoly σ R) )) := by
 --   intros ismon

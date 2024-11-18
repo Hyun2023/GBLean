@@ -129,6 +129,9 @@ def term_exists [DecidableEq σ] [CommRing R] (p : MvPolynomial σ R) (p_nonzero
   rw [MvPolynomial.coeff] at mcond; simp at mcond
   apply (p.mem_support_toFun m).mpr mcond
 
+def leading_monomial_option [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : Option (Monomial σ) :=
+  @Finset.max _ ord.toLinearOrder (monomials p)
+
 def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): Monomial σ :=
   @Finset.max' _ ord.toLinearOrder (monomials p)
   (term_exists p p_nonzero)
