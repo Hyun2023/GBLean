@@ -11,29 +11,42 @@ import Mathlib.Algebra.MvPolynomial.Degrees
 
 instance [CommRing R] : FunLike (MvPolynomial σ R) (Monomial σ) R := Finsupp.instFunLike
 
-def is_monomial  [CommRing R] (p : MvPolynomial σ R)  :=
-  ∃! m, m ∈ p.support ∧ True -- p m = 1
-
-def mono_poly_mono [CommRing R] [Nontrivial R] : ∀(m : Monomial σ), is_monomial (@toMvPolynomial R _ _ m) := by {
-  intros m;unfold is_monomial;unfold toMvPolynomial
-  rw [<-MvPolynomial.single_eq_monomial];unfold MvPolynomial.support;unfold Finsupp.single;simp
-}
-
--- def is_monomial  [CommRing R] (p : MvPolynomial σ R)  :=
---   (∃! m, m ∈ p.support) ∧ (∀ m, m ∈ p.support -> p m = 1)
+def is_monomial'  [CommRing R] (p : MvPolynomial σ R)  :=
+  ∃! m, m ∈ p.support ∧ True
 
 -- def mono_poly_mono [CommRing R] [Nontrivial R] : ∀(m : Monomial σ), is_monomial (@toMvPolynomial R _ _ m) := by {
---   intros m; unfold is_monomial; unfold toMvPolynomial
---   rw [<-MvPolynomial.single_eq_monomial]; unfold MvPolynomial.support; unfold Finsupp.single; simp
---   rw [DFunLike.coe, instFunLikeMvPolynomialMonomial, Finsupp.instFunLike]; simp
+--   intros m;unfold is_monomial;unfold toMvPolynomial
+--   rw [<-MvPolynomial.single_eq_monomial];unfold MvPolynomial.support;unfold Finsupp.single;simp
 -- }
+
+def is_monomial  [CommRing R] (p : MvPolynomial σ R)  :=
+  (∃! m, m ∈ p.support ∧ True) ∧ (∀ m, m ∈ p.support -> p m = 1)
+
+def mono_poly_mono [CommRing R] [Nontrivial R] : ∀(m : Monomial σ), is_monomial (@toMvPolynomial R _ _ m) := by {
+  intros m; unfold is_monomial; unfold toMvPolynomial
+  rw [<-MvPolynomial.single_eq_monomial]; unfold MvPolynomial.support; unfold Finsupp.single; simp
+  rw [DFunLike.coe, instFunLikeMvPolynomialMonomial, Finsupp.instFunLike]; simp
+}
+
+def is_monomial_fst [CommRing R] {p : MvPolynomial σ R} (p_monomial : is_monomial p) :
+  is_monomial' p :=
+  let ⟨h1, _⟩ := p_monomial
+  h1
+
+lemma is_monomial'_nonzero [CommRing R] {p : MvPolynomial σ R} :
+    is_monomial' p -> p ≠ 0 := by
+  intro p_ismon'
+  obtain ⟨m, ⟨⟨P1, _⟩, P2⟩⟩ := p_ismon'
+  rw [MvPolynomial.ne_zero_iff]
+  use m; rw [MvPolynomial.coeff]
+  apply (p.mem_support_toFun m).mp; assumption
 
 lemma is_monomial_nonzero [CommRing R] {p : MvPolynomial σ R} :
     is_monomial p -> p ≠ 0 := by
   intro p_ismon
-  rcases p_ismon with ⟨p', ⟨h1,_⟩, _⟩; rw [MvPolynomial.ne_zero_iff];
-  exists p'; rw[MvPolynomial.coeff];
-  apply (p.mem_support_toFun p').mp; assumption
+  apply is_monomial'_nonzero
+  apply is_monomial_fst
+  apply p_ismon
 
 -- lemma is_monomial_true [CommRing R] (m : σ →₀ ℕ) :
 --     is_monomial (@MvPolynomial.monomial R σ _ m 1) := by
@@ -74,7 +87,7 @@ def MvPolynomial.instSub_sound [CommRing R] : ∀ (f t : MvPolynomial σ R), f =
   exact Eq.symm (add_eq_of_eq_sub' rfl)
 
 def MvPolynomial.toMonomial [CommRing R] [DecidableEq R] (p : MvPolynomial σ R) (h : is_monomial p) :=
-  Finset.choose (fun _ => True) p.support h
+  Finset.choose (fun _ => True) p.support (is_monomial_fst h)
 
 def Monomial.instMembership [CommRing R] [DecidableEq σ] [DecidableEq R] : Membership (Monomial σ) (Set (MvPolynomial σ R)) where
   mem := fun s m => (Monomial.toMvPolynomial.coe m) ∈ s

@@ -32,14 +32,15 @@ def MvPolynomial.monomial_equiv [DecidableEq σ] [ord : MonomialOrder σ] [Decid
   rw [coeff, coeff]
   rw [monomial, AddMonoidAlgebra.lsingle]
   rw [Finsupp.lsingle]; simp
-  have ⟨m0, ⟨m0P1, m0P2⟩⟩ := g_ismon
-  simp at m0P1
   rw [DFunLike.coe, DFunLike.coe, Finsupp.instFunLike, LinearMap.instFunLike]; simp
   rw [LinearMap.instFunLike]; simp
-  have EQ4 : (Finset.choose (fun x ↦ True) g.support g_ismon = m0) := by
-    have EQ5 := (@Finset.choose_mem _ (fun _ ↦ True) _ g.support g_ismon)
+  have ⟨_, PROP⟩ := g_ismon
+  have ⟨m0, ⟨m0P1, m0P2⟩⟩ := is_monomial_fst g_ismon
+  simp at m0P1
+  have EQ4 : (Finset.choose (fun x ↦ True) g.support (is_monomial_fst g_ismon) = m0) := by
+    have EQ5 := (@Finset.choose_mem _ (fun _ ↦ True) _ g.support (is_monomial_fst g_ismon))
     apply m0P2
-    exact Finset.choose_spec (fun x ↦ True) g.support g_ismon
+    exact Finset.choose_spec (fun x ↦ True) g.support (is_monomial_fst g_ismon)
   rw [EQ4]
   rcases em (m ∈ g.support) with p | p
   . have EQ6 : m = m0 := by
@@ -48,7 +49,8 @@ def MvPolynomial.monomial_equiv [DecidableEq σ] [ord : MonomialOrder σ] [Decid
     rw [<-EQ6]
     have EQ7 := (@Finsupp.single_eq_same _ _ _ m (@OfNat.ofNat R 1 One.toOfNat1))
     have EQ8 : g.toFun m = 1 := by
-      sorry
+      apply PROP
+      exact p
     rw [EQ8]
     symm
     exact EQ7
@@ -89,11 +91,11 @@ lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Decida
           (f.modMonomial (g.toMonomial g_ismon)) f EQ2 rfl EQ)
   . rw [leading_monomial, monomials]
     rw [toMonomial]
-    have ⟨m0, ⟨m0P1, m0P2⟩⟩ := g_ismon
-    have EQ4 : (Finset.choose (fun x ↦ True) g.support g_ismon = m0) := by
-      have EQ5 := (@Finset.choose_mem _ (fun _ ↦ True) _ g.support g_ismon)
+    have ⟨m0, ⟨m0P1, m0P2⟩⟩ := is_monomial_fst g_ismon
+    have EQ4 : (Finset.choose (fun x ↦ True) g.support (is_monomial_fst g_ismon) = m0) := by
+      have EQ5 := (@Finset.choose_mem _ (fun _ ↦ True) _ g.support (is_monomial_fst g_ismon))
       apply m0P2
-      exact Finset.choose_spec (fun x ↦ True) g.support g_ismon
+      exact Finset.choose_spec (fun x ↦ True) g.support (is_monomial_fst g_ismon)
     rw [EQ4]
     rcases em (f.modMonomial m0 = 0) with p | p
     . exact Or.symm (Or.inr p)
@@ -104,10 +106,10 @@ lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Decida
         rw [Monomial.instDvd_equiv'] at DVD
         rw [Monomial.instDvd''] at DVD
         unfold monomials at DVD
-        have EQ5 : ( (@Finset.max' (Monomial σ) MonomialOrder.toLinearOrder g.support (term_exists g (is_monomial_nonzero (Exists.intro m0 ⟨m0P1, m0P2⟩)))) = m0) := by
+        have EQ5 : ((@Finset.max' (Monomial σ) MonomialOrder.toLinearOrder g.support (term_exists g (is_monomial_nonzero g_ismon))) = m0) := by
           apply m0P2
           constructor
-          . exact (@Finset.max'_mem _ MonomialOrder.toLinearOrder g.support (term_exists g (is_monomial_nonzero (Exists.intro m0 ⟨m0P1, m0P2⟩))))
+          . exact (@Finset.max'_mem _ MonomialOrder.toLinearOrder g.support (term_exists g (is_monomial_nonzero g_ismon)))
           . exact trivial
         rw [<- EQ5]
         apply DVD
