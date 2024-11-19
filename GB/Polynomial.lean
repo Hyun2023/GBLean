@@ -19,6 +19,16 @@ def mono_poly_mono [CommRing R] [Nontrivial R] : ∀(m : Monomial σ), is_monomi
   rw [<-MvPolynomial.single_eq_monomial];unfold MvPolynomial.support;unfold Finsupp.single;simp
 }
 
+-- def is_monomial  [CommRing R] (p : MvPolynomial σ R)  :=
+--   ∃! m, m ∈ p.support ∧ p m = 1
+
+-- def mono_poly_mono [CommRing R] [Nontrivial R] : ∀(m : Monomial σ), is_monomial (@toMvPolynomial R _ _ m) := by {
+--   intros m; unfold is_monomial; unfold toMvPolynomial
+--   rw [<-MvPolynomial.single_eq_monomial]; unfold MvPolynomial.support; unfold Finsupp.single; simp
+--   use m; simp
+--   rw [DFunLike.coe, instFunLikeMvPolynomialMonomial, Finsupp.instFunLike]; simp
+-- }
+
 lemma is_monomial_nonzero [CommRing R] {p : MvPolynomial σ R} :
     is_monomial p -> p ≠ 0 := by
   intro p_ismon
