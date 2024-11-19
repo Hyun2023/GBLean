@@ -145,9 +145,9 @@ lemma MvPolynomial.multidiv_correct [DecidableEq σ] [DecidableEq R] [LinearOrde
       have EQ : (∀ l, ∀ pf : (∀ f ∈ l, is_monomial f), s = (s.multidiv_help l pf).2 + (List.map (fun f ↦ (s.multidiv_help l pf).1 f * f) l).sum) := by
         clear F_isMonomial F
         intro l
-        induction' l
-        intro pf
-        sorry
+        induction' l with head tail IH <;> intro pf <;> simp
+        . rw [multidiv_help]
+        . sorry
       exact EQ F.toList (multidiv.proof_1 F F_isMonomial)
     . sorry
   -- unfold multidiv; simp
