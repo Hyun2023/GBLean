@@ -1,7 +1,5 @@
 -- import GB.CFinsupp
 import GB.Monomial
--- open Monomial
--- import Mathlib.Order.WellFoundedSet
 import Mathlib.Algebra.MvPolynomial.Degrees
 
 -- -- Finite Variable Polynomial
@@ -28,21 +26,21 @@ lemma is_monomial_nonzero [CommRing R] {p : MvPolynomial σ R} :
   exists p'; rw[MvPolynomial.coeff];
   apply (p.mem_support_toFun p').mp; assumption
 
-lemma is_monomial_true [CommRing R] (m : σ →₀ ℕ) :
-    is_monomial (@MvPolynomial.monomial R σ _ m 1) := by
-  constructor; any_goals exact m
-  constructor
-  . simp; apply ((MvPolynomial.monomial m 1).mem_support_toFun m).mp
-    have := @MvPolynomial.support_monomial _ _ 1 m _ (by apply isFalse; linarith)
-    simp at this;
-    -- rw [this]
-    -- have G: m∈{m} := sorry
-    sorry
-  . intro y h
-    have := @MvPolynomial.support_monomial _ _ 1 m _ (by apply isFalse; linarith)
-    simp at this;
-    -- rw [this] at h
-    sorry
+-- lemma is_monomial_true [CommRing R] (m : σ →₀ ℕ) :
+--     is_monomial (@MvPolynomial.monomial R σ _ m 1) := by
+--   constructor; any_goals exact m
+--   constructor
+--   . simp; apply ((MvPolynomial.monomial m 1).mem_support_toFun m).mp
+--     have := @MvPolynomial.support_monomial _ _ 1 m _ (by apply isFalse; linarith)
+--     simp at this;
+--     -- rw [this]
+--     -- have G: m∈{m} := sorry
+--     sorry
+--   . intro y h
+--     have := @MvPolynomial.support_monomial _ _ 1 m _ (by apply isFalse; linarith)
+--     simp at this;
+--     -- rw [this] at h
+--     sorry
 
 noncomputable def MvPolynomial.instSub  [CommRing R] : Sub (MvPolynomial σ R) where
   sub := fun a b => Finsupp.instSub.sub a b
