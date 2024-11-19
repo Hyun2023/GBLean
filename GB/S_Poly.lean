@@ -7,4 +7,6 @@ open Monomial
 
 
 -- Definition of S-Polynomial
-def S [CommRing R] (f g : MvPolynomial σ R) : MvPolynomial σ R := sorry
+def S [CommRing R] (f g : MvPolynomial σ R) : MvPolynomial σ R :=
+  sorry
+-- ((LCM f g) / (LT f)) * f - ((LCM f g) / (LT g)) * g

@@ -74,13 +74,13 @@ def MvPolynomial.instSub_sound [CommRing R] : ∀ (f t : MvPolynomial σ R), f =
   rw [coeff, coeff]; simp
   exact Eq.symm (add_eq_of_eq_sub' rfl)
 
-def MvPolynomial.toMonomial [CommRing R] (p : MvPolynomial σ R) (h : is_monomial p) :=
+def MvPolynomial.toMonomial [CommRing R] [DecidableEq R] (p : MvPolynomial σ R) (h : is_monomial p) :=
   Finset.choose (fun _ => True) p.support h
 
-def Monomial.instMembership [CommRing R] [DecidableEq σ] : Membership (Monomial σ) (Set (MvPolynomial σ R)) where
+def Monomial.instMembership [CommRing R] [DecidableEq σ] [DecidableEq R] : Membership (Monomial σ) (Set (MvPolynomial σ R)) where
   mem := fun s m => (Monomial.toMvPolynomial.coe m) ∈ s
 
-def MvPolynomial.instMembership [CommRing R] [DecidableEq σ] : Membership (MvPolynomial σ R) (Set (Monomial σ)) where
+def MvPolynomial.instMembership [CommRing R] [DecidableEq σ] [DecidableEq R] : Membership (MvPolynomial σ R) (Set (Monomial σ)) where
   mem := fun s p => exists h : (is_monomial p), (MvPolynomial.toMonomial p h) ∈ s
 
 -- lemma zero_is_not_mon  [CommRing R] : ¬(is_monomial (0 : (FiniteVarPoly σ R) )) := by

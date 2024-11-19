@@ -18,15 +18,15 @@ noncomputable def Monomial.div [DecidableEq σ] (f : Monomial σ) (g : Monomial 
   then (f / g, 0)
   else (0, f)
 
-def Generators (σ R: Type) [DecidableEq σ] [CommRing R] : Type := Finset (MvPolynomial σ R)
+def Generators (σ R: Type) [DecidableEq σ] [DecidableEq R] [CommRing R] : Type := Finset (MvPolynomial σ R)
 
-instance Generators.instMembership (σ R: Type) [DecidableEq σ] [CommRing R] : Membership (MvPolynomial σ R) (Generators σ R) where
+instance Generators.instMembership (σ R: Type) [DecidableEq σ] [DecidableEq R] [CommRing R] : Membership (MvPolynomial σ R) (Generators σ R) where
   mem := Finset.instMembership.mem
 
-noncomputable def MvPolynomial.div [DecidableEq σ] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_ismon : is_monomial g) : (MvPolynomial σ R) × (MvPolynomial σ R) :=
+noncomputable def MvPolynomial.div [DecidableEq σ] [DecidableEq R] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_ismon : is_monomial g) : (MvPolynomial σ R) × (MvPolynomial σ R) :=
   (f.divMonomial (g.toMonomial g_ismon), f.modMonomial (g.toMonomial g_ismon))
 
-def MvPolynomial.monomial_equiv [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (g : MvPolynomial σ R) (g_ismon : is_monomial g) : g = (monomial (g.toMonomial g_ismon)) 1 := by
+def MvPolynomial.monomial_equiv [DecidableEq σ] [ord : MonomialOrder σ] [DecidableEq R] [Field R] (g : MvPolynomial σ R) (g_ismon : is_monomial g) : g = (monomial (g.toMonomial g_ismon)) 1 := by
   rw [toMonomial]
   ext m
   rw [coeff, coeff]
@@ -71,7 +71,7 @@ def MvPolynomial.monomial_equiv [DecidableEq σ] [ord : MonomialOrder σ] [Field
     rw [EQ8]
     exact id (Eq.symm EQ7)
 
-lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_ismon : is_monomial g):
+lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [DecidableEq R] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_ismon : is_monomial g):
   let (h,r) := MvPolynomial.div f g g_ismon;
   f = g*h+r ∧
   (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (@leading_monomial σ _ _ _ ord g (is_monomial_nonzero g_ismon)) m) := by
@@ -135,7 +135,8 @@ noncomputable def MvPolynomial.multidiv [DecidableEq σ] [DecidableEq R] [Linear
 lemma MvPolynomial.multidiv_correct [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [ord : MonomialOrder σ] [Field R] (s : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_isMonomial : ∀ f ∈ F, is_monomial f):
     -- let (a,r) := (MvPolynomial.multidiv s F F_isMonomial);
     s = (s.multidiv F F_isMonomial).snd + (∑ (f ∈ F), ((s.multidiv F F_isMonomial).fst f)*(f)) /\
-    ((s.multidiv F F_isMonomial).snd = 0 ∨ ∀m ∈ monomials (s.multidiv F F_isMonomial).snd, ∀ f (inF : f ∈ F), ¬ Monomial.instDvd.dvd (leading_monomial f (is_monomial_nonzero (F_isMonomial f inF))) m) := by sorry
+    ((s.multidiv F F_isMonomial).snd = 0 ∨ ∀m ∈ monomials (s.multidiv F F_isMonomial).snd, ∀ f (inF : f ∈ F), ¬ Monomial.instDvd.dvd (leading_monomial f (is_monomial_nonzero (F_isMonomial f inF))) m) := by
+    sorry
   -- unfold multidiv; simp
   -- constructor
   -- .
