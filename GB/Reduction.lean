@@ -138,7 +138,18 @@ lemma MvPolynomial.multidiv_correct [DecidableEq σ] [DecidableEq R] [LinearOrde
     -- let (a,r) := (MvPolynomial.multidiv s F F_isMonomial);
     s = (s.multidiv F F_isMonomial).snd + (∑ (f ∈ F), ((s.multidiv F F_isMonomial).fst f)*(f)) /\
     ((s.multidiv F F_isMonomial).snd = 0 ∨ ∀m ∈ monomials (s.multidiv F F_isMonomial).snd, ∀ f (inF : f ∈ F), ¬ Monomial.instDvd.dvd (leading_monomial f (is_monomial_nonzero (F_isMonomial f inF))) m) := by
-    sorry
+    constructor
+    . unfold multidiv
+      have P := @Finset.sum_to_list
+      rw [<- P]
+      have EQ : (∀ l, ∀ pf : (∀ f ∈ l, is_monomial f), s = (s.multidiv_help l pf).2 + (List.map (fun f ↦ (s.multidiv_help l pf).1 f * f) l).sum) := by
+        clear F_isMonomial F
+        intro l
+        induction' l
+        intro pf
+        sorry
+      exact EQ F.toList (multidiv.proof_1 F F_isMonomial)
+    . sorry
   -- unfold multidiv; simp
   -- constructor
   -- .
