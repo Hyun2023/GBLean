@@ -17,30 +17,89 @@ noncomputable def Spol [DecidableEq σ] [Field R] [DecidableEq R] [ord : Monomia
   if f_NE : f = 0 then 0 else (if g_NE : g = 0 then 0 else Spol_help f g f_NE g_NE)
 -- gives trivial value for zero polynomials
 
-lemma Spol_help_lemma5_help [DecidableEq σ] [Field R] [ord : MonomialOrder σ ] n (c : Fin n -> R) (f : Fin n -> MvPolynomial σ R)
+lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
+  (Fn : Finset T)
+  (c : Fn -> R) (f : Fn -> MvPolynomial σ R)
   (m : Monomial σ)
-  (NE0 : ∀ (n' : Fin n), c n' ≠ 0)
-  (NE1 : ∀ (n' : Fin n), f n' ≠ 0)
-  (MDEG1 : ∀ (n' : Fin n), leading_monomial (f n') (NE1 n') = m)
-  (NE2 : (∑ (n' : Fin n), (MvPolynomial.C (c n')) * (f n')) ≠ 0)
-  (MDEG2 : (leading_monomial (∑ (n' : Fin n), (MvPolynomial.C (c n')) * (f n')) NE2) < m) :
-  ∃ (c' : Fin n -> Fin n -> R),
-  (∑ (n' : Fin n), (MvPolynomial.C (c n')) * (f n')) = (∑ (n' : Fin n), ∑ (n'' : Fin n), (MvPolynomial.C (c' n' n'')) * (Spol_help (f n') (f n'') (NE1 n') (NE1 n''))) := by
+  (NE0 : ∀ (n' : Fn), c n' ≠ 0)
+  (NE1 : ∀ (n' : Fn), f n' ≠ 0)
+  (MDEG1 : ∀ (n' : Fn), leading_monomial (f n') (NE1 n') = m)
+  (NE2 : (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) ≠ 0)
+  (MDEG2 : (leading_monomial (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) NE2) < m) :
+  ∃ (c_new : Fn -> Fn -> R),
+  (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) = (∑ (n' : Fn), ∑ (n'' : Fn), (MvPolynomial.C (c_new n' n'')) * (Spol_help (f n') (f n'') (NE1 n') (NE1 n''))) := by
   let d := (fun n' => leading_coeff (f n') (NE1 n'))
-  -- induction' n with np IH; simp
-  -- simp
   sorry
 
-lemma Spol_help_lemma5 [DecidableEq σ] [Field R] [ord : MonomialOrder σ ] n (c : Fin n -> R) (f : Fin n -> MvPolynomial σ R)
+lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
+  (Fn : Finset T)
+  (c : Fn -> R) (f : Fn -> MvPolynomial σ R)
   (m : Monomial σ)
-  (NE1 : ∀ (n' : Fin n), f n' ≠ 0)
-  (MDEG1 : ∀ (n' : Fin n), leading_monomial (f n') (NE1 n') = m)
-  (NE2 : (∑ (n' : Fin n), (MvPolynomial.C (c n')) * (f n')) ≠ 0)
-  (MDEG2 : (leading_monomial (∑ (n' : Fin n), (MvPolynomial.C (c n')) * (f n')) NE2) < m) :
-  ∃ (c' : Fin n -> Fin n -> R),
-  (∑ (n' : Fin n), (MvPolynomial.C (c n')) * (f n')) = (∑ (n' : Fin n), ∑ (n'' : Fin n), (MvPolynomial.C (c' n' n'')) * (Spol_help (f n') (f n'') (NE1 n') (NE1 n''))) := by
-
-  let d := (fun n' => leading_coeff (f n') (NE1 n'))
-  -- induction' n with np IH; simp
-  -- simp
+  (NE1 : ∀ (n' : Fn), f n' ≠ 0)
+  (MDEG1 : ∀ (n' : Fn), leading_monomial (f n') (NE1 n') = m)
+  (NE2 : (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) ≠ 0)
+  (MDEG2 : (leading_monomial (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) NE2) < m) :
+  ∃ (c_new : Fn -> Fn -> R),
+  (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) = (∑ (n' : Fn), ∑ (n'' : Fn), (MvPolynomial.C (c_new n' n'')) * (Spol_help (f n') (f n'') (NE1 n') (NE1 n''))) := by
+  let Fn' : Finset Fn := { n' | c n' ≠ 0 }
+  let c' : Fn' -> R := fun n => c n
+  let f' : Fn' -> MvPolynomial σ R := fun n => f n
+  let NE0' : ∀ (n' : Fn'), c n' ≠ 0 := by
+    intro n'
+    have Pf := (n'.2)
+    unfold Fn' at Pf
+    rw [Finset.mem_filter] at Pf
+    have ⟨Pf1, Pf2⟩ := Pf
+    exact Pf2
+  let NE1' : ∀ (n' : Fn'), f' n' ≠ 0 := fun n' => NE1 n'
+  let MDEG1' : ∀ (n' : Fn'), leading_monomial (f' n') (NE1' n') = m := fun n' => MDEG1 n'
+  have Lem := Spol_help_lemma5_help Fn' c' f' m NE0' NE1'
+  have EQ0 : (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) = (∑ x ∈ Finset.filter (fun n' ↦ True) Finset.univ, MvPolynomial.C (c x) * f x) := by
+    sorry
+  have EQ : (∑ (n' : Fn'), (MvPolynomial.C (c' n')) * (f' n')) = (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) := by
+    rw [EQ0]
+    have EQ1 := (Finset.sum_filter_add_sum_filter_not ({ n' : Fn | True } : Finset Fn) (fun n' : Fn => c n' = 0) (fun n' => (MvPolynomial.C (c n')) * (f n')))
+    rw [<- EQ1]
+    have EQ2 : ∑ x ∈ Finset.filter (fun x ↦ c x = 0) (Finset.filter (fun n' ↦ True) Finset.univ), MvPolynomial.C (c x) * f x = 0 := by
+      sorry
+    rw [EQ2]
+    have EQ3 : ∑ n' : { x // x ∈ Fn' }, MvPolynomial.C (c' n') * f' n' = ∑ x ∈ Finset.filter (fun x ↦ ¬c x = 0) (Finset.filter (fun n' ↦ True) Finset.univ), MvPolynomial.C (c x) * f x := by
+      sorry
+    rw [EQ3]
+    exact
+      Eq.symm
+        (AddZeroClass.zero_add
+          (∑ x ∈ Finset.filter (fun x ↦ ¬c x = 0) (Finset.filter (fun n' ↦ True) Finset.univ),
+            MvPolynomial.C (c x) * f x))
   sorry
+
+-- lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] n (c : Fin n -> R) (f : Fin n -> MvPolynomial σ R)
+--   (m : Monomial σ)
+--   (NE0 : ∀ (n' : Fin n), c n' ≠ 0)
+--   (NE1 : ∀ (n' : Fin n), f n' ≠ 0)
+--   (MDEG1 : ∀ (n' : Fin n), leading_monomial (f n') (NE1 n') = m)
+--   (NE2 : (∑ (n' : Fin n), (MvPolynomial.C (c n')) * (f n')) ≠ 0)
+--   (MDEG2 : (leading_monomial (∑ (n' : Fin n), (MvPolynomial.C (c n')) * (f n')) NE2) < m) :
+--   ∃ (c' : Fin n -> Fin n -> R),
+--   (∑ (n' : Fin n), (MvPolynomial.C (c n')) * (f n')) = (∑ (n' : Fin n), ∑ (n'' : Fin n), (MvPolynomial.C (c' n' n'')) * (Spol_help (f n') (f n'') (NE1 n') (NE1 n''))) := by
+--   let d := (fun n' => leading_coeff (f n') (NE1 n'))
+--   -- induction' n with np IH; simp
+--   -- simp
+--   sorry
+
+-- lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] n (c : Fin n -> R) (f : Fin n -> MvPolynomial σ R)
+--   (m : Monomial σ)
+--   (NE1 : ∀ (n' : Fin n), f n' ≠ 0)
+--   (MDEG1 : ∀ (n' : Fin n), leading_monomial (f n') (NE1 n') = m)
+--   (NE2 : (∑ (n' : Fin n), (MvPolynomial.C (c n')) * (f n')) ≠ 0)
+--   (MDEG2 : (leading_monomial (∑ (n' : Fin n), (MvPolynomial.C (c n')) * (f n')) NE2) < m) :
+--   ∃ (c' : Fin n -> Fin n -> R),
+--   (∑ (n' : Fin n), (MvPolynomial.C (c n')) * (f n')) = (∑ (n' : Fin n), ∑ (n'' : Fin n), (MvPolynomial.C (c' n' n'')) * (Spol_help (f n') (f n'') (NE1 n') (NE1 n''))) := by
+--   let NZ : Finset (Fin n) := { n' | c n' ≠ 0 }
+--   let crd : ℕ := NZ.card
+--   have EQ : Multiset.card (Fin crd) = crd by
+--     sorry
+--   let d := (fun n' => leading_coeff (f n') (NE1 n'))
+--   -- induction' n with np IH; simp
+--   -- simp
+--   sorry
