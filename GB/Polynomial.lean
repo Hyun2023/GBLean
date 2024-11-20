@@ -109,10 +109,14 @@ lemma polynomial_scalarmult_nonzero [DecidableEq σ] [Field R] [DecidableEq R] [
       rw [Finset.filter_eq_self]
       intro x H
       have NEQ : p x ≠ 0 := by
-        sorry
+        have EQ'' := (p.mem_support_toFun x)
+        have EQ''' : p.toFun x ≠ 0 := by
+          rw [<- EQ'']
+          apply H
+        apply EQ'''
       exact mul_ne_zero NE NEQ
     rw [EQ']
-    sorry
+    simp; rfl
   rw [<- EQ]
   assumption
 
