@@ -72,7 +72,8 @@ lemma MonomialGen (m : MvPolynomial σ R) (mons : Finset (Monomial σ))
   by
     intro mon; have ismon := mon
     rw [is_monomial] at mon; rcases mon with ⟨mon, ⟨⟨min, _⟩, munique⟩⟩
-    rw [Ideal.span, Finsupp.mem_span_iff_linearCombination] at m_mem; rcases m_mem with ⟨l, hm⟩
+    rw [Ideal.span, Finsupp.mem_span_iff_linearCombination] at m_mem
+    rcases m_mem with ⟨l, hm⟩
     rw [Finsupp.linearCombination_apply (MvPolynomial σ R)] at hm; simp
     rw [Finsupp.sum] at hm
     rw [Finset.sum_congr rfl] at hm
@@ -94,46 +95,54 @@ lemma MonomialGen (m : MvPolynomial σ R) (mons : Finset (Monomial σ))
     have test :
       ∃ x ∈ l.support.sigma fun x ↦ (l x).support,
         ((monomial x.snd) (1 : R)) • (x.fst : MvPolynomial σ R) = monomial mon 1 := by {
-          sorry
+          apply of_not_not; intros neg
+          rw [← hm] at min
+          apply Finsupp.mem_support_finset_sum at min
+          rcases min with ⟨c, min1, min2⟩
+          apply neg; exists c; constructor
+          { exact min1 }
+          rcases c with ⟨c1, c2⟩; simp at min2
+          simp
+          have exi : ∃ mono ∈ mons, monomial mono 1 = c1.val := by {
+            rcases c1 with ⟨c1, c1in⟩; rw [Set.mem_image] at c1in
+            rcases c1in with ⟨c1m, c1min⟩
+            exists c1m
+          }
+          rcases exi with ⟨mono, hmono, hmono2⟩
+          rw [← hmono2]; simp
+          rw [← hmono2] at min2; simp at min2
+          rw [← MvPolynomial.single_eq_monomial, Finsupp.single_apply] at min2
+          split_ifs at min2; any_goals trivial
         }
     rcases test with ⟨⟨xf, xs⟩, hx, hx2⟩
     simp at hx2
 
+    rcases xf with ⟨xf, xfin⟩
+    rw [Set.mem_image] at xfin; rcases xfin with ⟨xfm, xfmin1, xfmin2⟩
 
-
-    let exmon := @MvPolynomial.toMonomial R σ _ xf
-    have ismonxf : is_monomial (xf : MvPolynomial σ R) := by {
-      rw [is_monomial]
-      rcases xf with ⟨xf, xfin⟩
-      simp
-      rw [Set.mem_image] at xfin; rcases xfin with ⟨xfm, xfmin1, xfmin2⟩
-      rw [← xfmin2]
-      exists xfm; simp
-    }
-    apply exmon at ismonxf
-    exists (exmon ismonxf); constructor
+    exists xfm; constructor
+    { rw [← mons.mem_coe]; exact xfmin1 }
+    rw [xfmin2]
+    have meq :
+      m = (monomial mon) (m.coeff mon) := by {
+        apply m.ext; intros m_1; simp
+        rcases (eq_or_ne mon m_1) with ⟨eq, neq⟩; simp
+        split_ifs
+        congr; symm; trivial
+        rw [← m.not_mem_support_iff]
+        rintro ins; have ttmp : (m_1 = mon) := by { apply munique; trivial }
+        have triv : (m_1 ≠ mon) := by { symm; assumption }
+        apply triv; assumption
+      }
+    rw [meq]
+    exists (monomial xs (coeff mon m))
+    simp at hx2
+    have meq : (monomial xs) (coeff mon m) = (MvPolynomial.C (coeff mon m)) * (monomial xs 1) := by
     {
-      unfold exmon
+      ext n; simp
     }
-
-
-
-
-    have : x.fst ∈ mons := by sorry
-    exists ⟨x.fst, this⟩
-
-
-
-    let f : _ → MvPolynomial σ R :=
-      fun (a : l.support.sigma (fun x ↦ (l x).support)) ↦
-        let ⟨a, ain⟩ := a
-        (monomial a.snd) (coeff a.snd (l a.fst)) • ↑a.fst
-    let pred : _ → Prop :=
-      fun a ↦ f a = m
-    have tmp : DecidablePred pred := sorry
-    rw [← (Finset.sum_filter_add_sum_filter_not (l.support.sigma fun x ↦ (l x).support) pred)] at hm
-
-
+    rw [meq, mul_assoc, hx2]
+    rw [MvPolynomial.C_mul_monomial]; simp
 
 
 -- def red (s : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_nonzero : ∀ f ∈ F, f ≠ 0) :
