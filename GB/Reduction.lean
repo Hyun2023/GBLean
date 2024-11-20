@@ -155,15 +155,26 @@ lemma MvPolynomial.multidiv_correct [DecidableEq R] [LinearOrder σ] [ord : Mono
     -- let (a,r) := (MvPolynomial.multidiv s F F_isNonzero);
     s = (s.multidiv F F_isNonzero).snd + (∑ (f ∈ F), ((s.multidiv F F_isNonzero).fst f)*(f)) /\
     ((s.multidiv F F_isNonzero).snd = 0 ∨ ∀m ∈ monomials (s.multidiv F F_isNonzero).snd, ∀ f (inF : f ∈ F), ¬ Monomial.instDvd.dvd (leading_monomial f (F_isNonzero f inF)) m) := by
-    constructor
-    . unfold multidiv
-      have P := @Finset.sum_to_list
-      rw [<- P]
-      have EQ : (∀ l, ∀ pf : (∀ f ∈ l, f ≠ 0), s = (s.multidiv_help l pf).2 + (List.map (fun f ↦ (s.multidiv_help l pf).1 f * f) l).sum) := by
-        clear F_isNonzero F
-        intro l
-        induction' l with head tail IH <;> intro pf <;> simp
-        . rw [multidiv_help]
-        . sorry
-      exact EQ F.toList (multidiv.proof_1 F F_isNonzero)
-    . sorry
+  unfold multidiv; constructor
+  . have : ∀ l (s : MvPolynomial σ R) F F_isNonzero (EQ: l = F.toList),
+    s = (multidiv_help s l (by rw[EQ]; exact FList_isNonzero F_isNonzero)).2 + (∑ (f ∈ F), ((multidiv_help s l (by rw[EQ]; exact FList_isNonzero F_isNonzero)).1 f)*(f)) := by
+      clear s F F_isNonzero
+      intro l s F F_isNonzero EQ
+      have F_isNonzero' := FList_isNonzero F_isNonzero
+      rw [← EQ] at F_isNonzero'
+      have EQ' : F = l.toFinset := by rw [EQ]; simp
+      have G : ∀ l (s : MvPolynomial σ R) (l_isNonzero : ∀ f ∈ l, f ≠ 0), s = (s.multidiv_help l l_isNonzero).2 + (l.map (fun f => (s.multidiv_help l l_isNonzero).1 f * f)).sum := by
+        intro l; induction' l with f F' IH
+        <;> intro s l_isNonzero
+        . unfold multidiv_help; simp
+        . simp [multidiv_help]
+          have IH' := IH (div s f (by apply l_isNonzero; apply List.mem_cons_self)).2 (by intros; apply l_isNonzero; apply List.mem_cons_of_mem; assumption)
+          have div_correct := (MvPolynomial.div_correct s f (by apply l_isNonzero; apply List.mem_cons_self)).1
+          nth_rewrite 1 [div_correct]
+          nth_rewrite 1 [IH']
+          -- rw [IH']
+          sorry
+      nth_rewrite 1 [G l s F_isNonzero'];
+      rw [Finset.sumEQ]; congr!
+    apply this; rfl; assumption
+  . sorry
