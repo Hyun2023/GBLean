@@ -191,9 +191,44 @@ lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : Monomia
     rw [AddZeroClass.zero_add]
   rw [EQ1]
   clear EQ1
-  simp
-  -- have CONG := (Finset.sum_congr)
-  sorry
+  rw [Finset.filter_filter]
+  have EQ1 : ∑ n' : { x // x ∈ Fn' }, ∑ n'' : { x // x ∈ Fn' }, MvPolynomial.C (c_new' n' n'') * Spol_help (f' n') (f' n'') (NE1' n') (NE1' n'') =
+    ∑ n' : { x // x ∈ Fn' }, ∑ n'' : { x // x ∈ Fn' }, MvPolynomial.C (c_new n' n'') * Spol_help (f n') (f n'') (NE1 n') (NE1 n'') := by
+    unfold f'
+    unfold NE1'
+    unfold c_new
+    apply Finset.sum_congr; simp
+    intro x H
+    apply Finset.sum_congr; simp
+    intro x_1 H_1
+    simp
+  rw [EQ1]
+  clear EQ1
+  have EQ4 := (@Finset.sum_finset_coe Fn _ _ (fun n' => ∑ n'' : { x // x ∈ Fn' }, MvPolynomial.C (c_new n' ↑n'') * Spol_help (f n') (f ↑n'') (NE1 n') (NE1 ↑n'')) (Finset.filter (fun x ↦ ¬c x = 0) Fn.attach))
+  have EQ5 : (∑ i : ↑↑(Finset.filter (fun x ↦ ¬c x = 0) Fn.attach),
+      ∑ n'' : { x // x ∈ Fn' }, MvPolynomial.C (c_new ↑i ↑n'') * Spol_help (f ↑i) (f ↑n'') (NE1 ↑i) (NE1 ↑n'')) =
+      (∑ n' : { x // x ∈ Fn' }, ∑ n'' : { x // x ∈ Fn' }, MvPolynomial.C (c_new ↑n' ↑n'') * Spol_help (f ↑n') (f ↑n'') (NE1 ↑n') (NE1 ↑n'')) := by
+    simp
+  rewrite [<-EQ5]
+  clear EQ5
+  have EQ6 : (∑ i ∈ Finset.filter (fun x ↦ ¬c x = 0) Fn.attach,
+    ∑ n'' : { x // x ∈ Fn' }, MvPolynomial.C (c_new i ↑n'') * Spol_help (f i) (f ↑n'') (NE1 i) (NE1 ↑n'')) =
+    (∑ x ∈ Finset.filter (fun a ↦ True ∧ ¬c a = 0) Fn.attach,
+      ∑ n'' ∈ Finset.filter (fun a ↦ True ∧ ¬c a = 0) Fn.attach,
+        MvPolynomial.C (c_new x n'') * Spol_help (f x) (f n'') (NE1 x) (NE1 n'')) := by
+    clear EQ4
+    simp
+    apply Finset.sum_congr; simp
+    intro x H
+    have EQ4 := (@Finset.sum_finset_coe Fn _ _ (fun n'' => MvPolynomial.C (c_new x n'') * Spol_help (f x) (f ↑n'') (NE1 x) (NE1 ↑n'')) (Finset.filter (fun x ↦ ¬c x = 0) Fn.attach))
+    have EQ5 : (∑ i : ↑↑(Finset.filter (fun x ↦ ¬c x = 0) Fn.attach), MvPolynomial.C (c_new x ↑i) * Spol_help (f x) (f ↑i) (NE1 x) (NE1 ↑i)) =
+      (∑ n'' ∈ Fn'.attach, MvPolynomial.C (c_new x ↑n'') * Spol_help (f x) (f ↑n'') (NE1 x) (NE1 ↑n'')) := by
+      simp
+    rewrite [<-EQ5]
+    clear EQ5
+    sorry
+  rw [<-EQ6]
+  apply EQ4
 
 -- lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] n (c : Fin n -> R) (f : Fin n -> MvPolynomial σ R)
 --   (m : Monomial σ)
