@@ -9,7 +9,7 @@ open Monomial
 
 -- Definition of S-Polynomial
 -- ((LCM (LM f) (LM g)) / (LT f)) * f - ((LCM (LM f) (LM g)) / (LT g)) * g
-def Spol_help [CommRing R] (f g : MvPolynomial σ R) (f_NE : f ≠ 0) (g_NE : g ≠ 0) : MvPolynomial σ R :=
-  sorry
--- def Spol [CommRing R] [DecidableEq R] (f g : MvPolynomial σ R) : MvPolynomial σ R :=
+noncomputable def Spol_help [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (f g : MvPolynomial σ R) (f_NE : f ≠ 0) (g_NE : g ≠ 0) : MvPolynomial σ R :=
+  MvPolynomial.instSub.sub (toMvPolynomial ((LCM (leading_monomial f f_NE) (leading_monomial g g_NE)) / (leading_monomial f f_NE)) * f) (toMvPolynomial ((LCM (leading_monomial f f_NE) (leading_monomial g g_NE)) / (leading_monomial g g_NE)) * g)
+-- noncomputable def Spol [DecidableEq σ] [CommRing R] [DecidableEq R] [ord : MonomialOrder σ ] (f g : MvPolynomial σ R) : MvPolynomial σ R :=
 --   if f_NE : f = 0 then 0 else (if g_NE : g = 0 then 0 else Spol_help f g f_NE g_NE)
