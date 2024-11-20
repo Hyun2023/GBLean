@@ -107,6 +107,47 @@ lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : Monomia
     fun n m => if NEQ1 : n ∈ Fn' then (if NEQ2 : m ∈ Fn' then (c_new' ⟨n, NEQ1⟩ ⟨m, NEQ2⟩) else 0) else 0
   exists c_new
   unfold c_new
+  clear Lem NE2' MDEG2'
+  rw [EQ] at CP
+  rw [CP]
+  have EQ0 : (∑ (n' : Fn),
+        ∑ n'' : { x // x ∈ Fn },
+          MvPolynomial.C (if NEQ1 : n' ∈ Fn' then if NEQ2 : n'' ∈ Fn' then c_new' ⟨n', NEQ1⟩ ⟨n'', NEQ2⟩ else 0 else 0) *
+            Spol_help (f n') (f n'') (NE1 n') (NE1 n'')) =
+      (∑ n' ∈ Finset.filter (fun x ↦ True) Fn.attach,
+        ∑ n'' ∈ Finset.filter (fun x ↦ True) Fn.attach,
+          MvPolynomial.C (if NEQ1 : n' ∈ Fn' then if NEQ2 : n'' ∈ Fn' then c_new' ⟨n', NEQ1⟩ ⟨n'', NEQ2⟩ else 0 else 0) *
+            Spol_help (f n') (f n'') (NE1 n') (NE1 n'')) := by
+    simp
+  rw [EQ0]
+  clear EQ0
+  have EQ1 := (Finset.sum_filter_add_sum_filter_not (Finset.filter (fun x ↦ True) Fn.attach)
+    (fun n' : Fn => c n' = 0)
+    (fun n' => ∑ n'' ∈ Finset.filter (fun x ↦ True) Fn.attach,
+          MvPolynomial.C (if NEQ1 : n' ∈ Fn' then if NEQ2 : n'' ∈ Fn' then c_new' ⟨n', NEQ1⟩ ⟨n'', NEQ2⟩ else 0 else 0) *
+            Spol_help (f n') (f n'') (NE1 n') (NE1 n'')))
+  rw [<- EQ1]
+  clear EQ1
+  have EQ2 : (∑ x ∈ Finset.filter (fun x ↦ c x = 0) (Finset.filter (fun x ↦ True) Fn.attach),
+      ∑ n'' ∈ Finset.filter (fun x ↦ True) Fn.attach,
+        MvPolynomial.C (if NEQ1 : x ∈ Fn' then if NEQ2 : n'' ∈ Fn' then c_new' ⟨x, NEQ1⟩ ⟨n'', NEQ2⟩ else 0 else 0) *
+          Spol_help (f x) (f n'') (NE1 x) (NE1 n'') = 0) := by
+    apply Finset.sum_eq_zero
+    intro x
+    simp
+    intro H
+    have MEM : ¬ x ∈ Fn' := by
+      unfold Fn'
+      simp
+      apply H
+    apply Finset.sum_eq_zero
+    intro x_1
+    simp
+    rw [@dif_neg (x ∈ Fn') (DEC x) MEM]
+    rw [MvPolynomial.C_0]
+    exact zero_mul (Spol_help (f x) (f x_1) (NE1 x) (NE1 x_1))
+  rw [EQ2]
+  clear EQ2
   sorry
 
 -- lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] n (c : Fin n -> R) (f : Fin n -> MvPolynomial σ R)
