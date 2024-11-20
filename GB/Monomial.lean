@@ -158,5 +158,5 @@ def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p 
 def leading_monomial_unsafe [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
   @Option.get! _ MonomialExists (@Finset.max _ ord.toLinearOrder (monomials p))
 
-def leading_coeff [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): R :=
+def leading_coeff [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : R :=
   MvPolynomial.coeff (leading_monomial p p_nonzero) p

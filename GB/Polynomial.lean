@@ -95,6 +95,32 @@ def Monomial.instMembership [CommRing R] [DecidableEq σ] [DecidableEq R] : Memb
 def MvPolynomial.instMembership [CommRing R] [DecidableEq σ] [DecidableEq R] : Membership (MvPolynomial σ R) (Set (Monomial σ)) where
   mem := fun s p => exists h : (is_monomial p), (MvPolynomial.toMonomial p h) ∈ s
 
+lemma polynomial_scalarmult_nonzero [DecidableEq σ] [Field R] [DecidableEq R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0)
+  (c : R) (NE : c ≠ 0) : c • p ≠ 0 := by
+  rw [<-MvPolynomial.support_nonempty]
+  rw [<-MvPolynomial.support_nonempty] at p_nonzero
+  have EQ : (p.support = (c • p).support) := by
+    rw [HSMul.hSMul, instHSMul]; simp
+    rw [SMul.smul, Algebra.toSMul, MvPolynomial.algebra, AddMonoidAlgebra.algebra]; simp
+    rw [SMulZeroClass.toSMul, AddMonoidAlgebra.smulZeroClass, Finsupp.smulZeroClass]; simp
+    rw [Finsupp.mapRange, Finsupp.onFinset]; simp
+    have EQ' : p.support = Finset.filter (fun a ↦ ¬c * p a = 0) p.support := by
+      symm
+      rw [Finset.filter_eq_self]
+      intro x H
+      have NEQ : p x ≠ 0 := by
+        sorry
+      exact mul_ne_zero NE NEQ
+    rw [EQ']
+    sorry
+  rw [<- EQ]
+  assumption
+
+lemma leading_coeff_scalarmult [DecidableEq σ] [Field R] [DecidableEq R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0)
+  (c : R) (NE : c ≠ 0) : c * (leading_coeff p p_nonzero) = leading_coeff (c • p) (polynomial_scalarmult_nonzero p p_nonzero c NE) := by
+  sorry
+
+
 -- lemma zero_is_not_mon  [CommRing R] : ¬(is_monomial (0 : (FiniteVarPoly σ R) )) := by
 --   intros ismon
 --   unfold is_monomial at *
