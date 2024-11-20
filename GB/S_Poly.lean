@@ -148,6 +148,51 @@ lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : Monomia
     exact zero_mul (Spol_help (f x) (f x_1) (NE1 x) (NE1 x_1))
   rw [EQ2]
   clear EQ2
+  rw [AddZeroClass.zero_add]
+  have EQ1 : (∑ x ∈ Finset.filter (fun x ↦ ¬c x = 0) (Finset.filter (fun x ↦ True) Fn.attach),
+        ∑ n'' ∈ Finset.filter (fun x ↦ True) Fn.attach,
+          MvPolynomial.C (if NEQ1 : x ∈ Fn' then if NEQ2 : n'' ∈ Fn' then c_new' ⟨x, NEQ1⟩ ⟨n'', NEQ2⟩ else 0 else 0) *
+            Spol_help (f x) (f n'') (NE1 x) (NE1 n'')) =
+      (∑ x ∈ Finset.filter (fun x ↦ ¬c x = 0) (Finset.filter (fun x ↦ True) Fn.attach),
+        ∑ n'' ∈ Finset.filter (fun x ↦ ¬c x = 0) (Finset.filter (fun x ↦ True) Fn.attach),
+          MvPolynomial.C (c_new x n'') *
+            Spol_help (f x) (f n'') (NE1 x) (NE1 n'')) := by
+    apply Finset.sum_congr; simp
+    intro x H
+    have EQ2 := (Finset.sum_filter_add_sum_filter_not (Finset.filter (fun x ↦ True) Fn.attach)
+      (fun n' : Fn => c n' = 0)
+      (fun n'' => MvPolynomial.C (if NEQ1 : x ∈ Fn' then if NEQ2 : n'' ∈ Fn' then c_new' ⟨x, NEQ1⟩ ⟨n'', NEQ2⟩ else 0 else 0) *
+            Spol_help (f x) (f n'') (NE1 x) (NE1 n'')))
+    rw [<- EQ2]
+    clear EQ2
+    have EQ3 : (∑ x_1 ∈ Finset.filter (fun x ↦ c x = 0) (Finset.filter (fun x ↦ True) Fn.attach),
+      MvPolynomial.C (if NEQ1 : x ∈ Fn' then if NEQ2 : x_1 ∈ Fn' then c_new' ⟨x, NEQ1⟩ ⟨x_1, NEQ2⟩ else 0 else 0) *
+        Spol_help (f x) (f x_1) (NE1 x) (NE1 x_1)) = 0 := by
+      apply Finset.sum_eq_zero
+      intro x' H'
+      have MEM : x ∈ Fn' := by
+        unfold Fn'
+        simp
+        rw [Finset.mem_filter] at H
+        have ⟨_, H''⟩ := H
+        exact H''
+      rw [@dif_pos (x ∈ Fn') (DEC x) MEM]
+      have MEM2 : ¬ x' ∈ Fn' := by
+        unfold Fn'
+        simp
+        rw [Finset.mem_filter] at H'
+        have ⟨_, H''⟩ := H'
+        exact H''
+      rw [@dif_neg (x' ∈ Fn') (DEC x') MEM2]
+      rw [MvPolynomial.C_0]
+      exact zero_mul (Spol_help (f x) (f x') (NE1 x) (NE1 x'))
+    rw [EQ3]
+    clear EQ3
+    rw [AddZeroClass.zero_add]
+  rw [EQ1]
+  clear EQ1
+  simp
+  -- have CONG := (Finset.sum_congr)
   sorry
 
 -- lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] n (c : Fin n -> R) (f : Fin n -> MvPolynomial σ R)
