@@ -18,18 +18,104 @@ noncomputable def Monomial.div [DecidableEq σ] (f : Monomial σ) (g : Monomial 
   then (f / g, 0)
   else (0, f)
 
-def Generators (σ R: Type) [DecidableEq σ] [CommRing R] : Type := Finset (MvPolynomial σ R)
+def Generators (σ R: Type) [DecidableEq σ] [DecidableEq R] [CommRing R] : Type := Finset (MvPolynomial σ R)
 
-instance Generators.instMembership (σ R: Type) [DecidableEq σ] [CommRing R] : Membership (MvPolynomial σ R) (Generators σ R) where
+instance Generators.instMembership (σ R: Type) [DecidableEq σ] [DecidableEq R] [CommRing R] : Membership (MvPolynomial σ R) (Generators σ R) where
   mem := Finset.instMembership.mem
 
-noncomputable def MvPolynomial.div [DecidableEq σ] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_ismon : is_monomial g) : (MvPolynomial σ R) × (MvPolynomial σ R) :=
-  (f.divMonomial (g.toMonomial g_ismon), MvPolynomial.instSub.sub f (f.divMonomial (g.toMonomial g_ismon)))
+noncomputable def MvPolynomial.div [DecidableEq σ] [DecidableEq R] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_ismon : is_monomial g) : (MvPolynomial σ R) × (MvPolynomial σ R) :=
+  (f.divMonomial (g.toMonomial g_ismon), f.modMonomial (g.toMonomial g_ismon))
 
-lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_ismon : is_monomial g):
+def MvPolynomial.monomial_equiv [DecidableEq σ] [ord : MonomialOrder σ] [DecidableEq R] [Field R] (g : MvPolynomial σ R) (g_ismon : is_monomial g) : g = (monomial (g.toMonomial g_ismon)) 1 := by
+  rw [toMonomial]
+  ext m
+  rw [coeff, coeff]
+  rw [monomial, AddMonoidAlgebra.lsingle]
+  rw [Finsupp.lsingle]; simp
+  rw [DFunLike.coe, DFunLike.coe, Finsupp.instFunLike, LinearMap.instFunLike]; simp
+  rw [LinearMap.instFunLike]; simp
+  have ⟨_, PROP⟩ := g_ismon
+  have ⟨m0, ⟨m0P1, m0P2⟩⟩ := is_monomial_fst g_ismon
+  simp at m0P1
+  have EQ4 : (Finset.choose (fun x ↦ True) g.support (is_monomial_fst g_ismon) = m0) := by
+    have EQ5 := (@Finset.choose_mem _ (fun _ ↦ True) _ g.support (is_monomial_fst g_ismon))
+    apply m0P2
+    exact Finset.choose_spec (fun x ↦ True) g.support (is_monomial_fst g_ismon)
+  rw [EQ4]
+  rcases em (m ∈ g.support) with p | p
+  . have EQ6 : m = m0 := by
+      apply m0P2
+      exact And.symm ⟨trivial, p⟩
+    rw [<-EQ6]
+    have EQ7 := (@Finsupp.single_eq_same _ _ _ m (@OfNat.ofNat R 1 One.toOfNat1))
+    have EQ8 : g.toFun m = 1 := by
+      apply PROP
+      exact p
+    rw [EQ8]
+    symm
+    exact EQ7
+  . have EQ6 : g m = 0 := by
+      have EQ7 := (Finsupp.mem_support_toFun g m)
+      have EQ8 : ¬ (g m ≠ 0) := by
+        intro H
+        apply p
+        exact mem_support_iff.mpr H
+      exact Function.nmem_support.mp EQ8
+    have NEQ : m0 ≠ m := by
+      intro H
+      apply m0P1
+      rw [coeff]
+      rw [H]
+      exact EQ6
+    have EQ7 := (@Finsupp.single_eq_of_ne _ _ _ m0 m (@OfNat.ofNat R 1 One.toOfNat1) NEQ)
+    have EQ8 : g.toFun m = 0 := by
+      exact EQ6
+    rw [EQ8]
+    exact id (Eq.symm EQ7)
+
+lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [DecidableEq R] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_ismon : is_monomial g):
   let (h,r) := f.div g g_ismon;
   f = g*h+r ∧
-  (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (@leading_monomial σ _ _ _ ord g (is_monomial_nonzero g_ismon)) m) := sorry
+  (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (@leading_monomial σ _ _ _ ord g (is_monomial_nonzero g_ismon)) m) := by
+  constructor
+  . have EQ := (MvPolynomial.divMonomial_add_modMonomial f (g.toMonomial g_ismon))
+    have EQ2 : (g * f.divMonomial (g.toMonomial g_ismon) = (monomial (g.toMonomial g_ismon)) 1 * f.divMonomial (g.toMonomial g_ismon)) := by
+      have EQ3 : g = (monomial (g.toMonomial g_ismon)) 1 := by
+        apply monomial_equiv
+      exact congrFun (congrArg HMul.hMul EQ3) (f.divMonomial (g.toMonomial g_ismon))
+    exact
+      Eq.symm
+        (Mathlib.Tactic.Abel.subst_into_add (g * f.divMonomial (g.toMonomial g_ismon))
+          (f.modMonomial (g.toMonomial g_ismon))
+          ((monomial (g.toMonomial g_ismon)) 1 * f.divMonomial (g.toMonomial g_ismon))
+          (f.modMonomial (g.toMonomial g_ismon)) f EQ2 rfl EQ)
+  . rw [leading_monomial, monomials]
+    rw [toMonomial]
+    have ⟨m0, ⟨m0P1, m0P2⟩⟩ := is_monomial_fst g_ismon
+    have EQ4 : (Finset.choose (fun x ↦ True) g.support (is_monomial_fst g_ismon) = m0) := by
+      have EQ5 := (@Finset.choose_mem _ (fun _ ↦ True) _ g.support (is_monomial_fst g_ismon))
+      apply m0P2
+      exact Finset.choose_spec (fun x ↦ True) g.support (is_monomial_fst g_ismon)
+    rw [EQ4]
+    rcases em (f.modMonomial m0 = 0) with p | p
+    . exact Or.symm (Or.inr p)
+    . right
+      intro m SUP DVD
+      have LE : (m0 <= m) := by
+        rw [Monomial.instDvd_equiv] at DVD
+        rw [Monomial.instDvd_equiv'] at DVD
+        rw [Monomial.instDvd''] at DVD
+        unfold monomials at DVD
+        have EQ5 : ((@Finset.max' (Monomial σ) MonomialOrder.toLinearOrder g.support (term_exists g (is_monomial_nonzero g_ismon))) = m0) := by
+          apply m0P2
+          constructor
+          . exact (@Finset.max'_mem _ MonomialOrder.toLinearOrder g.support (term_exists g (is_monomial_nonzero g_ismon)))
+          . exact trivial
+        rw [<- EQ5]
+        apply DVD
+      have EQ5 := (@coeff_modMonomial_of_le _ _ _ _ _ f LE)
+      have EQ6 := (Finsupp.mem_support_toFun (f.modMonomial m0) m).mp
+      exact EQ6 SUP EQ5
 
 -- Opaque
 attribute [irreducible] MvPolynomial.div
@@ -61,26 +147,15 @@ lemma MvPolynomial.multidiv_correct [DecidableEq R] [LinearOrder σ] [ord : Mono
     -- let (a,r) := (MvPolynomial.multidiv s F F_isMonomial);
     s = (s.multidiv F F_isMonomial).snd + (∑ (f ∈ F), ((s.multidiv F F_isMonomial).fst f)*(f)) /\
     ((s.multidiv F F_isMonomial).snd = 0 ∨ ∀m ∈ monomials (s.multidiv F F_isMonomial).snd, ∀ f (inF : f ∈ F), ¬ Monomial.instDvd.dvd (leading_monomial f (is_monomial_nonzero (F_isMonomial f inF))) m) := by
-  unfold multidiv; constructor
-  . have : ∀ l (s : MvPolynomial σ R) F F_isMonomial (EQ: l = F.toList),
-    s = (multidiv_help s l (by rw[EQ]; exact FList_isMonomial F_isMonomial)).2 + (∑ (f ∈ F), ((multidiv_help s l (by rw[EQ]; exact FList_isMonomial F_isMonomial)).1 f)*(f)) := by
-      clear s F F_isMonomial
-      intro l s F F_isMonomial EQ
-      have F_isMonomial' := FList_isMonomial F_isMonomial
-      rw [← EQ] at F_isMonomial'
-      have EQ' : F = l.toFinset := by rw [EQ]; simp
-      have G : ∀ l (s : MvPolynomial σ R) (l_isMonomial : ∀ f ∈ l, is_monomial f), s = (s.multidiv_help l l_isMonomial).2 + (l.map (fun f => (s.multidiv_help l l_isMonomial).1 f * f)).sum := by
-        intro l; induction' l with f F' IH
-        <;> intro s l_isMonomial
-        . unfold multidiv_help; simp
-        . simp [multidiv_help]
-          have IH' := IH (div s f (by apply l_isMonomial; apply List.mem_cons_self)).2 (by intros; apply l_isMonomial; apply List.mem_cons_of_mem; assumption)
-          have div_correct := (MvPolynomial.div_correct s f (by apply l_isMonomial; apply List.mem_cons_self)).1
-          nth_rewrite 1 [div_correct]
-          nth_rewrite 1 [IH']
-          -- rw [IH']
-          sorry
-      nth_rewrite 1 [G l s F_isMonomial'];
-      rw [Finset.sumEQ]; congr!
-    apply this; rfl; assumption
-  . sorry
+    constructor
+    . unfold multidiv
+      have P := @Finset.sum_to_list
+      rw [<- P]
+      have EQ : (∀ l, ∀ pf : (∀ f ∈ l, is_monomial f), s = (s.multidiv_help l pf).2 + (List.map (fun f ↦ (s.multidiv_help l pf).1 f * f) l).sum) := by
+        clear F_isMonomial F
+        intro l
+        induction' l with head tail IH <;> intro pf <;> simp
+        . rw [multidiv_help]
+        . sorry
+      exact EQ F.toList (multidiv.proof_1 F F_isMonomial)
+    . sorry

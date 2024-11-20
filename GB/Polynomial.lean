@@ -11,20 +11,42 @@ import Mathlib.Algebra.MvPolynomial.Degrees
 
 instance [CommRing R] : FunLike (MvPolynomial σ R) (Monomial σ) R := Finsupp.instFunLike
 
-def is_monomial  [CommRing R] (p : MvPolynomial σ R)  :=
+def is_monomial'  [CommRing R] (p : MvPolynomial σ R)  :=
   ∃! m, m ∈ p.support ∧ True
 
+-- def mono_poly_mono [CommRing R] [Nontrivial R] : ∀(m : Monomial σ), is_monomial (@toMvPolynomial R _ _ m) := by {
+--   intros m;unfold is_monomial;unfold toMvPolynomial
+--   rw [<-MvPolynomial.single_eq_monomial];unfold MvPolynomial.support;unfold Finsupp.single;simp
+-- }
+
+def is_monomial  [CommRing R] (p : MvPolynomial σ R)  :=
+  (∃! m, m ∈ p.support ∧ True) ∧ (∀ m, m ∈ p.support -> p m = 1)
+
 def mono_poly_mono [CommRing R] [Nontrivial R] : ∀(m : Monomial σ), is_monomial (@toMvPolynomial R _ _ m) := by {
-  intros m;unfold is_monomial;unfold toMvPolynomial
-  rw [<-MvPolynomial.single_eq_monomial];unfold MvPolynomial.support;unfold Finsupp.single;simp
+  intros m; unfold is_monomial; unfold toMvPolynomial
+  rw [<-MvPolynomial.single_eq_monomial]; unfold MvPolynomial.support; unfold Finsupp.single; simp
+  rw [DFunLike.coe, instFunLikeMvPolynomialMonomial, Finsupp.instFunLike]; simp
 }
+
+def is_monomial_fst [CommRing R] {p : MvPolynomial σ R} (p_monomial : is_monomial p) :
+  is_monomial' p :=
+  let ⟨h1, _⟩ := p_monomial
+  h1
+
+lemma is_monomial'_nonzero [CommRing R] {p : MvPolynomial σ R} :
+    is_monomial' p -> p ≠ 0 := by
+  intro p_ismon'
+  obtain ⟨m, ⟨⟨P1, _⟩, P2⟩⟩ := p_ismon'
+  rw [MvPolynomial.ne_zero_iff]
+  use m; rw [MvPolynomial.coeff]
+  apply (p.mem_support_toFun m).mp; assumption
 
 lemma is_monomial_nonzero [CommRing R] {p : MvPolynomial σ R} :
     is_monomial p -> p ≠ 0 := by
   intro p_ismon
-  rcases p_ismon with ⟨p', ⟨h1,_⟩, _⟩; rw [MvPolynomial.ne_zero_iff];
-  exists p'; rw[MvPolynomial.coeff];
-  apply (p.mem_support_toFun p').mp; assumption
+  apply is_monomial'_nonzero
+  apply is_monomial_fst
+  apply p_ismon
 
 -- lemma is_monomial_true [CommRing R] (m : σ →₀ ℕ) :
 --     is_monomial (@MvPolynomial.monomial R σ _ m 1) := by
@@ -45,13 +67,32 @@ lemma is_monomial_nonzero [CommRing R] {p : MvPolynomial σ R} :
 noncomputable def MvPolynomial.instSub  [CommRing R] : Sub (MvPolynomial σ R) where
   sub := fun a b => Finsupp.instSub.sub a b
 
-def MvPolynomial.toMonomial [CommRing R] (p : MvPolynomial σ R) (h : is_monomial p) :=
-  Finset.choose (fun _ => True) p.support h
+def MvPolynomial.instSub_sound [CommRing R] : ∀ (f t : MvPolynomial σ R), f = t + (MvPolynomial.instSub.sub f t) := by
+  intro f t
+  rw [Sub.sub, instSub]; simp
+  rw [Sub.sub, Finsupp.instSub]; simp
+  rw [HAdd.hAdd, instHAdd]; simp
+  rw [Add.add, Distrib.toAdd, NonUnitalNonAssocSemiring.toDistrib]; simp
+  rw [AddSemigroup.toAdd, AddMonoid.toAddSemigroup, AddCommMonoid.toAddMonoid, NonUnitalNonAssocSemiring.toAddCommMonoid, NonAssocSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonAssocSemiring]; simp
+  rw [NonUnitalSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonUnitalSemiring, CommSemiring.toSemiring, commSemiring, AddMonoidAlgebra.commSemiring]; simp
+  rw [NonUnitalCommSemiring.toNonUnitalSemiring, AddMonoidAlgebra.nonUnitalCommSemiring]; simp
+  rw [AddMonoidAlgebra.nonUnitalSemiring]; simp
+  rw [AddMonoidAlgebra.nonUnitalNonAssocSemiring]; simp
+  rw [AddMonoid.toAddSemigroup, AddCommMonoid.toAddMonoid, Finsupp.instAddCommMonoid]; simp
+  rw [Finsupp.instAddMonoid]; simp
+  rw [AddZeroClass.toAdd]; simp
+  rw [Finsupp.instAdd]; simp
+  ext m
+  rw [coeff, coeff]; simp
+  exact Eq.symm (add_eq_of_eq_sub' rfl)
 
-def Monomial.instMembership [CommRing R] [DecidableEq σ] : Membership (Monomial σ) (Set (MvPolynomial σ R)) where
+def MvPolynomial.toMonomial [CommRing R] [DecidableEq R] (p : MvPolynomial σ R) (h : is_monomial p) :=
+  Finset.choose (fun _ => True) p.support (is_monomial_fst h)
+
+def Monomial.instMembership [CommRing R] [DecidableEq σ] [DecidableEq R] : Membership (Monomial σ) (Set (MvPolynomial σ R)) where
   mem := fun s m => (Monomial.toMvPolynomial.coe m) ∈ s
 
-def MvPolynomial.instMembership [CommRing R] [DecidableEq σ] : Membership (MvPolynomial σ R) (Set (Monomial σ)) where
+def MvPolynomial.instMembership [CommRing R] [DecidableEq σ] [DecidableEq R] : Membership (MvPolynomial σ R) (Set (Monomial σ)) where
   mem := fun s p => exists h : (is_monomial p), (MvPolynomial.toMonomial p h) ∈ s
 
 -- lemma zero_is_not_mon  [CommRing R] : ¬(is_monomial (0 : (FiniteVarPoly σ R) )) := by
