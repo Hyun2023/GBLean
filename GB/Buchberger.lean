@@ -88,10 +88,14 @@ def buchberger_step_keep_nonempty
 def buchberger_step_keep_membership
   (F G: Finset (MvPolynomial σ R))
   (G_nonzero : ∀ g ∈ G, g ≠ 0)
-  (Gmember : G_queue.toSet ⊆ SetLike.coe (Ideal.span F) ) :
-  (buchberger_step (G.product G).toList G_queue G (G_nonzero)).toSet ⊆ SetLike.coe (Ideal.span F) := by
-
-  induction (G.product G).toList generalizing G_queue with
+  (Gmember : G.toSet ⊆ SetLike.coe (Ideal.span F) ) :
+  (buchberger_step (G.product G).toList G G (G_nonzero)).toSet ⊆ SetLike.coe (Ideal.span F) := by
+  let G' := G
+  have G'eq : G' = G := by rfl;
+  clear_value G'
+  have G'_membership : G'.toSet ⊆ SetLike.coe (Ideal.span F) := by rw [G'eq];assumption
+  nth_rewrite 3 [<-G'eq];clear G'eq
+  induction (G.product G).toList generalizing G' with
   |nil => unfold buchberger_step;assumption
   |cons hd tl ih => {
     have (p,q) := hd
@@ -107,7 +111,10 @@ def buchberger_step_keep_membership
         simp [red0];apply ih;assumption
       }
       {
-        simp [red0];apply ih
+        simp [pqeq,red0]
+        apply ih
+        have sin : s_red p q G G_nonzero ∈ (Ideal.span ↑F) := by sorry
+        -- almost trivial
         sorry
       }
     }
@@ -157,6 +164,7 @@ def buchberger_correct
     have GB_def : GB = buchberger_algorithm G G_nonzero G_nonempty := by rfl
     have GB_nonzero : ∀g ∈ GB, g ≠ 0 := by sorry
     have GB_nonempty : Nonempty GB := by sorry
+    have GB_basis : (Ideal.span GB : Ideal (MvPolynomial σ R) )  = Ideal.span G := by sorry
     rw [BuchbergerCriterion (G_nonzero := GB_nonzero)]
     have H := buchberger_fixpoint G G_nonzero G_nonempty
     simp at H
@@ -207,6 +215,7 @@ def buchberger_correct
           sorry
       }
     }
+    sorry
   }
 
 

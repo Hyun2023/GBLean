@@ -232,16 +232,18 @@ lemma GB_multidiv (G : Finset (MvPolynomial σ R))  (G_nonzero : ∀ g ∈ G, g 
     }
 
 theorem BuchbergerCriterion :
-  forall (G : Finset (MvPolynomial σ R)) (I : Ideal (MvPolynomial σ R)) (G_nonzero : ∀ g ∈ G, g ≠ 0 ),
+  forall (G : Finset (MvPolynomial σ R)) (I : Ideal (MvPolynomial σ R))
+  (G_basis : Ideal.span G = I)
+  (G_nonzero : ∀ g ∈ G, g ≠ 0 ),
     ( Groebner G I ) ↔ (∀ fi fj, fi∈ G -> fj ∈ G -> fi ≠ fj → ((S fi fj).multidiv G G_nonzero).2 = 0 ) := by
-    intros G I G_NZ
+    intros G I G_basis G_nonzero
     constructor
     {
       -- (==>)
       intros GB fi fj neq
       have Sin: (S fi fj) ∈ I := by sorry
       intros
-      exact (GB_multidiv G G_NZ I (S fi fj) GB).mp Sin
+      exact (GB_multidiv G G_nonzero I (S fi fj) GB).mp Sin
     }
     {
       -- (<==)
