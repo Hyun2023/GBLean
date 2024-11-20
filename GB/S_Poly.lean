@@ -226,7 +226,8 @@ lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : Monomia
       simp
     rewrite [<-EQ5]
     clear EQ5
-    sorry
+    rw [<-EQ4]
+    simp
   rw [<-EQ6]
   apply EQ4
 
