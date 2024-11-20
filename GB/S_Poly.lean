@@ -41,7 +41,7 @@ lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : Monomia
   (MDEG2 : (leading_monomial (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) NE2) < m) :
   ∃ (c_new : Fn -> Fn -> R),
   (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) = (∑ (n' : Fn), ∑ (n'' : Fn), (MvPolynomial.C (c_new n' n'')) * (Spol_help (f n') (f n'') (NE1 n') (NE1 n''))) := by
-  let Fn' : Finset Fn := { n' | c n' ≠ 0 }
+  let Fn' : Finset Fn := Finset.filter (fun x ↦ ¬c x = 0) Fn.attach
   let c' : Fn' -> R := fun n => c n
   let f' : Fn' -> MvPolynomial σ R := fun n => f n
   let NE0' : ∀ (n' : Fn'), c n' ≠ 0 := by
@@ -54,17 +54,29 @@ lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : Monomia
   let NE1' : ∀ (n' : Fn'), f' n' ≠ 0 := fun n' => NE1 n'
   let MDEG1' : ∀ (n' : Fn'), leading_monomial (f' n') (NE1' n') = m := fun n' => MDEG1 n'
   have Lem := Spol_help_lemma5_help Fn' c' f' m NE0' NE1'
-  have EQ0 : (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) = (∑ x ∈ Finset.filter (fun n' ↦ True) Finset.univ, MvPolynomial.C (c x) * f x) := by
+  have EQ0 : (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) = (∑ x ∈ Finset.filter (fun x ↦ True) Fn.attach, MvPolynomial.C (c x) * f x) := by
     sorry
   have EQ : (∑ (n' : Fn'), (MvPolynomial.C (c' n')) * (f' n')) = (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) := by
     rw [EQ0]
-    have EQ1 := (Finset.sum_filter_add_sum_filter_not ({ n' : Fn | True } : Finset Fn) (fun n' : Fn => c n' = 0) (fun n' => (MvPolynomial.C (c n')) * (f n')))
+    have EQ1 := (Finset.sum_filter_add_sum_filter_not (Finset.filter (fun x ↦ True) Fn.attach) (fun n' : Fn => c n' = 0) (fun n' => (MvPolynomial.C (c n')) * (f n')))
     rw [<- EQ1]
-    have EQ2 : ∑ x ∈ Finset.filter (fun x ↦ c x = 0) (Finset.filter (fun n' ↦ True) Finset.univ), MvPolynomial.C (c x) * f x = 0 := by
-      sorry
+    have EQ2 : ∑ x ∈ Finset.filter (fun x ↦ c x = 0) (Finset.filter (fun x ↦ True) Fn.attach), MvPolynomial.C (c x) * f x = 0 := by
+      apply Finset.sum_eq_zero
+      intro x
+      simp
+      intro H; rw [H]
+      rw [MvPolynomial.C_0]
+      exact zero_mul (f x)
     rw [EQ2]
-    have EQ3 : ∑ n' : { x // x ∈ Fn' }, MvPolynomial.C (c' n') * f' n' = ∑ x ∈ Finset.filter (fun x ↦ ¬c x = 0) (Finset.filter (fun n' ↦ True) Finset.univ), MvPolynomial.C (c x) * f x := by
-      sorry
+    have EQ3 : ∑ n' : { x // x ∈ Fn' }, MvPolynomial.C (c' n') * f' n' = ∑ x ∈ Finset.filter (fun x ↦ ¬c x = 0) (Finset.filter (fun n' ↦ True) Fn.attach), MvPolynomial.C (c x) * f x := by
+      unfold Fn'; simp
+      unfold c'; unfold f'
+      have EQ4 := (@Finset.sum_finset_coe Fn _ _ (fun n' => MvPolynomial.C (c n') * f n') (Finset.filter (fun x ↦ ¬c x = 0) Fn.attach))
+      have EQ5 : (∑ i : ↑↑(Finset.filter (fun x ↦ ¬c x = 0) Fn.attach), MvPolynomial.C (c ↑i) * f ↑i) = (∑ n' ∈ (Finset.filter (fun x ↦ ¬c x = 0) Fn.attach).attach, MvPolynomial.C (c ↑n') * f ↑n') := by
+        simp
+      rw [<-EQ5]
+      rw [<-EQ4]
+      simp
     rw [EQ3]
     exact
       Eq.symm
