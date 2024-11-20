@@ -55,7 +55,7 @@ lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : Monomia
   let MDEG1' : ∀ (n' : Fn'), leading_monomial (f' n') (NE1' n') = m := fun n' => MDEG1 n'
   have Lem := Spol_help_lemma5_help Fn' c' f' m NE0' NE1'
   have EQ0 : (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) = (∑ x ∈ Finset.filter (fun x ↦ True) Fn.attach, MvPolynomial.C (c x) * f x) := by
-    sorry
+    simp
   have EQ : (∑ (n' : Fn'), (MvPolynomial.C (c' n')) * (f' n')) = (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) := by
     rw [EQ0]
     have EQ1 := (Finset.sum_filter_add_sum_filter_not (Finset.filter (fun x ↦ True) Fn.attach) (fun n' : Fn => c n' = 0) (fun n' => (MvPolynomial.C (c n')) * (f n')))
@@ -83,6 +83,30 @@ lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : Monomia
         (AddZeroClass.zero_add
           (∑ x ∈ Finset.filter (fun x ↦ ¬c x = 0) (Finset.filter (fun n' ↦ True) Finset.univ),
             MvPolynomial.C (c x) * f x))
+  clear EQ0
+  have MDEG1' : ∀ (n' : Fn'), leading_monomial (f' n') (NE1' n') = m := by
+    intro n'
+    apply MDEG1
+  have NE2' : (∑ (n' : Fn'), (MvPolynomial.C (c' n')) * (f' n')) ≠ 0 := by
+    rw [EQ]
+    apply NE2
+  have MDEG2' : (leading_monomial (∑ (n' : Fn'), (MvPolynomial.C (c' n')) * (f' n')) NE2') < m := by
+    have EQ1 : leading_monomial (∑ n' : { x // x ∈ Fn }, MvPolynomial.C (c n') * f n') NE2 = leading_monomial (∑ (n' : Fn'), (MvPolynomial.C (c' n')) * (f' n')) NE2' := by
+      congr!
+      rw [EQ]
+    rw [<- EQ1]
+    apply MDEG2
+  specialize (Lem MDEG1' NE2' MDEG2')
+  have ⟨c_new', CP⟩ := Lem
+  have DEC : ∀ n', Decidable (n' ∈ Fn') := by
+    intro n'
+    unfold Fn'
+    simp
+    apply instDecidableNot
+  let c_new : Fn -> Fn -> R :=
+    fun n m => if NEQ1 : n ∈ Fn' then (if NEQ2 : m ∈ Fn' then (c_new' ⟨n, NEQ1⟩ ⟨m, NEQ2⟩) else 0) else 0
+  exists c_new
+  unfold c_new
   sorry
 
 -- lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] n (c : Fin n -> R) (f : Fin n -> MvPolynomial σ R)
