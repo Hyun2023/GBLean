@@ -28,7 +28,7 @@ variable
 [DecidableEq σ]
 [DecidableEq R]
 [FieldR : Field R]
-[ord : MonomialOrder σ ]
+[ord : MonomialOrder σ]
 -- [LinearOrder ( σ R)]
 
 abbrev poly := MvPolynomial σ R
@@ -68,7 +68,82 @@ def Groebner (G : Finset (MvPolynomial σ R))  (I : Ideal (MvPolynomial σ R)) :
 
 lemma MonomialGen (m : MvPolynomial σ R) (mons : Finset (Monomial σ))
 (m_mem : m ∈ Ideal.span ((fun a : (Monomial σ) => ↑a) '' mons)) :
-  (h : is_monomial m) → ∃ mi, mi ∈  mons ∧ ( mi ∣ m.toMonomial h ) := by sorry
+  (is_monomial m) → ∃ mi : mons, ∃ k_poly : (MvPolynomial σ R), m = k_poly * mi :=
+  by
+    intro mon; have ismon := mon
+    rw [is_monomial] at mon; rcases mon with ⟨mon, ⟨⟨min, _⟩, munique⟩⟩
+    rw [Ideal.span, Finsupp.mem_span_iff_linearCombination] at m_mem
+    rcases m_mem with ⟨l, hm⟩
+    rw [Finsupp.linearCombination_apply (MvPolynomial σ R)] at hm; simp
+    rw [Finsupp.sum] at hm
+    rw [Finset.sum_congr rfl] at hm
+
+    any_goals intro x xin; rw [MvPolynomial.as_sum (l x)]
+
+    rw [← SMul.smul_eq_hSMul] at hm
+    have comm :
+      ∀ x ∈ l.support, (∑ v ∈ (l x).support, (monomial v) (coeff v (l x))) • ↑x
+      = (∑ v ∈ (l x).support, (monomial v) (coeff v (l x)) • (x : MvPolynomial σ R)) := by {
+        intros x xin
+        rw [Finset.sum_smul]
+      }
+    rw [Finset.sum_congr rfl] at hm
+    any_goals apply comm
+    clear comm
+    rw [Finset.sum_sigma'] at hm
+
+    have test :
+      ∃ x ∈ l.support.sigma fun x ↦ (l x).support,
+        ((monomial x.snd) (1 : R)) • (x.fst : MvPolynomial σ R) = monomial mon 1 := by {
+          apply of_not_not; intros neg
+          rw [← hm] at min
+          apply Finsupp.mem_support_finset_sum at min
+          rcases min with ⟨c, min1, min2⟩
+          apply neg; exists c; constructor
+          { exact min1 }
+          rcases c with ⟨c1, c2⟩; simp at min2
+          simp
+          have exi : ∃ mono ∈ mons, monomial mono 1 = c1.val := by {
+            rcases c1 with ⟨c1, c1in⟩; rw [Set.mem_image] at c1in
+            rcases c1in with ⟨c1m, c1min⟩
+            exists c1m
+          }
+          rcases exi with ⟨mono, hmono, hmono2⟩
+          rw [← hmono2]; simp
+          rw [← hmono2] at min2; simp at min2
+          rw [← MvPolynomial.single_eq_monomial, Finsupp.single_apply] at min2
+          split_ifs at min2; any_goals trivial
+        }
+    rcases test with ⟨⟨xf, xs⟩, hx, hx2⟩
+    simp at hx2
+
+    rcases xf with ⟨xf, xfin⟩
+    rw [Set.mem_image] at xfin; rcases xfin with ⟨xfm, xfmin1, xfmin2⟩
+
+    exists xfm; constructor
+    { rw [← mons.mem_coe]; exact xfmin1 }
+    rw [xfmin2]
+    have meq :
+      m = (monomial mon) (m.coeff mon) := by {
+        apply m.ext; intros m_1; simp
+        rcases (eq_or_ne mon m_1) with ⟨eq, neq⟩; simp
+        split_ifs
+        congr; symm; trivial
+        rw [← m.not_mem_support_iff]
+        rintro ins; have ttmp : (m_1 = mon) := by { apply munique; trivial }
+        have triv : (m_1 ≠ mon) := by { symm; assumption }
+        apply triv; assumption
+      }
+    rw [meq]
+    exists (monomial xs (coeff mon m))
+    simp at hx2
+    have meq : (monomial xs) (coeff mon m) = (MvPolynomial.C (coeff mon m)) * (monomial xs 1) := by
+    {
+      ext n; simp
+    }
+    rw [meq, mul_assoc, hx2]
+    rw [MvPolynomial.C_mul_monomial]; simp
+
 
 -- def red (s : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_nonzero : ∀ f ∈ F, f ≠ 0) :
 --   (Finsupp (MvPolynomial σ R) (Monomial σ)) × (MvPolynomial σ R)   := sorry
@@ -157,16 +232,18 @@ lemma GB_multidiv (G : Finset (MvPolynomial σ R))  (G_nonzero : ∀ g ∈ G, g 
     }
 
 theorem BuchbergerCriterion :
-  forall (G : Finset (MvPolynomial σ R)) (I : Ideal (MvPolynomial σ R)) (G_nonzero : ∀ g ∈ G, g ≠ 0 ),
+  forall (G : Finset (MvPolynomial σ R)) (I : Ideal (MvPolynomial σ R))
+  (G_basis : Ideal.span G = I)
+  (G_nonzero : ∀ g ∈ G, g ≠ 0 ),
     ( Groebner G I ) ↔ (∀ fi fj, fi∈ G -> fj ∈ G -> fi ≠ fj → ((S fi fj).multidiv G G_nonzero).2 = 0 ) := by
-    intros G I G_NZ
+    intros G I G_basis G_nonzero
     constructor
     {
       -- (==>)
       intros GB fi fj neq
       have Sin: (S fi fj) ∈ I := by sorry
       intros
-      exact (GB_multidiv G G_NZ I (S fi fj) GB).mp Sin
+      exact (GB_multidiv G G_nonzero I (S fi fj) GB).mp Sin
     }
     {
       -- (<==)
