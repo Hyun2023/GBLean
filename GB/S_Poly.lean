@@ -29,6 +29,8 @@ lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : Mo
   ∃ (c_new : Fn -> Fn -> R),
   (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) = (∑ (n' : Fn), ∑ (n'' : Fn), (MvPolynomial.C (c_new n' n'')) * (Spol_help (f n') (f n'') (NE1 n') (NE1 n''))) := by
   let d := (fun n' => leading_coeff (f n') (NE1 n'))
+  -- have EQ : (∑ (n' : Fn), (MvPolynomial.C (c n')) * (d n')) = 0 := by
+  --   sorry
   sorry
 
 lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
