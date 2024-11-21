@@ -123,33 +123,6 @@ def buchberger_step_keep_membership
     }
   }
 
-
--- def ideal_order_wf : WellFounded (@ideal_order σ R _ _ _ ord) := sorry
-
-instance wf : WellFoundedRelation (Ideal (MvPolynomial σ R)) where
-  rel := fun x y => x>y
-  wf := by {
-    apply IsNoetherian.wf; apply MvPolynomial.isNoetherianRing
-  }
-
-noncomputable def buchberger_algorithm
-  (G : Finset (MvPolynomial σ R))
-  (G_nonzero : ∀ g ∈ G, g ≠ 0)
-  (G_nonempty : Nonempty G)
-  : Finset (MvPolynomial σ R) :=
-  let G' := buchberger_step (G.product G).toList G G (G_nonzero)
-  if h : G' = G then
-    G
-  else
-    buchberger_algorithm G' (by { apply buchberger_step_keep_nonzero G;assumption }) (
-      by { apply buchberger_step_keep_nonempty; all_goals assumption}
-    )
-  termination_by (Ideal.span (toMvPolynomial_Finset (@leading_monomial_finset σ R _ _ ord G)).toSet : Ideal (MvPolynomial σ R))
-  decreasing_by {
-    -- Look at the page 90 Theorem 2
-    sorry
-  }
-
 lemma buchberger_step_increase
   (G : Finset (MvPolynomial σ R))
   (G' : Finset (MvPolynomial σ R))
@@ -179,6 +152,45 @@ lemma buchberger_step_increase
           { apply ih }
   }
 
+
+lemma fundamental_thm_of_buchberger_step
+  (G : Finset (MvPolynomial σ R))
+  (G' : Finset (MvPolynomial σ R))
+  (l : List (MvPolynomial σ R × MvPolynomial σ R))
+  (G'_nonzero : ∀ g ∈ G', g ≠ 0)
+  (Neq : ¬buchberger_step l G G' G'_nonzero = G) :
+  Ideal.span (toMvPolynomial_Finset (leading_monomial_finset (buchberger_step l G G' G'_nonzero))).toSet >
+      @Ideal.span (MvPolynomial σ R) _ (toMvPolynomial_Finset (leading_monomial_finset G)).toSet := sorry
+
+
+-- def ideal_order_wf : WellFounded (@ideal_order σ R _ _ _ ord) := sorry
+
+instance wf : WellFoundedRelation (Ideal (MvPolynomial σ R)) where
+  rel := fun x y => x>y
+  wf := by {
+    apply IsNoetherian.wf; apply MvPolynomial.isNoetherianRing
+  }
+
+noncomputable def buchberger_algorithm [Finite σ] [IsNoetherianRing R]
+  (G : Finset (MvPolynomial σ R))
+  (G_nonzero : ∀ g ∈ G, g ≠ 0)
+  (G_nonempty : Nonempty G)
+  : Finset (MvPolynomial σ R) :=
+  let G' := buchberger_step (G.product G).toList G G (G_nonzero)
+  if h : G' = G then
+    G
+  else
+    buchberger_algorithm G' (by { apply buchberger_step_keep_nonzero G;assumption }) (
+      by { apply buchberger_step_keep_nonempty; all_goals assumption}
+    )
+  termination_by (Ideal.span (toMvPolynomial_Finset (@leading_monomial_finset σ R _ _ ord G)).toSet : Ideal (MvPolynomial σ R))
+  decreasing_by {
+    unfold G' at h
+    clear G'
+    apply fundamental_thm_of_buchberger_step
+    all_goals trivial
+  }
+
 lemma buchberger_algorithm_increase
   (G : Finset (MvPolynomial σ R))
   (G_nonzero : ∀ g ∈ G, g ≠ 0)
@@ -200,7 +212,8 @@ lemma buchberger_algorithm_increase
       · rw [← E]
         unfold WellFoundedRelation.rel wf
         simp
-        sorry
+        apply fundamental_thm_of_buchberger_step
+        all_goals trivial
       · trivial
   }
 
@@ -218,12 +231,74 @@ lemma buchberger_algorithm_nonempty
     use a
   }
 
+lemma buchberger_algorithm_nonzero
+  (G : Finset (MvPolynomial σ R))
+  (G_nonzero : ∀ g ∈ G, g ≠ 0)
+  (G_nonempty : Nonempty G) :
+  let GB := buchberger_algorithm G G_nonzero G_nonempty
+  ∀ g ∈ GB, g ≠ 0 := by {
+    simp
+    generalize h : Ideal.span (@toMvPolynomial_Finset _ _ _ _ FR (@leading_monomial_finset σ R _ _ ord G)).toSet = I
+    revert G
+    apply (@WellFounded.induction _ ((wf).rel) ((wf).wf) _ I)
+    intros I' IHI' G G_nonzero G_nonempty E
+    unfold buchberger_algorithm
+    simp
+    by_cases X : buchberger_step (G.product G).toList G G G_nonzero = G
+    all_goals simp [X]
+    · simp at G_nonzero
+      trivial
+    · apply (IHI' (Ideal.span (@Finset.toSet _ (toMvPolynomial_Finset (leading_monomial_finset (buchberger_step (G.product G).toList G G G_nonzero))))))
+      · rw [← E]
+        unfold WellFoundedRelation.rel wf
+        simp
+        apply fundamental_thm_of_buchberger_step
+        all_goals trivial
+      · trivial
+  }
+
+lemma buchberger_step_same_span
+  (G : Finset (MvPolynomial σ R))
+  (G_nonzero : ∀ g ∈ G, g ≠ 0)
+  (G_nonempty : Nonempty G) :
+  Ideal.span (buchberger_step l G G' G'_nonzero) = @Ideal.span (MvPolynomial σ R) _ G := by {
+    sorry
+  }
+
+lemma buchberger_algorithm_same_span
+  (G : Finset (MvPolynomial σ R))
+  (G_nonzero : ∀ g ∈ G, g ≠ 0)
+  (G_nonempty : Nonempty G) :
+  let GB := buchberger_algorithm G G_nonzero G_nonempty
+  Ideal.span GB = @Ideal.span (MvPolynomial σ R) _ G := by {
+    simp
+    generalize h : Ideal.span (@toMvPolynomial_Finset _ _ _ _ FR (@leading_monomial_finset σ R _ _ ord G)).toSet = I
+    revert G
+    apply (@WellFounded.induction _ ((wf).rel) ((wf).wf) _ I)
+    intros I' IHI' G G_nonzero G_nonempty E
+    unfold buchberger_algorithm
+    simp
+    by_cases X : buchberger_step (G.product G).toList G G G_nonzero = G
+    all_goals simp [X]
+    transitivity (Ideal.span (buchberger_step (G.product G).toList G G G_nonzero))
+    · apply (IHI' (Ideal.span (@Finset.toSet _ (toMvPolynomial_Finset (leading_monomial_finset (buchberger_step (G.product G).toList G G G_nonzero))))))
+      · rw [← E]
+        unfold WellFoundedRelation.rel wf
+        simp
+        apply fundamental_thm_of_buchberger_step
+        all_goals trivial
+      · trivial
+    · apply buchberger_step_same_span
+      all_goals trivial
+  }
+
 lemma buchberger_fixpoint
 (G : Finset (MvPolynomial σ R))
   (G_nonzero : ∀ g ∈ G, g ≠ 0)
   (G_nonempty : Nonempty G) :
   let GB := buchberger_algorithm G G_nonzero G_nonempty
-  buchberger_step (GB.product GB).toList GB GB sorry = GB := by {
+  let GB_nonzero := buchberger_algorithm_nonzero G G_nonzero G_nonempty
+  buchberger_step (GB.product GB).toList GB GB GB_nonzero = GB := by {
     simp
     generalize h : Ideal.span (@toMvPolynomial_Finset _ _ _ _ FR (@leading_monomial_finset σ R _ _ ord G)).toSet = I
     revert G
@@ -237,7 +312,8 @@ lemma buchberger_fixpoint
     · rw [← E]
       unfold WellFoundedRelation.rel wf
       simp
-      sorry
+      apply fundamental_thm_of_buchberger_step
+      all_goals trivial
     · trivial
   }
 
@@ -249,10 +325,11 @@ lemma buchberger_correct
   Groebner GB (Ideal.span G) := by {
     intros GB
     have GB_def : GB = buchberger_algorithm G G_nonzero G_nonempty := by rfl
-    have GB_nonzero : ∀g ∈ GB, g ≠ 0 := by sorry
-    have GB_nonempty : Nonempty GB := by sorry
-    have GB_basis : (Ideal.span GB : Ideal (MvPolynomial σ R) )  = Ideal.span G := by sorry
+    have GB_nonzero : ∀g ∈ GB, g ≠ 0 := buchberger_algorithm_nonzero G G_nonzero G_nonempty
+    have GB_nonempty : Nonempty GB := buchberger_algorithm_nonempty G G_nonzero G_nonempty
+    have GB_basis : (Ideal.span GB : Ideal (MvPolynomial σ R) )  = Ideal.span G := buchberger_algorithm_same_span G G_nonzero G_nonempty
     rw [BuchbergerCriterion (G_nonzero := GB_nonzero)]
+    any_goals trivial
     have H := buchberger_fixpoint G G_nonzero G_nonempty
     simp at H
     have GB_fix := H
