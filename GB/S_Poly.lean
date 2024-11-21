@@ -31,8 +31,21 @@ lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : Mo
   ∃ (c_new : Fn -> Fn -> R),
   (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) = (∑ (n' : Fn), ∑ (n'' : Fn), (MvPolynomial.C (c_new n' n'')) * (Spol_help (f n') (f n'') (NE1 n') (NE1 n''))) := by
   let d := (fun n' => leading_coeff (f n') (NE1 n'))
-  have LE : leading_monomial (∑ n' : Fn, MvPolynomial.C (c n') * f n') NE2 ≤ m := by
-    unfold leading_monomial
+  let p := leading_monomial (∑ n' : { x // x ∈ Fn }, MvPolynomial.C (c n') * f n') NE2
+  have LE : p ≤ m := by
+    have MEM : p ∈ (∑ n' : { x // x ∈ Fn }, MvPolynomial.C (c n') * f n').support := by
+      apply leading_monomial_in
+    have NE : (∑ n' : { x // x ∈ Fn }, MvPolynomial.C (c n') * f n').toFun p ≠ 0 := by
+      rw [<-Finsupp.mem_support_toFun]
+      assumption
+    rw [<- not_lt]
+    intro H
+    apply NE
+    have EQ' : (∑ n' : Fn, MvPolynomial.C (c n') * f n').toFun p = ∑ n' : Fn, (MvPolynomial.C (c n') * f n').toFun p := by
+      sorry
+    rw [EQ']
+    apply Finset.sum_eq_zero
+    intro x H
     sorry
   have EQ : (∑ (n' : Fn), (c n') * (d n')) = 0 := by
     have EQ' : ¬ m ∈ (∑ n' : Fn, MvPolynomial.C (c n') * f n').support := by
