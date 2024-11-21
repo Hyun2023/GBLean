@@ -158,5 +158,19 @@ def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p 
 def leading_monomial_unsafe [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
   @Option.get! _ MonomialExists (@Finset.max _ ord.toLinearOrder (monomials p))
 
+lemma leading_monomial_in [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
+  leading_monomial p p_nonzero ∈ p.support := by
+  unfold leading_monomial
+  unfold monomials
+  apply Finset.max'_mem
+
+lemma leading_monomial_sound [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0)
+  (m : Monomial σ) (m_in : m ∈ p.support) :
+  m ≤ leading_monomial p p_nonzero := by
+  unfold leading_monomial
+  unfold monomials
+  apply Finset.le_max'
+  assumption
+
 def leading_coeff [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : R :=
   MvPolynomial.coeff (leading_monomial p p_nonzero) p

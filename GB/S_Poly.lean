@@ -17,6 +17,8 @@ noncomputable def Spol [DecidableEq σ] [Field R] [DecidableEq R] [ord : Monomia
   if f_NE : f = 0 then 0 else (if g_NE : g = 0 then 0 else Spol_help f g f_NE g_NE)
 -- gives trivial value for zero polynomials
 
+
+
 lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
   (Fn : Finset T)
   (c : Fn -> R) (f : Fn -> MvPolynomial σ R)
@@ -29,8 +31,13 @@ lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : Mo
   ∃ (c_new : Fn -> Fn -> R),
   (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) = (∑ (n' : Fn), ∑ (n'' : Fn), (MvPolynomial.C (c_new n' n'')) * (Spol_help (f n') (f n'') (NE1 n') (NE1 n''))) := by
   let d := (fun n' => leading_coeff (f n') (NE1 n'))
-  -- have EQ : (∑ (n' : Fn), (MvPolynomial.C (c n')) * (d n')) = 0 := by
-  --   sorry
+  have LE : leading_monomial (∑ n' : Fn, MvPolynomial.C (c n') * f n') NE2 ≤ m := by
+    unfold leading_monomial
+    sorry
+  have EQ : (∑ (n' : Fn), (c n') * (d n')) = 0 := by
+    have EQ' : ¬ m ∈ (∑ n' : Fn, MvPolynomial.C (c n') * f n').support := by
+      sorry
+    sorry
   sorry
 
 lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
