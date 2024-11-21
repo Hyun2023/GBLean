@@ -21,7 +21,7 @@ lemma func_sum_distr [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialO
   (f g : MvPolynomial σ R)
   (m : Monomial σ) :
   (f + g) m = f m + g m := by
-  sorry
+  rfl
 
 lemma func_sum_distr_gen [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
   (Fn : Finset T)
@@ -38,12 +38,6 @@ lemma func_sum_distr_gen [DecidableEq σ] [DecidableEq R] [Field R] [ord : Monom
     . rw [<-IH]
       apply func_sum_distr
   apply EQ
-
-lemma func_prod_distr [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ]
-  (f g : MvPolynomial σ R)
-  (m : Monomial σ) :
-  (f * g) m = f m * g m := by
-  sorry
 
 lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
   (Fn : Finset T)
