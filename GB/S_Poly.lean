@@ -17,7 +17,18 @@ noncomputable def Spol [DecidableEq σ] [Field R] [DecidableEq R] [ord : Monomia
   if f_NE : f = 0 then 0 else (if g_NE : g = 0 then 0 else Spol_help f g f_NE g_NE)
 -- gives trivial value for zero polynomials
 
+lemma func_sum_distr [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
+  (Fn : Finset T)
+  (f : Fn -> MvPolynomial σ R)
+  (m : Monomial σ) :
+  (∑ n' : Fn, f n') m = ∑ n' : Fn, (f n') m := by
+  sorry
 
+lemma func_prod_distr [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ]
+  (f g : MvPolynomial σ R)
+  (m : Monomial σ) :
+  (f * g) m = f m * g m := by
+  sorry
 
 lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
   (Fn : Finset T)
