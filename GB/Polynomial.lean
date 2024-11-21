@@ -95,28 +95,35 @@ def Monomial.instMembership [CommRing R] [DecidableEq σ] [DecidableEq R] : Memb
 def MvPolynomial.instMembership [CommRing R] [DecidableEq σ] [DecidableEq R] : Membership (MvPolynomial σ R) (Set (Monomial σ)) where
   mem := fun s p => exists h : (is_monomial p), (MvPolynomial.toMonomial p h) ∈ s
 
+lemma polynomial_scalarmult_nonzero_help [DecidableEq σ] [Field R] [DecidableEq R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0)
+  (c : R) (NE : c ≠ 0) : p.support = (c • p).support := by
+  rw [HSMul.hSMul, instHSMul]; simp
+  rw [SMul.smul, Algebra.toSMul, MvPolynomial.algebra, AddMonoidAlgebra.algebra]; simp
+  rw [SMulZeroClass.toSMul, AddMonoidAlgebra.smulZeroClass, Finsupp.smulZeroClass]; simp
+  rw [Finsupp.mapRange, Finsupp.onFinset]; simp
+  have EQ' : p.support = Finset.filter (fun a ↦ ¬c * p a = 0) p.support := by
+    symm
+    rw [Finset.filter_eq_self]
+    intro x H
+    have NEQ : p x ≠ 0 := by
+      have EQ'' := (p.mem_support_toFun x)
+      have EQ''' : p.toFun x ≠ 0 := by
+        rw [<- EQ'']
+        apply H
+      apply EQ'''
+    exact mul_ne_zero NE NEQ
+  rw [EQ']
+  simp; rfl
+
 lemma polynomial_scalarmult_nonzero [DecidableEq σ] [Field R] [DecidableEq R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0)
   (c : R) (NE : c ≠ 0) : c • p ≠ 0 := by
   rw [<-MvPolynomial.support_nonempty]
   rw [<-MvPolynomial.support_nonempty] at p_nonzero
   have EQ : (p.support = (c • p).support) := by
-    rw [HSMul.hSMul, instHSMul]; simp
-    rw [SMul.smul, Algebra.toSMul, MvPolynomial.algebra, AddMonoidAlgebra.algebra]; simp
-    rw [SMulZeroClass.toSMul, AddMonoidAlgebra.smulZeroClass, Finsupp.smulZeroClass]; simp
-    rw [Finsupp.mapRange, Finsupp.onFinset]; simp
-    have EQ' : p.support = Finset.filter (fun a ↦ ¬c * p a = 0) p.support := by
-      symm
-      rw [Finset.filter_eq_self]
-      intro x H
-      have NEQ : p x ≠ 0 := by
-        have EQ'' := (p.mem_support_toFun x)
-        have EQ''' : p.toFun x ≠ 0 := by
-          rw [<- EQ'']
-          apply H
-        apply EQ'''
-      exact mul_ne_zero NE NEQ
-    rw [EQ']
-    simp; rfl
+    apply polynomial_scalarmult_nonzero_help
+    . rw [<-MvPolynomial.support_nonempty]
+      assumption
+    . assumption
   rw [<- EQ]
   assumption
 
@@ -127,7 +134,9 @@ lemma leading_coeff_scalarmult [DecidableEq σ] [Field R] [DecidableEq R] [Monom
   have EQ : leading_monomial p p_nonzero = leading_monomial (c • p) (polynomial_scalarmult_nonzero p p_nonzero c NE) := by
     unfold leading_monomial
     unfold monomials
-    sorry
+    have EQ' : p.support = (c • p).support := by
+      apply polynomial_scalarmult_nonzero_help <;> assumption
+    congr!
   rw [<- EQ]
   rfl
 
