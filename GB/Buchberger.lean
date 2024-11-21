@@ -1,6 +1,8 @@
 -- Todo
 -- 1. Define Buchberger algorithms in two version, one with FiniteVarPoly, and another just Mvpoly
 
+import Init.WF
+import Mathlib.Logic.Nonempty
 import Mathlib.Algebra.MvPolynomial.Basic
 import Mathlib.Data.Finset.Basic
 import Mathlib.RingTheory.Ideal.Basic
@@ -8,6 +10,7 @@ import Mathlib.RingTheory.Ideal.Span
 import Mathlib.Algebra.Module.Submodule.Defs
 import Mathlib.RingTheory.Noetherian.Defs
 import Mathlib.RingTheory.Polynomial.Basic
+import Mathlib.Data.Finset.Lattice.Basic
 import GB.Monomial
 import GB.Polynomial
 import GB.Reduction
@@ -147,14 +150,98 @@ noncomputable def buchberger_algorithm
     sorry
   }
 
-def buchberger_fixpoint
+lemma buchberger_step_increase
+  (G : Finset (MvPolynomial σ R))
+  (G' : Finset (MvPolynomial σ R))
+  (l : List (MvPolynomial σ R × MvPolynomial σ R) )
+  (G_nonzero : ∀ g ∈ G, g ≠ 0) :
+  let G'' := buchberger_step l G' G G_nonzero
+  G' ⊆ G'' := by {
+    intros G''
+    unfold G''
+    clear G''
+    revert G'
+    induction l with
+    | nil =>
+      intros
+      trivial
+    |cons hd tl ih =>
+      intros G'
+      unfold buchberger_step
+      by_cases X : hd.1 = hd.2
+      all_goals simp [X]
+      · apply ih
+      · by_cases X' : s_red hd.1 hd.2 G G_nonzero = 0
+        all_goals simp [X']
+        · apply ih
+        · transitivity (G' ∪ {s_red hd.1 hd.2 G G_nonzero})
+          { apply (@le_sup_left _ _ G') }
+          { apply ih }
+  }
+
+lemma buchberger_algorithm_increase
+  (G : Finset (MvPolynomial σ R))
+  (G_nonzero : ∀ g ∈ G, g ≠ 0)
+  (G_nonempty : Nonempty G) :
+  let G' := buchberger_algorithm G G_nonzero G_nonempty
+  G ⊆ G' := by {
+    simp
+    generalize h : Ideal.span (@toMvPolynomial_Finset _ _ _ _ FR (@leading_monomial_finset σ R _ _ ord G)).toSet = I
+    revert G
+    apply (@WellFounded.induction _ ((wf).rel) ((wf).wf) _ I)
+    intros I' IHI' G G_nonzero G_nonempty E
+    unfold buchberger_algorithm
+    simp
+    by_cases X : buchberger_step (G.product G).toList G G G_nonzero = G
+    all_goals simp [X]
+    transitivity (buchberger_step (G.product G).toList G G G_nonzero)
+    · apply buchberger_step_increase
+    · apply (IHI' (Ideal.span (@Finset.toSet _ (toMvPolynomial_Finset (leading_monomial_finset (buchberger_step (G.product G).toList G G G_nonzero))))))
+      · rw [← E]
+        unfold WellFoundedRelation.rel wf
+        simp
+        sorry
+      · trivial
+  }
+
+lemma buchberger_algorithm_nonempty
+  (G : Finset (MvPolynomial σ R))
+  (G_nonzero : ∀ g ∈ G, g ≠ 0)
+  (G_nonempty : Nonempty G) :
+  Nonempty (buchberger_algorithm G G_nonzero G_nonempty) := by {
+    have Q := buchberger_algorithm_increase G G_nonzero G_nonempty
+    simp at Q
+    rw [nonempty_subtype]
+    rw [nonempty_subtype] at G_nonempty
+    obtain ⟨a, P⟩ := G_nonempty
+    apply Q at P
+    use a
+  }
+
+lemma buchberger_fixpoint
 (G : Finset (MvPolynomial σ R))
   (G_nonzero : ∀ g ∈ G, g ≠ 0)
   (G_nonempty : Nonempty G) :
   let GB := buchberger_algorithm G G_nonzero G_nonempty
-  buchberger_step (GB.product GB).toList GB GB sorry = GB := by sorry
+  buchberger_step (GB.product GB).toList GB GB sorry = GB := by {
+    simp
+    generalize h : Ideal.span (@toMvPolynomial_Finset _ _ _ _ FR (@leading_monomial_finset σ R _ _ ord G)).toSet = I
+    revert G
+    apply (@WellFounded.induction _ ((wf).rel) ((wf).wf) _ I)
+    intros I' IHI' G G_nonzero G_nonempty E
+    unfold buchberger_algorithm
+    simp
+    by_cases X : buchberger_step (G.product G).toList G G G_nonzero = G
+    all_goals simp [X]
+    apply (IHI' (Ideal.span (@Finset.toSet _ (toMvPolynomial_Finset (leading_monomial_finset (buchberger_step (G.product G).toList G G G_nonzero))))))
+    · rw [← E]
+      unfold WellFoundedRelation.rel wf
+      simp
+      sorry
+    · trivial
+  }
 
-def buchberger_correct
+lemma buchberger_correct
 (G : Finset (MvPolynomial σ R))
   (G_nonzero : ∀ g ∈ G, g ≠ 0)
   (G_nonempty : Nonempty G) :
