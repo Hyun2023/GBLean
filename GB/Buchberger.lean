@@ -75,13 +75,37 @@ def buchberger_step_monotone
 
 def buchberger_step_keep_nonzero
   (G: Finset (MvPolynomial σ R))
-  (G_queue : Finset (MvPolynomial σ R))
-  (G_nonzero : ∀ g ∈ G, g ≠ 0)
-  (G_queue_nonzero : ∀ g ∈ G_queue, g ≠ 0  ) :
-  ∀ g ∈ (buchberger_step (G.product G).toList G_queue G (G_nonzero)), g ≠ 0 := by
-  induction (G.product G).toList generalizing G_queue with
-  |nil => sorry
-  |cons hd tl ih => sorry
+  (G_nonzero : ∀ g ∈ G, g ≠ 0) :
+  ∀ g ∈ (buchberger_step (G.product G).toList G G (G_nonzero)), g ≠ 0 := by
+  let G' := G
+  have G'eq : G' = G := by rfl;
+  clear_value G'
+  have G'_nonzero : ∀ g ∈ G', g ≠ 0 := by rw [G'eq];assumption
+  nth_rewrite 3 [<-G'eq];clear G'eq
+  induction (G.product G).toList generalizing G' with
+  |nil => unfold buchberger_step;simp;exact fun a ↦ G'_nonzero 0 a rfl
+  |cons hd tl ih => {
+    simp at ih
+    have (p,q):=hd;unfold buchberger_step;by_cases pqeq : p=q
+    {
+      simp [pqeq];apply ih;exact fun a ↦ G'_nonzero 0 a rfl
+    }
+    {
+      unfold buchberger_step;simp [pqeq]
+      by_cases red0 : s_red p q G G_nonzero = 0
+      {
+        simp [red0];unfold buchberger_step at ih;apply ih;exact fun a ↦ G'_nonzero 0 a rfl
+      }
+      {
+        simp [pqeq,red0]
+        unfold buchberger_step at ih;simp at ih
+        simp [<- Finset.union_assoc]
+        apply (ih (G' ∪ {s_red p q G G_nonzero}))
+        simp;constructor;exact fun a ↦ G'_nonzero 0 a rfl
+        exact fun a ↦ red0 (id (Eq.symm a))
+      }
+    }
+  }
 
 def buchberger_step_keep_nonempty
   (G: Finset (MvPolynomial σ R))
@@ -243,7 +267,7 @@ noncomputable def buchberger_algorithm [Finite σ] [IsNoetherianRing R]
   if h : G' = G then
     G
   else
-    buchberger_algorithm G' (by { apply buchberger_step_keep_nonzero G;assumption }) (
+    buchberger_algorithm G' (by { apply buchberger_step_keep_nonzero G }) (
       by { apply buchberger_step_keep_nonempty; all_goals assumption}
     )
   termination_by (Ideal.span (toMvPolynomial_Finset (@leading_monomial_finset σ R _ _ ord G)).toSet : Ideal (MvPolynomial σ R))
@@ -397,14 +421,15 @@ lemma buchberger_correct
     simp at H
     have GB_fix := H
     contrapose! H
-    rw [<-GB_def]
+    -- rw [<-GB_def]
     unfold buchberger_step
 
     have ⟨ p, q, pin, qin, pneq , S_zero⟩ := H
 
     induction ((GB.product GB).toList) with
     |nil =>{
-      -- GB가 Nonempty인데 모순
+      -- GB가 Nonempty인데 GB X GB가 [] 인게 모순
+
       sorry
     }
     |cons hd tl ih =>{
@@ -442,7 +467,7 @@ lemma buchberger_correct
           sorry
       }
     }
-    sorry
+
   }
 
 
