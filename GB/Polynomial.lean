@@ -124,13 +124,12 @@ lemma leading_coeff_scalarmult [DecidableEq σ] [Field R] [DecidableEq R] [Monom
   (c : R) (NE : c ≠ 0) : c * (leading_coeff p p_nonzero) = leading_coeff (c • p) (polynomial_scalarmult_nonzero p p_nonzero c NE) := by
   unfold leading_coeff
   rw [MvPolynomial.coeff, MvPolynomial.coeff]
-  unfold leading_monomial
-  unfold monomials
-  -- rw [HSMul.hSMul, instHSMul]; simp
-  -- rw [SMul.smul, Algebra.toSMul, MvPolynomial.algebra, AddMonoidAlgebra.algebra]; simp
-  -- rw [SMulZeroClass.toSMul, AddMonoidAlgebra.smulZeroClass, Finsupp.smulZeroClass]; simp
-  sorry
-
+  have EQ : leading_monomial p p_nonzero = leading_monomial (c • p) (polynomial_scalarmult_nonzero p p_nonzero c NE) := by
+    unfold leading_monomial
+    unfold monomials
+    sorry
+  rw [<- EQ]
+  rfl
 
 -- lemma zero_is_not_mon  [CommRing R] : ¬(is_monomial (0 : (FiniteVarPoly σ R) )) := by
 --   intros ismon
