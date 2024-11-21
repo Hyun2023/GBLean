@@ -38,6 +38,9 @@ def Spoly (f g : MvPolynomial σ R) : MvPolynomial σ R := sorry
 def s_red [MonomialOrder σ] (p q : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_nonzero : ∀ f ∈ F, f ≠ 0): MvPolynomial σ R :=
   ((S p q).multidiv F F_nonzero).snd
 
+lemma s_red_nin (f g : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_nonzero : ∀ f ∈ F, f ≠ 0) :
+ s_red f g G G_nonzero ∉ Ideal.span (toMvPolynomial_Finset (leading_monomial_finset G)).toSet := sorry
+
 -- def reduction_list (gen: List (MvPolynomial σ R)) (f : MvPolynomial σ R)
 --   : MvPolynomial σ R := sorry
 
@@ -151,18 +154,78 @@ lemma buchberger_step_increase
           { apply (@le_sup_left _ _ G') }
           { apply ih }
   }
+lemma leading_monomial_finset_mono (G : Finset (MvPolynomial σ R))
+  (G' : Finset (MvPolynomial σ R)) (L : G ⊆ G') :
+  leading_monomial_finset G ⊆ leading_monomial_finset G' := sorry
 
+lemma leading_monomial_finset_union_commut (G : Finset (MvPolynomial σ R))
+  (G' : Finset (MvPolynomial σ R)) :
+  leading_monomial_finset (G ∪ G') = leading_monomial_finset G ∪ leading_monomial_finset G' := sorry
 
 lemma fundamental_thm_of_buchberger_step
   (G : Finset (MvPolynomial σ R))
-  (G' : Finset (MvPolynomial σ R))
   (l : List (MvPolynomial σ R × MvPolynomial σ R))
-  (G'_nonzero : ∀ g ∈ G', g ≠ 0)
-  (Neq : ¬buchberger_step l G G' G'_nonzero = G) :
-  Ideal.span (toMvPolynomial_Finset (leading_monomial_finset (buchberger_step l G G' G'_nonzero))).toSet >
-      @Ideal.span (MvPolynomial σ R) _ (toMvPolynomial_Finset (leading_monomial_finset G)).toSet := sorry
-
-
+  (G_nonzero : ∀ g ∈ G, g ≠ 0)
+  (Neq : ¬buchberger_step l G G G_nonzero = G) :
+  Ideal.span (toMvPolynomial_Finset (leading_monomial_finset (buchberger_step l G G G_nonzero))).toSet >
+      @Ideal.span (MvPolynomial σ R) _ (toMvPolynomial_Finset (leading_monomial_finset G)).toSet := by {
+    revert G
+    induction l with
+    | nil =>
+      intros G G_nonzero Neq
+      trivial
+    | cons hd tl ih =>
+      intros G G_nonzero
+      unfold buchberger_step
+      by_cases X : hd.1 = hd.2
+      all_goals simp [X]
+      any_goals apply ih
+      by_cases X' : s_red hd.1 hd.2 G G_nonzero = 0
+      all_goals simp [X']
+      any_goals apply ih
+      intros Neq
+      clear ih
+      apply (@gt_of_ge_of_gt _ _ _ (Ideal.span (toMvPolynomial_Finset (leading_monomial_finset (G ∪ {s_red hd.1 hd.2 G G_nonzero}))).toSet))
+      · apply Ideal.span_mono
+        rw [Finset.coe_subset]
+        unfold toMvPolynomial_Finset
+        apply Finset.image_subset_image
+        apply leading_monomial_finset_mono
+        apply buchberger_step_increase
+      · have poly_set_le : (toMvPolynomial_Finset (leading_monomial_finset G)).toSet ⊆ (@toMvPolynomial_Finset _ R _ _ _ (leading_monomial_finset G)).toSet ∪ (toMvPolynomial_Finset (leading_monomial_finset {s_red hd.1 hd.2 G G_nonzero})).toSet := by apply Set.subset_union_left
+        have ideal_le := Ideal.span_mono poly_set_le
+        have EQ : Ideal.span ((toMvPolynomial_Finset (leading_monomial_finset G)).toSet ∪ (toMvPolynomial_Finset (leading_monomial_finset {s_red hd.1 hd.2 G G_nonzero})).toSet)
+        = @Ideal.span (MvPolynomial σ R) _ (toMvPolynomial_Finset (leading_monomial_finset G ∪ leading_monomial_finset {s_red hd.1 hd.2 G G_nonzero})).toSet := by {
+            congr
+            rw [← Finset.coe_union]
+            unfold toMvPolynomial_Finset
+            simp [Finset.image_union]
+        }
+        rw [leading_monomial_finset_union_commut, ← EQ]
+        clear EQ poly_set_le
+        have aim : Ideal.span (toMvPolynomial_Finset (leading_monomial_finset G)).toSet
+        ≠ @Ideal.span (MvPolynomial σ R) _ ((toMvPolynomial_Finset (leading_monomial_finset G)).toSet ∪ (toMvPolynomial_Finset (leading_monomial_finset {s_red hd.1 hd.2 G G_nonzero})).toSet) := by {
+          clear X Neq ideal_le
+          contrapose! X'
+          have member : (s_red hd.1 hd.2 G G_nonzero ∈ Ideal.span (toMvPolynomial_Finset (leading_monomial_finset G)).toSet) := by {
+            rw [X']
+            apply Ideal.subset_span
+            apply Set.subset_union_right
+            rw [Finset.mem_coe]
+            /-
+            prove s_red hd.1 hd.2 G G_nonzero ∈ toMvPolynomial_Finset (leading_monomial_finset {s_red hd.1 hd.2 G G_nonzero})
+            -/
+            sorry
+          }
+          clear X'
+          absurd member
+          apply s_red_nin
+          all_goals trivial
+        }
+        rw [gt_iff_lt]
+        rw [lt_iff_le_and_ne]
+        trivial
+  }
 -- def ideal_order_wf : WellFounded (@ideal_order σ R _ _ _ ord) := sorry
 
 instance wf : WellFoundedRelation (Ideal (MvPolynomial σ R)) where
