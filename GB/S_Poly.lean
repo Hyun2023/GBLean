@@ -17,12 +17,27 @@ noncomputable def Spol [DecidableEq σ] [Field R] [DecidableEq R] [ord : Monomia
   if f_NE : f = 0 then 0 else (if g_NE : g = 0 then 0 else Spol_help f g f_NE g_NE)
 -- gives trivial value for zero polynomials
 
-lemma func_sum_distr [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
+lemma func_sum_distr [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ]
+  (f g : MvPolynomial σ R)
+  (m : Monomial σ) :
+  (f + g) m = f m + g m := by
+  sorry
+
+lemma func_sum_distr_gen [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
   (Fn : Finset T)
   (f : Fn -> MvPolynomial σ R)
   (m : Monomial σ) :
   (∑ n' : Fn, f n') m = ∑ n' : Fn, (f n') m := by
-  sorry
+  rw [<-Finset.sum_to_list]
+  rw [<-Finset.sum_to_list]
+  rw [List.sum, List.sum]
+  have EQ : ∀ l, (List.foldr (fun x1 x2 ↦ x1 + x2) 0 (List.map (fun n' ↦ f n') l)).toFun m =
+      List.foldr (fun x1 x2 ↦ x1 + x2) 0 (List.map (fun n' ↦ (f n') m) l) := by
+    intro l; induction' l with head tail IH <;> simp
+    . rfl
+    . rw [<-IH]
+      apply func_sum_distr
+  apply EQ
 
 lemma func_prod_distr [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ]
   (f g : MvPolynomial σ R)
