@@ -32,23 +32,46 @@ lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : Mo
   (∑ (n' : Fn), (MvPolynomial.C (c n')) * (f n')) = (∑ (n' : Fn), ∑ (n'' : Fn), (MvPolynomial.C (c_new n' n'')) * (Spol_help (f n') (f n'') (NE1 n') (NE1 n''))) := by
   let d := (fun n' => leading_coeff (f n') (NE1 n'))
   let p := leading_monomial (∑ n' : { x // x ∈ Fn }, MvPolynomial.C (c n') * f n') NE2
-  have LE : p ≤ m := by
-    have MEM : p ∈ (∑ n' : { x // x ∈ Fn }, MvPolynomial.C (c n') * f n').support := by
-      apply leading_monomial_in
-    have NE : (∑ n' : { x // x ∈ Fn }, MvPolynomial.C (c n') * f n').toFun p ≠ 0 := by
-      rw [<-Finsupp.mem_support_toFun]
-      assumption
-    rw [<- not_lt]
-    intro H
-    apply NE
-    have EQ' : (∑ n' : Fn, MvPolynomial.C (c n') * f n').toFun p = ∑ n' : Fn, (MvPolynomial.C (c n') * f n').toFun p := by
-      sorry
-    rw [EQ']
-    apply Finset.sum_eq_zero
-    intro x H
-    sorry
+  -- have LE : p ≤ m := by
+  --   have MEM : p ∈ (∑ n' : { x // x ∈ Fn }, MvPolynomial.C (c n') * f n').support := by
+  --     apply leading_monomial_in
+  --   have NE : (∑ n' : { x // x ∈ Fn }, MvPolynomial.C (c n') * f n').toFun p ≠ 0 := by
+  --     rw [<-Finsupp.mem_support_toFun]
+  --     assumption
+  --   rw [<- not_lt]
+  --   intro H
+  --   apply NE
+  --   have EQ' : (∑ n' : Fn, MvPolynomial.C (c n') * f n').toFun p = ∑ n' : Fn, (MvPolynomial.C (c n') * f n').toFun p := by
+  --     sorry
+  --   rw [EQ']
+  --   clear EQ'
+  --   apply Finset.sum_eq_zero
+  --   intro x H'
+  --   have EQ' : (MvPolynomial.C (c x) * (f x)).toFun p = (c x) * ((f x) p) := by
+  --     sorry
+  --   rw [EQ']
+  --   clear EQ'
+  --   simp; right
+  --   have NN : (¬ (f x) p ≠ 0) := by
+  --     intro H''
+  --     have EQ'' : (f x).toFun p ≠ 0 := by
+  --       apply H''
+  --     rw [<-Finsupp.mem_support_toFun (f x) p] at EQ''
+  --     have LE' : p ≤ m := by
+  --       rw [<- MDEG1 x]
+  --       apply leading_monomial_sound
+  --       assumption
+  --     rw [<-not_lt] at LE'
+  --     apply LE'
+  --     assumption
+  --   exact Function.nmem_support.mp NN
+  have LT : p < m := by
+    exact MDEG2
   have EQ : (∑ (n' : Fn), (c n') * (d n')) = 0 := by
     have EQ' : ¬ m ∈ (∑ n' : Fn, MvPolynomial.C (c n') * f n').support := by
+      intro H
+      apply (Finsupp.mem_support_toFun (∑ n' : { x // x ∈ Fn }, MvPolynomial.C (c n') * f n') m).mp at H
+      apply H
       sorry
     sorry
   sorry
