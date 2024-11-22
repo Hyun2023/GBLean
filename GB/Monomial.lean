@@ -174,3 +174,9 @@ lemma leading_monomial_sound [DecidableEq σ] [CommRing R] [ord : MonomialOrder 
 
 def leading_coeff [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : R :=
   MvPolynomial.coeff (leading_monomial p p_nonzero) p
+
+lemma leading_coeff_nonzero [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
+  leading_coeff p p_nonzero ≠ 0 := by
+  unfold leading_coeff
+  apply (@Finsupp.mem_support_iff _ _ _ p (leading_monomial p p_nonzero)).mp
+  apply leading_monomial_in

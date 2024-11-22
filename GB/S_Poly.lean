@@ -51,13 +51,13 @@ lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : Mo
   ∃ (c_new : Fn -> Fn -> R),
   (∑ (n' : Fn), (c n') • (f n')) = (∑ (n' : Fn), ∑ (n'' : Fn), (c_new n' n'') • (Spol_help (f n') (f n'') (NE1 n') (NE1 n''))) := by
   let d := (fun n' => leading_coeff (f n') (NE1 n'))
-  let p := leading_monomial (∑ n' : { x // x ∈ Fn }, (c n') • f n') NE2
-  have LT : p < m := by
+  let lm := leading_monomial (∑ n' : { x // x ∈ Fn }, (c n') • f n') NE2
+  have LT : lm < m := by
     exact MDEG2
   have EQ : (∑ (n' : Fn), (c n') * (d n')) = 0 := by
     have EQ' : ¬ m ∈ (∑ n' : Fn, (c n') • f n').support := by
       intro H
-      have LE : m ≤ p := by
+      have LE : m ≤ lm := by
         apply leading_monomial_sound
         assumption
       apply not_le.mpr at LT
@@ -83,6 +83,7 @@ lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : Mo
       unfold leading_coeff
       rw [MDEG1 x]
       rfl
+  let p := (fun n => f n')
   sorry
 
 lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
