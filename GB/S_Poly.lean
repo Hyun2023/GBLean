@@ -83,7 +83,7 @@ lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : Mo
       unfold leading_coeff
       rw [MDEG1 x]
       rfl
-  let p := (fun n => f n')
+  let p := (fun n' => (1 / d n') • f n')
   sorry
 
 lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
