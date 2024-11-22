@@ -57,25 +57,32 @@ lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : Mo
   have EQ : (∑ (n' : Fn), (c n') * (d n')) = 0 := by
     have EQ' : ¬ m ∈ (∑ n' : Fn, (c n') • f n').support := by
       intro H
-      apply (Finsupp.mem_support_toFun (∑ n' : { x // x ∈ Fn }, (c n') • f n') m).mp at H
-      apply H
-      have EQ'' : ∑ n' : { x // x ∈ Fn }, ((c n') • f n').toFun m = 0 := by
-        apply Finset.sum_eq_zero
-        intro x H'
-        have EQ''' : MvPolynomial.coeff m (f x) = 0 := by
-          simp at H'
-          sorry
-        have EQ'''' := (MvPolynomial.coeff_smul m (c x) (f x))
-        rw [EQ'''] at EQ''''
-        unfold MvPolynomial.coeff at EQ''''
-        trans
-        . exact EQ''''
-        . exact DistribMulAction.smul_zero (c x)
-      have EQ''' := func_sum_distr_gen Fn (fun n' => ((c n') • f n')) m
-      trans
-      . apply EQ'''
-      . apply EQ''
-    sorry
+      have LE : m ≤ p := by
+        apply leading_monomial_sound
+        assumption
+      apply not_le.mpr at LT
+      exact LT LE
+    have EQ'' : (∑ n' : Fn, (c n') • f n') m = 0 := by
+      apply of_not_not
+      intro H
+      have MR := (Finsupp.mem_support_toFun (∑ n' : { x // x ∈ Fn }, c n' • f n') m)
+      apply MR.mpr at H
+      exact EQ' H
+    rw [<- EQ'']
+    clear EQ' EQ''
+    rw [func_sum_distr_gen]
+    apply Finset.sum_congr; simp
+    intro x H
+    have EQ' := (MvPolynomial.coeff_smul m (c x) (f x))
+    nth_rewrite 1 [MvPolynomial.coeff] at EQ'
+    symm
+    trans
+    . apply EQ'
+    . clear EQ'
+      unfold d
+      unfold leading_coeff
+      rw [MDEG1 x]
+      rfl
   sorry
 
 lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
