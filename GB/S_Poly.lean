@@ -62,7 +62,15 @@ lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : Mo
       have EQ'' : ∑ n' : { x // x ∈ Fn }, ((c n') • f n').toFun m = 0 := by
         apply Finset.sum_eq_zero
         intro x H'
-        sorry
+        have EQ''' : MvPolynomial.coeff m (f x) = 0 := by
+          simp at H'
+          sorry
+        have EQ'''' := (MvPolynomial.coeff_smul m (c x) (f x))
+        rw [EQ'''] at EQ''''
+        unfold MvPolynomial.coeff at EQ''''
+        trans
+        . exact EQ''''
+        . exact DistribMulAction.smul_zero (c x)
       have EQ''' := func_sum_distr_gen Fn (fun n' => ((c n') • f n')) m
       trans
       . apply EQ'''
@@ -178,12 +186,6 @@ lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : Monomia
       apply H
     intro h
     exfalso; apply MEM; assumption
-    -- apply Finset.sum_eq_zero
-    -- intro x_1
-    -- simp
-    -- rw [@dif_neg (x ∈ Fn') (DEC x) MEM]
-    -- rw [MvPolynomial.C_0]
-    -- exact zero_mul (Spol_help (f x) (f x_1) (NE1 x) (NE1 x_1))
   rw [EQ2]
   clear EQ2
   rw [AddZeroClass.zero_add]
@@ -222,9 +224,7 @@ lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : Monomia
         have ⟨_, H''⟩ := H'
         exact H''
       rw [@dif_neg (x' ∈ Fn') (DEC x') MEM2]
-      -- rw [MvPolynomial.C_0]
-      -- exact zero_mul (Spol_help (f x) (f x') (NE1 x) (NE1 x'))
-      sorry
+      apply zero_smul
     rw [EQ3]
     clear EQ3
     rw [AddZeroClass.zero_add]
