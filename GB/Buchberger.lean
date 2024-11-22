@@ -421,61 +421,56 @@ lemma buchberger_correct
     simp at H
     have GB_fix := H
     contrapose! H
-    -- Why it doesn't work?
-    rw [<-GB_def]
+    simp_rw [<-GB_def]
+    simp_rw [<-GB_def] at GB_fix
     unfold buchberger_step
 
     have ⟨ p, q, pin, qin, pneq , S_zero⟩ := H
 
-    -- let pair_list := (GB.product GB).toList
-    -- have pair_list_def : pair_list = (GB.product GB).toList := rfl
-
-    -- have pair_list_invariant : Nonempty GB -> ∃x y, x∈ GB ∧ y∈ GB ∧ (x,y) ∈ pair_list  := sorry
-
-    -- -- 이걸 하면 cons case 증명이 막힘 안하면 nil case 증명이 막힘 살려주세요 시바
-    -- clear_value pair_list
-
-    -- rw [<-pair_list_def]
-    -- revert pair_list_invariant pair_list_def
-
+    have BuchbergerInvariant : (p,q) ∈ (GB.product GB).toList := sorry
+    revert BuchbergerInvariant
     induction (GB.product GB).toList with
     |nil =>{
+      intros H;contradiction
+      -- intros H pair_list_nonempty;
       -- GB가 Nonempty인데 GB X GB가 [] 인게 모순
-      simp; sorry -- using Nonempty
+      -- sorry -- using Nonempty
     }
     |cons hd tl ih =>{
       -- (hd = (p,q) 이거나 tl에 (p,q)가 있음)
-      dsimp at ih
       have pqH : hd = (p,q) ∨ (p,q) ∈ tl := by sorry
       cases pqH with
       |inl pq => {
-        intros pair_list_def pair_list_invariant
         unfold s_red
         simp [pq,pneq,S_zero];
         intros H
         have monotone := buchberger_step_monotone tl (GB ∪ {s_red p q GB GB_nonzero}) GB GB_nonzero
         unfold s_red at monotone
+
         rw [H] at monotone
         by_cases Sin : ((S p q).multidiv GB GB_nonzero).2 ∈ GB
         {
           have : (GB ∪ {((S p q).multidiv GB GB_nonzero).2}) = GB := by {
           simp [<- Finset.insert_eq];assumption
           }
-          rw [this] at H;unfold buchberger_step at H; apply ih
-          any_goals trivial
+
+          -- We need to prove that Sin is not true!
+          sorry
         }
         {
           -- Because S is not in GB, GB ∪ S is larger than GB, which is contradict to monotone
+
           sorry
         }
       }
       |inr pq => {
+          intros pairprop
           have (p',q') := hd;simp
           by_cases pqeq' : p' = q'
-          · simp [pqeq'];unfold buchberger_step;assumption
+          · simp [pqeq'];unfold buchberger_step;apply ih;assumption
           simp [pqeq']
           by_cases name : s_red p' q' GB GB_nonzero = 0
-          · simp [name];unfold buchberger_step;assumption
+          · simp [name];unfold buchberger_step;apply ih;assumption
           simp [name]
           -- 위와 같은 증명, buchberger_step에서 G_queue 위치에 있는게 작아질수는 없다는걸 증명하면 됨
           sorry
