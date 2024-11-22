@@ -415,28 +415,41 @@ lemma buchberger_correct
     have GB_nonzero : ∀g ∈ GB, g ≠ 0 := buchberger_algorithm_nonzero G G_nonzero G_nonempty
     have GB_nonempty : Nonempty GB := buchberger_algorithm_nonempty G G_nonzero G_nonempty
     have GB_basis : (Ideal.span GB : Ideal (MvPolynomial σ R) )  = Ideal.span G := buchberger_algorithm_same_span G G_nonzero G_nonempty
-    rw [BuchbergerCriterion (G_nonzero := GB_nonzero)]
-    any_goals trivial
+    clear_value GB
+    rw [BuchbergerCriterion (G_nonzero := GB_nonzero) (G_basis := GB_basis)]
     have H := buchberger_fixpoint G G_nonzero G_nonempty
     simp at H
     have GB_fix := H
     contrapose! H
-    -- rw [<-GB_def]
+    -- Why it doesn't work?
+    rw [<-GB_def]
     unfold buchberger_step
 
     have ⟨ p, q, pin, qin, pneq , S_zero⟩ := H
 
-    induction ((GB.product GB).toList) with
+    -- let pair_list := (GB.product GB).toList
+    -- have pair_list_def : pair_list = (GB.product GB).toList := rfl
+
+    -- have pair_list_invariant : Nonempty GB -> ∃x y, x∈ GB ∧ y∈ GB ∧ (x,y) ∈ pair_list  := sorry
+
+    -- -- 이걸 하면 cons case 증명이 막힘 안하면 nil case 증명이 막힘 살려주세요 시바
+    -- clear_value pair_list
+
+    -- rw [<-pair_list_def]
+    -- revert pair_list_invariant pair_list_def
+
+    induction (GB.product GB).toList with
     |nil =>{
       -- GB가 Nonempty인데 GB X GB가 [] 인게 모순
-
-      sorry
+      simp; sorry -- using Nonempty
     }
     |cons hd tl ih =>{
       -- (hd = (p,q) 이거나 tl에 (p,q)가 있음)
+      dsimp at ih
       have pqH : hd = (p,q) ∨ (p,q) ∈ tl := by sorry
       cases pqH with
       |inl pq => {
+        intros pair_list_def pair_list_invariant
         unfold s_red
         simp [pq,pneq,S_zero];
         intros H
@@ -448,7 +461,8 @@ lemma buchberger_correct
           have : (GB ∪ {((S p q).multidiv GB GB_nonzero).2}) = GB := by {
           simp [<- Finset.insert_eq];assumption
           }
-          rw [this] at H;unfold buchberger_step at H; contradiction
+          rw [this] at H;unfold buchberger_step at H; apply ih
+          any_goals trivial
         }
         {
           -- Because S is not in GB, GB ∪ S is larger than GB, which is contradict to monotone
