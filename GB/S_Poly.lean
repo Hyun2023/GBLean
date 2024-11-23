@@ -17,13 +17,13 @@ noncomputable def Spol [DecidableEq σ] [Field R] [DecidableEq R] [ord : Monomia
   if f_NE : f = 0 then 0 else (if g_NE : g = 0 then 0 else Spol_help f g f_NE g_NE)
 -- gives trivial value for zero polynomials
 
-lemma func_sum_distr [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ]
+lemma func_sum_distr [DecidableEq σ] [DecidableEq R] [CommRing R]
   (f g : MvPolynomial σ R)
   (m : Monomial σ) :
   (f + g) m = f m + g m := by
   rfl
 
-lemma func_sum_distr_gen [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
+lemma func_sum_distr_gen [DecidableEq σ] [DecidableEq R] [CommRing R] {T : Type}
   (Fn : Finset T)
   (f : Fn -> MvPolynomial σ R)
   (m : Monomial σ) :
@@ -38,6 +38,74 @@ lemma func_sum_distr_gen [DecidableEq σ] [DecidableEq R] [Field R] [ord : Monom
     . rw [<-IH]
       apply func_sum_distr
   apply EQ
+
+lemma func_sum_distr_gen_fin [DecidableEq σ] [DecidableEq R] [CommRing R] n
+  (f : Fin n -> MvPolynomial σ R)
+  (m : Monomial σ) :
+  (∑ n' : Fin n, f n') m = ∑ n' : Fin n, (f n') m := by
+  rw [<-Finset.sum_to_list]
+  rw [<-Finset.sum_to_list]
+  rw [List.sum, List.sum]
+  have EQ : ∀ l, (List.foldr (fun x1 x2 ↦ x1 + x2) 0 (List.map (fun n' ↦ f n') l)).toFun m =
+      List.foldr (fun x1 x2 ↦ x1 + x2) 0 (List.map (fun n' ↦ (f n') m) l) := by
+    intro l; induction' l with head tail IH <;> simp
+    . rfl
+    . rw [<-IH]
+      apply func_sum_distr
+  apply EQ
+
+lemma Spol_help_lemma5_help_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] n
+  (c : Fin n -> R) (f : Fin n -> MvPolynomial σ R)
+  (m : Monomial σ)
+  (NE0 : ∀ (n' : Fin n), c n' ≠ 0)
+  (NE1 : ∀ (n' : Fin n), f n' ≠ 0)
+  (MDEG1 : ∀ (n' : Fin n), leading_monomial (f n') (NE1 n') = m)
+  (NE2 : (∑ (n' : Fin n), (c n') • (f n')) ≠ 0)
+  (MDEG2 : (leading_monomial (∑ (n' : Fin n), (c n') • (f n')) NE2) < m) :
+  ∃ (c' : Fin n -> Fin n -> R),
+  (∑ (n' : Fin n), (c n') • (f n')) = (∑ (n' : Fin n), ∑ (n'' : Fin n), (c' n' n'') • (Spol_help (f n') (f n'') (NE1 n') (NE1 n''))) := by
+  let d := (fun n' => leading_coeff (f n') (NE1 n'))
+  let lm := leading_monomial (∑ n' : Fin n, (c n') • f n') NE2
+  have LT : lm < m := by
+    exact MDEG2
+  have EQ : (∑ (n' : Fin n), (c n') * (d n')) = 0 := by
+    have EQ' : ¬ m ∈ (∑ n' : Fin n, (c n') • f n').support := by
+      intro H
+      have LE : m ≤ lm := by
+        apply leading_monomial_sound
+        assumption
+      apply not_le.mpr at LT
+      exact LT LE
+    have EQ'' : (∑ n' : Fin n, (c n') • f n') m = 0 := by
+      apply of_not_not
+      intro H
+      have MR := (Finsupp.mem_support_toFun (∑ n' : Fin n, c n' • f n') m)
+      apply MR.mpr at H
+      exact EQ' H
+    rw [<- EQ'']
+    clear EQ' EQ''
+    rw [func_sum_distr_gen_fin]
+    apply Finset.sum_congr; simp
+    intro x H
+    have EQ' := (MvPolynomial.coeff_smul m (c x) (f x))
+    nth_rewrite 1 [MvPolynomial.coeff] at EQ'
+    symm
+    trans
+    . apply EQ'
+    . clear EQ'
+      unfold d
+      unfold leading_coeff
+      rw [MDEG1 x]
+      rfl
+  let p := (fun n' => (1 / d n') • f n')
+  have p_NE : (forall n', p n' ≠ 0) := by
+    intro n'
+    apply leading_coeff_div_nonzero
+  have p_coeff_1 : forall n', leading_coeff (p n') (p_NE n') = 1 := by
+    intro n'
+    apply leading_coeff_div
+  sorry
+
 
 lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
   (Fn : Finset T)
@@ -87,8 +155,9 @@ lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : Mo
   have p_NE : (forall n', p n' ≠ 0) := by
     intro n'
     apply leading_coeff_div_nonzero
-  have p_coeff : forall n', leading_coeff (p n') (p_NE n') = 1 := by
-    sorry
+  have p_coeff_1 : forall n', leading_coeff (p n') (p_NE n') = 1 := by
+    intro n'
+    apply leading_coeff_div
   sorry
 
 lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
@@ -283,19 +352,6 @@ lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : Monomia
   rw [<-EQ6]
   apply EQ4
 
--- lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] n (c : Fin n -> R) (f : Fin n -> MvPolynomial σ R)
---   (m : Monomial σ)
---   (NE0 : ∀ (n' : Fin n), c n' ≠ 0)
---   (NE1 : ∀ (n' : Fin n), f n' ≠ 0)
---   (MDEG1 : ∀ (n' : Fin n), leading_monomial (f n') (NE1 n') = m)
---   (NE2 : (∑ (n' : Fin n), (MvPolynomial.C (c n')) * (f n')) ≠ 0)
---   (MDEG2 : (leading_monomial (∑ (n' : Fin n), (MvPolynomial.C (c n')) * (f n')) NE2) < m) :
---   ∃ (c' : Fin n -> Fin n -> R),
---   (∑ (n' : Fin n), (MvPolynomial.C (c n')) * (f n')) = (∑ (n' : Fin n), ∑ (n'' : Fin n), (MvPolynomial.C (c' n' n'')) * (Spol_help (f n') (f n'') (NE1 n') (NE1 n''))) := by
---   let d := (fun n' => leading_coeff (f n') (NE1 n'))
---   -- induction' n with np IH; simp
---   -- simp
---   sorry
 
 -- lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] n (c : Fin n -> R) (f : Fin n -> MvPolynomial σ R)
 --   (m : Monomial σ)
