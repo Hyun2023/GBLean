@@ -178,6 +178,26 @@ lemma leading_monomial_sound [DecidableEq σ] [CommRing R] [ord : MonomialOrder 
   apply Finset.le_max'
   assumption
 
+lemma leading_monomial_smul_nonzero [DecidableEq σ] [Field R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0)
+  (c : R) (NE : c ≠ 0) :
+  c • p ≠ 0 := by
+  sorry
+  -- have NEQ : MvPolynomial.coeff (leading_monomial p p_nonzero) (c • p) ≠ 0 := by
+  --   have NE := leading_monomial_nonzero p p_nonzero
+  --   have EQ' := (MvPolynomial.coeff_smul (leading_monomial p p_nonzero) (1 / leading_coeff p p_nonzero) p)
+  --   rw [EQ']
+  --   clear EQ'
+  --   have NE' := leading_coeff_nonzero p p_nonzero
+  --   have NE'' : (1 / leading_coeff p p_nonzero) ≠ 0 := by
+  --     exact one_div_ne_zero NE
+  --   exact smul_ne_zero NE'' NE
+  -- exact Ne.symm (ne_of_apply_ne (MvPolynomial.coeff (leading_monomial p p_nonzero)) fun a ↦ NEQ (id (Eq.symm a)))
+
+lemma leading_monomial_smul [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0)
+  (c : R) (NE : c ≠ 0) :
+  leading_monomial (c • p) (leading_monomial_smul_nonzero p p_nonzero c NE) = leading_monomial p p_nonzero := by
+  sorry
+
 def leading_coeff [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : R :=
   MvPolynomial.coeff (leading_monomial p p_nonzero) p
 
@@ -197,11 +217,10 @@ lemma leading_coeff_div_nonzero [DecidableEq σ] [Field R] [MonomialOrder σ ] (
     have NE'' : (1 / leading_coeff p p_nonzero) ≠ 0 := by
       exact one_div_ne_zero NE
     exact smul_ne_zero NE'' NE
-  exact
-    Ne.symm
-      (ne_of_apply_ne (MvPolynomial.coeff (leading_monomial p p_nonzero)) fun a ↦
-        NEQ (id (Eq.symm a)))
+  exact Ne.symm (ne_of_apply_ne (MvPolynomial.coeff (leading_monomial p p_nonzero)) fun a ↦ NEQ (id (Eq.symm a)))
 
 lemma leading_coeff_div [DecidableEq σ] [Field R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
   leading_coeff ((1 / leading_coeff p p_nonzero) • p) (leading_coeff_div_nonzero p p_nonzero) = 1 := by
+  nth_rewrite 1 [leading_coeff]
+  rw [MvPolynomial.coeff_smul]
   sorry
