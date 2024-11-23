@@ -40,6 +40,14 @@ noncomputable instance Monomial.instMul : Mul (Monomial σ) where
 noncomputable def LCM : Monomial σ → Monomial σ → Monomial σ :=
   fun m1 m2 => Finsupp.zipWith (Nat.max) (by rfl) m1 m2
 
+lemma LCM_idem (m : Monomial σ) : LCM m m = m := by
+  unfold LCM
+  rw [Finsupp.zipWith]
+  rw [Finsupp.onFinset]; simp
+  apply Finsupp.ext
+  intro a
+  simp
+
 -- def LCM_computable [DecidableEq σ] : Computable₂ (@LCM σ) := by
 --   sorry
 

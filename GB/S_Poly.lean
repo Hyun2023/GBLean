@@ -117,6 +117,18 @@ lemma Spol_help_lemma5_help_help [DecidableEq σ] [DecidableEq R] [Field R] [ord
       apply leading_coeff_nonzero
     rw [EQ'']
     exact Eq.symm (MulAction.one_smul (f n'))
+  let S := (fun j k => Spol_help (f j) (f k) (NE1 j) (NE1 k))
+  have S_EQ : ∀ j k, S j k = MvPolynomial.instSub.sub (p j) (p k) := by
+    intro j k
+    unfold S
+    rw [Spol_help]
+    congr
+    . rw [MDEG1 j]
+      rw [MDEG1 k]
+      sorry
+    . rw [MDEG1 j]
+      rw [MDEG1 k]
+      sorry
   sorry
 
 
