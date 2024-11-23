@@ -421,7 +421,10 @@ lemma buchberger_correct
     simp at H
     have GB_fix := H
     contrapose! H
-    simp_rw [<-GB_def]
+    -- rw doesn't work
+    -- rw [<-GB_def]
+    -- simp only or simp_rw works
+    simp only [<-GB_def]
     simp_rw [<-GB_def] at GB_fix
     unfold buchberger_step
 
