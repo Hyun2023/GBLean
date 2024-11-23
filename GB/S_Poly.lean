@@ -104,6 +104,19 @@ lemma Spol_help_lemma5_help_help [DecidableEq σ] [DecidableEq R] [Field R] [ord
   have p_coeff_1 : forall n', leading_coeff (p n') (p_NE n') = 1 := by
     intro n'
     apply leading_coeff_div
+  have EQ' : forall n', f n' = (d n') • (p n') := by
+    intro n'
+    unfold p
+    unfold d
+    have EQ'' : leading_coeff (f n') (NE1 n') • (1 / leading_coeff (f n') (NE1 n')) • f n' = (leading_coeff (f n') (NE1 n') * (1 / leading_coeff (f n') (NE1 n'))) • f n' := by
+      apply smul_smul
+    rw [EQ'']
+    clear EQ''
+    have EQ'' : leading_coeff (f n') (NE1 n') * (1 / leading_coeff (f n') (NE1 n')) = 1 := by
+      refine mul_one_div_cancel ?h
+      apply leading_coeff_nonzero
+    rw [EQ'']
+    exact Eq.symm (MulAction.one_smul (f n'))
   sorry
 
 
@@ -351,6 +364,29 @@ lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : Monomia
     simp
   rw [<-EQ6]
   apply EQ4
+
+
+
+
+-- lemma func_sum_distr_gen [DecidableEq σ] [DecidableEq R] [CommRing R] {T : Type}
+--   (Fn : Finset T)
+--   (f : Fn -> MvPolynomial σ R)
+--   (m : Monomial σ) :
+--   (∑ n' : Fn, f n') m = ∑ n' : Fn, (f n') m := by
+--   have EQUIV := Equiv.symm (@Finset.equivFinOfCardEq _ Fn _ rfl)
+--   have BJ := Equiv.bijective EQUIV
+--   have FIN := (func_sum_distr_gen_fin Fn.card (f ∘ EQUIV.toFun) m)
+--   have EQ1 : (∑ n' : { x // x ∈ Fn }, f n') m = (∑ n' : Fin Fn.card, (f ∘ EQUIV.toFun) n') m := by
+--     clear FIN
+--     have EQ1' := (@Function.Bijective.sum_comp _ _ _ _ _ _ _ BJ (fun n' => f n' m))
+--     sorry
+--   have EQ2 : ∑ n' : { x // x ∈ Fn }, (f n') m = ∑ n' : Fin Fn.card, ((f ∘ EQUIV.toFun) n') m := by
+--     clear FIN
+--     have EQ2' := (@Function.Bijective.sum_comp _ _ _ _ _ _ _ BJ (fun n' => f n' m))
+--     sorry
+--   rw [EQ1]
+--   rw [EQ2]
+--   exact FIN
 
 
 -- lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] n (c : Fin n -> R) (f : Fin n -> MvPolynomial σ R)
