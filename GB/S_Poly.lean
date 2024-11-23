@@ -168,10 +168,43 @@ lemma Spol_help_lemma5_help_help [DecidableEq σ] [DecidableEq R] [Field R] [ord
         ((∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p (↑↑n' + 1))) =
         (∑ n' : Fin n_p, (∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p ↑↑n') -
         (∑ n' : Fin n_p, (∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p (↑↑n' + 1)) := by
+      exact Finset.sum_sub_distrib
+    rw [EQ'']
+    clear EQ''
+    have EQ'' : ∑ n' : Fin (n_p + 1), (c n' * d n') • p n' = ∑ n' : Fin (n_p + 1), ((∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') - (∑ n'' : Fin ↑n', c ↑↑n'' * d ↑↑n'')) • p n' := by
+      apply Finset.sum_congr; simp
+      intro x H
+      have EQ''' : (c x * d x) = (∑ n'' : Fin (↑x + 1), c ↑↑n'' * d ↑↑n'' - ∑ n'' : Fin ↑x, c ↑↑n'' * d ↑↑n'') := by
+        rw [Fin.sum_univ_castSucc]
+        simp
+      exact congrFun (congrArg HSMul.hSMul EQ''') (p x)
+    rw [EQ'']
+    clear EQ''
+    have EQ'' : ∑ n' : Fin (n_p + 1), (∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'' - ∑ n'' : Fin ↑n', c ↑↑n'' * d ↑↑n'') • p n' =  ∑ n' : Fin (n_p + 1), ((∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p n' - (∑ n'' : Fin ↑n', c ↑↑n'' * d ↑↑n'') • p n') := by
+      apply Finset.sum_congr; simp
+      intro x H
+      exact
+        sub_smul (∑ n'' : Fin (↑x + 1), c ↑↑n'' * d ↑↑n'') (∑ n'' : Fin ↑x, c ↑↑n'' * d ↑↑n'') (p x)
+    rw [EQ'']
+    clear EQ''
+    have EQ'' : ∑ n' : Fin (n_p + 1),
+      ((∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p n' - (∑ n'' : Fin ↑n', c ↑↑n'' * d ↑↑n'') • p n') =
+      (∑ n' : Fin (n_p + 1), (∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p n') - (∑ n' : Fin (n_p + 1), (∑ n'' : Fin ↑n', c ↑↑n'' * d ↑↑n'') • p n') := by
+      exact Finset.sum_sub_distrib
+    rw [EQ'']
+    clear EQ''
+    have EQ'' : ∑ n' : Fin (n_p + 1), (∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p n' = ∑ n' : Fin n_p, (∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p ↑↑n' + (∑ n'' : Fin (n_p + 1), c n'' * d n'') • p ↑n_p := by
+      rw [Fin.sum_univ_castSucc]
+      simp
+    rw [EQ'']
+    clear EQ''
+    have EQ'' : ∑ n' : Fin (n_p + 1), (∑ n'' : Fin ↑n', c ↑↑n'' * d ↑↑n'') • p n' = ∑ n' : Fin n_p, (∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p (↑↑n' + 1) := by
+      -- rw [Fin.sum_univ_castSucc]
+      -- simp
       sorry
     rw [EQ'']
     clear EQ''
-    sorry
+    apply add_sub_right_comm
   rw [SMEQ]
   clear SMEQ
   rw [SMEQ']
