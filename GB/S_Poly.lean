@@ -158,6 +158,8 @@ lemma Spol_help_lemma5_help_help [DecidableEq σ] [DecidableEq R] [Field R] [ord
     apply smul_smul
   have SMEQ' : ∑ (n' : Fin (n_p + 1)), (c n' * d n') • p n' = (∑ (n' : Fin n_p), (∑ (n'' : Fin (n' + 1)), c n'' * d n'') • (MvPolynomial.instSub.sub (p n') (p (n' + 1)))) + (∑ (n'' : Fin (n_p + 1)), c n'' * d n'') • (p n_p) := by
     clear S S_EQ SMEQ
+    -- have EQ' : ∑ n' : Fin n_p, (∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • MvPolynomial.instSub.sub (p ↑↑n') (p (↑↑n' + 1)) = ∑ n' : Fin n_p, (∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • MvPolynomial.instSub.sub (p ↑↑n') (p (↑↑n' + 1)) := by
+    --   sorry
     sorry
   rw [SMEQ]
   clear SMEQ
