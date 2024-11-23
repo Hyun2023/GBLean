@@ -189,8 +189,11 @@ lemma leading_monomial_smul [DecidableEq σ] [Field R] [ord : MonomialOrder σ ]
   rw [leading_monomial, leading_monomial]
   unfold monomials
   have EQ := (MvPolynomial.support_smul_eq NE p)
-  -- rw [EQ]
-  sorry
+  apply LE.le.antisymm'
+  . apply Finset.max'_subset
+    rw [EQ]
+  . apply Finset.max'_subset
+    rw [EQ]
 
 def leading_coeff [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : R :=
   MvPolynomial.coeff (leading_monomial p p_nonzero) p
