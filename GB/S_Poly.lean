@@ -131,47 +131,38 @@ lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : Mo
   (MDEG2 : (leading_monomial (∑ (n' : Fn), (c n') • (f n')) NE2) < m) :
   ∃ (c_new : Fn -> Fn -> R),
   (∑ (n' : Fn), (c n') • (f n')) = (∑ (n' : Fn), ∑ (n'' : Fn), (c_new n' n'') • (Spol_help (f n') (f n'') (NE1 n') (NE1 n''))) := by
-  let d := (fun n' => leading_coeff (f n') (NE1 n'))
-  let lm := leading_monomial (∑ n' : { x // x ∈ Fn }, (c n') • f n') NE2
-  have LT : lm < m := by
-    exact MDEG2
-  have EQ : (∑ (n' : Fn), (c n') * (d n')) = 0 := by
-    have EQ' : ¬ m ∈ (∑ n' : Fn, (c n') • f n').support := by
-      intro H
-      have LE : m ≤ lm := by
-        apply leading_monomial_sound
-        assumption
-      apply not_le.mpr at LT
-      exact LT LE
-    have EQ'' : (∑ n' : Fn, (c n') • f n') m = 0 := by
-      apply of_not_not
-      intro H
-      have MR := (Finsupp.mem_support_toFun (∑ n' : { x // x ∈ Fn }, c n' • f n') m)
-      apply MR.mpr at H
-      exact EQ' H
-    rw [<- EQ'']
-    clear EQ' EQ''
-    rw [func_sum_distr_gen]
-    apply Finset.sum_congr; simp
-    intro x H
-    have EQ' := (MvPolynomial.coeff_smul m (c x) (f x))
-    nth_rewrite 1 [MvPolynomial.coeff] at EQ'
-    symm
-    trans
-    . apply EQ'
-    . clear EQ'
-      unfold d
-      unfold leading_coeff
-      rw [MDEG1 x]
-      rfl
-  let p := (fun n' => (1 / d n') • f n')
-  have p_NE : (forall n', p n' ≠ 0) := by
+  have EQUIV := Equiv.symm (@Finset.equivFinOfCardEq _ Fn _ rfl)
+  have BJ := Equiv.bijective EQUIV
+  let NE0' : ∀ n', (c ∘ EQUIV.toFun) n' ≠ 0 := by
     intro n'
-    apply leading_coeff_div_nonzero
-  have p_coeff_1 : forall n', leading_coeff (p n') (p_NE n') = 1 := by
+    apply NE0
+  let NE1' : ∀ n', (f ∘ EQUIV.toFun) n' ≠ 0 := by
     intro n'
-    apply leading_coeff_div
-  sorry
+    apply NE1
+  let MDEG1' : ∀ n', leading_monomial ((f ∘ EQUIV.toFun) n') (NE1' n') = m := by
+    intro n'
+    apply MDEG1
+  let NE2' : (∑ (n' : Fin (Fn.card)), ((c ∘ EQUIV.toFun) n') • ((f ∘ EQUIV.toFun) n')) ≠ 0 := by
+    have EQ' : ∑ n' : Fin Fn.card, (c ∘ EQUIV.toFun) n' • (f ∘ EQUIV.toFun) n' = ∑ n' : { x // x ∈ Fn }, c n' • f n' := by
+      sorry
+    rw [EQ']
+    apply NE2
+  let MDEG2' : (leading_monomial (∑ (n' : Fin (Fn.card)), ((c ∘ EQUIV.toFun) n') • ((f ∘ EQUIV.toFun) n')) NE2') < m := by
+    have EQ' : leading_monomial (∑ (n' : Fin (Fn.card)), ((c ∘ EQUIV.toFun) n') • ((f ∘ EQUIV.toFun) n')) NE2' = leading_monomial (∑ n' : { x // x ∈ Fn }, c n' • f n') NE2 := by
+      sorry
+    rw [EQ']
+    assumption
+  have HLP := (Spol_help_lemma5_help_help Fn.card (c ∘ EQUIV.toFun) (f ∘ EQUIV.toFun) m NE0' NE1' MDEG1' NE2' MDEG2')
+  obtain ⟨c', cPR⟩ := HLP
+  have c'' : Fn -> Fn -> R := (fun n' n'' => c' (EQUIV.invFun n') (EQUIV.invFun n''))
+  use c''
+  have EQ1 : ∑ n' : { x // x ∈ Fn }, c n' • f n' = ∑ n' : Fin Fn.card, (c ∘ EQUIV.toFun) n' • (f ∘ EQUIV.toFun) n' := by
+    sorry
+  have EQ2 : ∑ n' : { x // x ∈ Fn }, ∑ n'' : { x // x ∈ Fn }, c'' n' n'' • Spol_help (f n') (f n'') (NE1 n') (NE1 n'') = ∑ n' : Fin Fn.card, ∑ n'' : Fin Fn.card, c' n' n'' • Spol_help ((f ∘ EQUIV.toFun) n') ((f ∘ EQUIV.toFun) n'') (NE1' n') (NE1' n'') := by
+    sorry
+  rw [EQ1]
+  rw [EQ2]
+  assumption
 
 lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
   (Fn : Finset T)
