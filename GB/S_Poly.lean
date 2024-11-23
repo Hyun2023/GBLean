@@ -84,6 +84,11 @@ lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : Mo
       rw [MDEG1 x]
       rfl
   let p := (fun n' => (1 / d n') • f n')
+  have p_NE : (forall n', p n' ≠ 0) := by
+    intro n'
+    apply leading_coeff_div_nonzero
+  have p_coeff : forall n', leading_coeff (p n') (p_NE n') = 1 := by
+    sorry
   sorry
 
 lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}

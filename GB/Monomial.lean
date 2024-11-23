@@ -205,16 +205,10 @@ lemma leading_coeff_nonzero [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p
 
 lemma leading_coeff_div_nonzero [DecidableEq σ] [Field R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
   (1 / leading_coeff p p_nonzero) • p ≠ 0 := by
-  have NEQ : MvPolynomial.coeff (leading_monomial p p_nonzero) ((1 / leading_coeff p p_nonzero) • p) ≠ 0 := by
-    have NE := leading_monomial_nonzero p p_nonzero
-    have EQ' := (MvPolynomial.coeff_smul (leading_monomial p p_nonzero) (1 / leading_coeff p p_nonzero) p)
-    rw [EQ']
-    clear EQ'
-    have NE' := leading_coeff_nonzero p p_nonzero
-    have NE'' : (1 / leading_coeff p p_nonzero) ≠ 0 := by
-      exact one_div_ne_zero NE
-    exact smul_ne_zero NE'' NE
-  exact Ne.symm (ne_of_apply_ne (MvPolynomial.coeff (leading_monomial p p_nonzero)) fun a ↦ NEQ (id (Eq.symm a)))
+  apply leading_monomial_smul_nonzero
+  . assumption
+  . apply one_div_ne_zero
+    apply leading_coeff_nonzero
 
 lemma leading_coeff_div [DecidableEq σ] [Field R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
   leading_coeff ((1 / leading_coeff p p_nonzero) • p) (leading_coeff_div_nonzero p p_nonzero) = 1 := by
