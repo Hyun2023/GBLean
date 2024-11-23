@@ -151,10 +151,38 @@ lemma Spol_help_lemma5_help_help [DecidableEq σ] [DecidableEq R] [Field R] [ord
   clear NE0
   obtain ⟨n_p, nP⟩ := NE0'
   subst n
-  have SMEQ : ∑ (n' : Fin (n_p + 1)), (c n') • f n' = (∑ (n' : { k : Fin (n_p + 1) | k < n_p }), (∑ (n'' : { k : Fin (n_p + 1) | k ≤ n' }), c n'' * d n'') • (MvPolynomial.instSub.sub (p n') (p (n' + 1)))) + (∑ (n'' : { k : Fin (n_p + 1) | k < n_p + 1 }), c n'' * d n'') • (p n_p) := by
+  have SMEQ : ∑ (n' : Fin (n_p + 1)), (c n') • f n' = ∑ (n' : Fin (n_p + 1)), (c n' * d n') • p n' := by
+    apply Finset.sum_congr; simp
+    intro x H
+    rw [EQ']
+    apply smul_smul
+  have SMEQ' : ∑ (n' : Fin (n_p + 1)), (c n' * d n') • p n' = (∑ (n' : Fin n_p), (∑ (n'' : Fin (n' + 1)), c n'' * d n'') • (MvPolynomial.instSub.sub (p n') (p (n' + 1)))) + (∑ (n'' : Fin (n_p + 1)), c n'' * d n'') • (p n_p) := by
     sorry
-  sorry
-
+  rw [SMEQ]
+  clear SMEQ
+  rw [SMEQ']
+  clear SMEQ'
+  rw [EQ]
+  clear EQ
+  rw [zero_smul]
+  use (fun n' n'' => if n' < n_p ∧ n'' = n' + 1 then (∑ (k : Fin n''), (c k * d k)) else 0)
+  simp
+  rw [Fin.sum_univ_castSucc]
+  simp
+  apply Finset.sum_congr; simp
+  intro x H
+  have EQ : ∑ x_1 : Fin (n_p + 1),
+      (if x.castSucc < Fin.last n_p ∧ x_1 = x.succ
+      then (∑ k : Fin ↑x_1, c ↑↑k * d ↑↑k) • Spol_help (f x.castSucc) (f x_1) (NE1 x.castSucc) (NE1 x_1)
+      else 0) =
+    (∑ k : Fin ↑(x.succ), c ↑↑k * d ↑↑k) • Spol_help (f x.castSucc) (f x.succ) (NE1 x.castSucc) (NE1 x.succ) := by
+    sorry
+  rw [EQ]
+  clear EQ
+  simp
+  specialize (S_EQ (x.castSucc) (x.succ))
+  unfold S at S_EQ
+  rw [S_EQ]
 
 lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] {T : Type}
   (Fn : Finset T)
