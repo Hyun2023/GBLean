@@ -157,6 +157,7 @@ lemma Spol_help_lemma5_help_help [DecidableEq σ] [DecidableEq R] [Field R] [ord
     rw [EQ']
     apply smul_smul
   have SMEQ' : ∑ (n' : Fin (n_p + 1)), (c n' * d n') • p n' = (∑ (n' : Fin n_p), (∑ (n'' : Fin (n' + 1)), c n'' * d n'') • (MvPolynomial.instSub.sub (p n') (p (n' + 1)))) + (∑ (n'' : Fin (n_p + 1)), c n'' * d n'') • (p n_p) := by
+    clear S S_EQ SMEQ
     sorry
   rw [SMEQ]
   clear SMEQ
@@ -176,7 +177,25 @@ lemma Spol_help_lemma5_help_help [DecidableEq σ] [DecidableEq R] [Field R] [ord
       then (∑ k : Fin ↑x_1, c ↑↑k * d ↑↑k) • Spol_help (f x.castSucc) (f x_1) (NE1 x.castSucc) (NE1 x_1)
       else 0) =
     (∑ k : Fin ↑(x.succ), c ↑↑k * d ↑↑k) • Spol_help (f x.castSucc) (f x.succ) (NE1 x.castSucc) (NE1 x.succ) := by
-    sorry
+    have EQ' : ∑ x_1 : Fin (n_p + 1),
+      (if x.castSucc < Fin.last n_p ∧ x_1 = x.succ
+      then (∑ k : Fin ↑x_1, c ↑↑k * d ↑↑k) • Spol_help (f x.castSucc) (f x_1) (NE1 x.castSucc) (NE1 x_1)
+      else 0) =
+      ∑ x_1 : Fin (n_p + 1),
+      (if x_1 = x.succ
+      then (∑ k : Fin ↑x_1, c ↑↑k * d ↑↑k) • Spol_help (f x.castSucc) (f x_1) (NE1 x.castSucc) (NE1 x_1)
+      else 0) := by
+      apply Finset.sum_congr; simp
+      intro x' H'
+      have LT : x.castSucc < Fin.last n_p := by
+        rw [Fin.last, Fin.castSucc, Fin.castAdd, Fin.castLE]
+        simp
+      congr!
+      apply Iff.symm
+      exact iff_and_self.mpr fun a ↦ LT
+    rw [EQ']
+    clear EQ'
+    simp
   rw [EQ]
   clear EQ
   simp
