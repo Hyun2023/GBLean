@@ -1,6 +1,7 @@
 -- import GB.CFinsupp
 import GB.Monomial
 import Mathlib.Algebra.MvPolynomial.Degrees
+import Mathlib.Algebra.MvPolynomial.CommRing
 
 -- -- Finite Variable Polynomial
 -- def FiniteVarPoly (σ : Type) (R : Type) [CommRing R] := CFinsupp (Monomial σ) R
@@ -64,72 +65,72 @@ lemma is_monomial_nonzero [CommRing R] {p : MvPolynomial σ R} :
 --     -- rw [this] at h
 --     sorry
 
-noncomputable def MvPolynomial.instSub [CommRing R] : Sub (MvPolynomial σ R) where
-  sub := fun a b => Finsupp.instSub.sub a b
+-- noncomputable def MvPolynomial.instSub [CommRing R] : Sub (MvPolynomial σ R) where
+--   sub := fun a b => Finsupp.instSub.sub a b
 
-noncomputable def MvPolynomial.instNeg [CommRing R] : Neg (MvPolynomial σ R) where
-  neg := fun a => Finsupp.instSub.sub 0 a
+-- noncomputable def MvPolynomial.instNeg [CommRing R] : Neg (MvPolynomial σ R) where
+--   neg := fun a => Finsupp.instSub.sub 0 a
 
-def MvPolynomial.instSub_sound [CommRing R] : ∀ (f t : MvPolynomial σ R), f = t + (MvPolynomial.instSub.sub f t) := by
-  intro f t
-  rw [Sub.sub, instSub]; simp
-  rw [Sub.sub, Finsupp.instSub]; simp
-  rw [HAdd.hAdd, instHAdd]; simp
-  rw [Add.add, Distrib.toAdd, NonUnitalNonAssocSemiring.toDistrib]; simp
-  rw [AddSemigroup.toAdd, AddMonoid.toAddSemigroup, AddCommMonoid.toAddMonoid, NonUnitalNonAssocSemiring.toAddCommMonoid, NonAssocSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonAssocSemiring]; simp
-  rw [NonUnitalSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonUnitalSemiring, CommSemiring.toSemiring, commSemiring, AddMonoidAlgebra.commSemiring]; simp
-  rw [NonUnitalCommSemiring.toNonUnitalSemiring, AddMonoidAlgebra.nonUnitalCommSemiring]; simp
-  rw [AddMonoidAlgebra.nonUnitalSemiring]; simp
-  rw [AddMonoidAlgebra.nonUnitalNonAssocSemiring]; simp
-  rw [AddMonoid.toAddSemigroup, AddCommMonoid.toAddMonoid, Finsupp.instAddCommMonoid]; simp
-  rw [Finsupp.instAddMonoid]; simp
-  rw [AddZeroClass.toAdd]; simp
-  rw [Finsupp.instAdd]; simp
-  ext m
-  rw [coeff, coeff]; simp
-  exact Eq.symm (add_eq_of_eq_sub' rfl)
+-- def MvPolynomial.instSub_sound [CommRing R] : ∀ (f t : MvPolynomial σ R), f = t + (f - t) := by
+--   intro f t
+--   rw [Sub.sub, instSub]; simp
+--   rw [Sub.sub, Finsupp.instSub]; simp
+--   rw [HAdd.hAdd, instHAdd]; simp
+--   rw [Add.add, Distrib.toAdd, NonUnitalNonAssocSemiring.toDistrib]; simp
+--   rw [AddSemigroup.toAdd, AddMonoid.toAddSemigroup, AddCommMonoid.toAddMonoid, NonUnitalNonAssocSemiring.toAddCommMonoid, NonAssocSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonAssocSemiring]; simp
+--   rw [NonUnitalSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonUnitalSemiring, CommSemiring.toSemiring, commSemiring, AddMonoidAlgebra.commSemiring]; simp
+--   rw [NonUnitalCommSemiring.toNonUnitalSemiring, AddMonoidAlgebra.nonUnitalCommSemiring]; simp
+--   rw [AddMonoidAlgebra.nonUnitalSemiring]; simp
+--   rw [AddMonoidAlgebra.nonUnitalNonAssocSemiring]; simp
+--   rw [AddMonoid.toAddSemigroup, AddCommMonoid.toAddMonoid, Finsupp.instAddCommMonoid]; simp
+--   rw [Finsupp.instAddMonoid]; simp
+--   rw [AddZeroClass.toAdd]; simp
+--   rw [Finsupp.instAdd]; simp
+--   ext m
+--   rw [coeff, coeff]; simp
+--   exact Eq.symm (add_eq_of_eq_sub' rfl)
 
-def MvPolynomial.instSub_sound' [CommRing R] : ∀ (f t : MvPolynomial σ R), f = (MvPolynomial.instSub.sub f t) + t := by
-  intro f t
-  have EQ' : (MvPolynomial.instSub.sub f t) + t = t + (MvPolynomial.instSub.sub f t) := by
-    symm
-    apply AddCommMagma.add_comm
-  rw [EQ']
-  apply MvPolynomial.instSub_sound
+-- def MvPolynomial.instSub_sound' [CommRing R] : ∀ (f t : MvPolynomial σ R), f = (MvPolynomial.instSub.sub f t) + t := by
+--   intro f t
+--   have EQ' : (MvPolynomial.instSub.sub f t) + t = t + (MvPolynomial.instSub.sub f t) := by
+--     symm
+--     apply AddCommMagma.add_comm
+--   rw [EQ']
+--   apply MvPolynomial.instSub_sound
 
-def MvPolynomial.instSub_sound'' [CommRing R] : ∀ (f g : MvPolynomial σ R), MvPolynomial.instSub.sub f g = f + (MvPolynomial.instSub.sub 0 g) := by
-  intro f g
-  have EQ : MvPolynomial.instSub.sub f g + g = (f + (MvPolynomial.instSub.sub 0 g)) + g := by
-    rw [<- MvPolynomial.instSub_sound']
-    have EQ' : f + MvPolynomial.instSub.sub 0 g + g = f + (MvPolynomial.instSub.sub 0 g + g) := by
-      apply add_assoc
-    rw [EQ']
-    rw [<- MvPolynomial.instSub_sound' 0 g]
-    exact Eq.symm (AddMonoid.add_zero f)
-  have RCA : IsRightCancelAdd (MvPolynomial σ R) := by
-    apply Finsupp.instIsRightCancelAdd
-  have AC := (@add_right_cancel _ _ _ (MvPolynomial.instSub.sub f g) g (f + (MvPolynomial.instSub.sub 0 g)))
-  exact AC EQ
+-- def MvPolynomial.instSub_sound'' [CommRing R] : ∀ (f g : MvPolynomial σ R), MvPolynomial.instSub.sub f g = f + (MvPolynomial.instSub.sub 0 g) := by
+--   intro f g
+--   have EQ : MvPolynomial.instSub.sub f g + g = (f + (MvPolynomial.instSub.sub 0 g)) + g := by
+--     rw [<- MvPolynomial.instSub_sound']
+--     have EQ' : f + MvPolynomial.instSub.sub 0 g + g = f + (MvPolynomial.instSub.sub 0 g + g) := by
+--       apply add_assoc
+--     rw [EQ']
+--     rw [<- MvPolynomial.instSub_sound' 0 g]
+--     exact Eq.symm (AddMonoid.add_zero f)
+--   have RCA : IsRightCancelAdd (MvPolynomial σ R) := by
+--     apply Finsupp.instIsRightCancelAdd
+--   have AC := (@add_right_cancel _ _ _ (MvPolynomial.instSub.sub f g) g (f + (MvPolynomial.instSub.sub 0 g)))
+--   exact AC EQ
 
-def MvPolynomial.instSub_smul [CommRing R] : ∀ (f g : MvPolynomial σ R) (c : R), c • (MvPolynomial.instSub.sub f g) = MvPolynomial.instSub.sub (c • f) (c • g) := by
-  intro f g c
-  rw [MvPolynomial.instSub_sound'']
-  nth_rewrite 2 [MvPolynomial.instSub_sound'']
-  have EQ : c • (f + MvPolynomial.instSub.sub 0 g) = c • f + c • (MvPolynomial.instSub.sub 0 g) := by
-    apply DistribSMul.smul_add
-  rw [EQ]
-  clear EQ
-  have EQ : c • MvPolynomial.instSub.sub 0 g = MvPolynomial.instSub.sub 0 (c • g) := by
-    have EQ' : c • MvPolynomial.instSub.sub 0 g + c • g = MvPolynomial.instSub.sub 0 (c • g) + c • g := by
-      rw [<- MvPolynomial.instSub_sound']
-      rw [<- DistribSMul.smul_add]
-      rw [<- MvPolynomial.instSub_sound']
-      exact DistribMulAction.smul_zero c
-    have RCA : IsRightCancelAdd (MvPolynomial σ R) := by
-      apply Finsupp.instIsRightCancelAdd
-    have AC := (@add_right_cancel _ _ _ (c • MvPolynomial.instSub.sub 0 g) (c • g) (MvPolynomial.instSub.sub 0 (c • g)))
-    exact AC EQ'
-  rw [EQ]
+-- def MvPolynomial.instSub_smul [CommRing R] : ∀ (f g : MvPolynomial σ R) (c : R), c • (MvPolynomial.instSub.sub f g) = MvPolynomial.instSub.sub (c • f) (c • g) := by
+--   intro f g c
+--   rw [MvPolynomial.instSub_sound'']
+--   nth_rewrite 2 [MvPolynomial.instSub_sound'']
+--   have EQ : c • (f + MvPolynomial.instSub.sub 0 g) = c • f + c • (MvPolynomial.instSub.sub 0 g) := by
+--     apply DistribSMul.smul_add
+--   rw [EQ]
+--   clear EQ
+--   have EQ : c • MvPolynomial.instSub.sub 0 g = MvPolynomial.instSub.sub 0 (c • g) := by
+--     have EQ' : c • MvPolynomial.instSub.sub 0 g + c • g = MvPolynomial.instSub.sub 0 (c • g) + c • g := by
+--       rw [<- MvPolynomial.instSub_sound']
+--       rw [<- DistribSMul.smul_add]
+--       rw [<- MvPolynomial.instSub_sound']
+--       exact DistribMulAction.smul_zero c
+--     have RCA : IsRightCancelAdd (MvPolynomial σ R) := by
+--       apply Finsupp.instIsRightCancelAdd
+--     have AC := (@add_right_cancel _ _ _ (c • MvPolynomial.instSub.sub 0 g) (c • g) (MvPolynomial.instSub.sub 0 (c • g)))
+--     exact AC EQ'
+--   rw [EQ]
 
 def MvPolynomial.toMonomial [CommRing R] [DecidableEq R] (p : MvPolynomial σ R) (h : is_monomial p) :=
   Finset.choose (fun _ => True) p.support (is_monomial_fst h)

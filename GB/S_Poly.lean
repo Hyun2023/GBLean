@@ -10,9 +10,8 @@ open Monomial
 -- Definition of S-Polynomial
 -- ((LCM (LM f) (LM g)) / (LT f)) * f - ((LCM (LM f) (LM g)) / (LT g)) * g
 noncomputable def Spol_help [DecidableEq σ] [Field R] [ord : MonomialOrder σ ] (f g : MvPolynomial σ R) (f_NE : f ≠ 0) (g_NE : g ≠ 0) : MvPolynomial σ R :=
-  MvPolynomial.instSub.sub
-    (MvPolynomial.monomial ((LCM (leading_monomial f f_NE) (leading_monomial g g_NE)) / (leading_monomial f f_NE)) (Inv.inv (leading_coeff f f_NE)) * f)
-    (MvPolynomial.monomial ((LCM (leading_monomial f f_NE) (leading_monomial g g_NE)) / (leading_monomial g g_NE)) (Inv.inv (leading_coeff g g_NE)) * g)
+  (MvPolynomial.monomial ((LCM (leading_monomial f f_NE) (leading_monomial g g_NE)) / (leading_monomial f f_NE)) (Inv.inv (leading_coeff f f_NE)) * f) -
+  (MvPolynomial.monomial ((LCM (leading_monomial f f_NE) (leading_monomial g g_NE)) / (leading_monomial g g_NE)) (Inv.inv (leading_coeff g g_NE)) * g)
 noncomputable def Spol [DecidableEq σ] [Field R] [DecidableEq R] [ord : MonomialOrder σ ] (f g : MvPolynomial σ R) : MvPolynomial σ R :=
   if f_NE : f = 0 then 0 else (if g_NE : g = 0 then 0 else Spol_help f g f_NE g_NE)
 -- gives trivial value for zero polynomials
@@ -118,7 +117,7 @@ lemma Spol_help_lemma5_help_help [DecidableEq σ] [DecidableEq R] [Field R] [ord
     rw [EQ'']
     exact Eq.symm (MulAction.one_smul (f n'))
   let S := (fun j k => Spol_help (f j) (f k) (NE1 j) (NE1 k))
-  have S_EQ : ∀ j k, S j k = MvPolynomial.instSub.sub (p j) (p k) := by
+  have S_EQ : ∀ j k, S j k = (p j) - (p k) := by
     intro j k
     unfold S
     rw [Spol_help]
@@ -156,19 +155,18 @@ lemma Spol_help_lemma5_help_help [DecidableEq σ] [DecidableEq R] [Field R] [ord
     intro x H
     rw [EQ']
     apply smul_smul
-  have SMEQ' : ∑ (n' : Fin (n_p + 1)), (c n' * d n') • p n' = (∑ (n' : Fin n_p), (∑ (n'' : Fin (n' + 1)), c n'' * d n'') • (MvPolynomial.instSub.sub (p n') (p (n' + 1)))) + (∑ (n'' : Fin (n_p + 1)), c n'' * d n'') • (p n_p) := by
+  have SMEQ' : ∑ (n' : Fin (n_p + 1)), (c n' * d n') • p n' = (∑ (n' : Fin n_p), (∑ (n'' : Fin (n' + 1)), c n'' * d n'') • ((p n') - (p (n' + 1)))) + (∑ (n'' : Fin (n_p + 1)), c n'' * d n'') • (p n_p) := by
     clear S S_EQ SMEQ
-    have EQ'' : (∑ (n' : Fin n_p), (∑ (n'' : Fin (n' + 1)), c n'' * d n'') • (MvPolynomial.instSub.sub (p n') (p (n' + 1)))) = (∑ (n' : Fin n_p), MvPolynomial.instSub.sub ((∑ (n'' : Fin (n' + 1)), c n'' * d n'') • (p n')) ((∑ (n'' : Fin (n' + 1)), c n'' * d n'') • (p (n' + 1)))) := by
+    have EQ'' : (∑ (n' : Fin n_p), (∑ (n'' : Fin (n' + 1)), c n'' * d n'') • ((p n') - (p (n' + 1)))) = (∑ (n' : Fin n_p), (((∑ (n'' : Fin (n' + 1)), c n'' * d n'') • (p n')) - ((∑ (n'' : Fin (n' + 1)), c n'' * d n'')) • (p (n' + 1)))) := by
       apply Finset.sum_congr; simp
       intro x H
-      rw [MvPolynomial.instSub_smul]
+      apply smul_sub
     rw [EQ'']
     clear EQ''
     have EQ'' : ∑ n' : Fin n_p,
-        MvPolynomial.instSub.sub ((∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p ↑↑n')
-        ((∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p (↑↑n' + 1)) =
-      MvPolynomial.instSub.sub
-        (∑ n' : Fin n_p, (∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p ↑↑n')
+        (((∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p ↑↑n') -
+        ((∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p (↑↑n' + 1))) =
+        (∑ n' : Fin n_p, (∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p ↑↑n') -
         (∑ n' : Fin n_p, (∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p (↑↑n' + 1)) := by
       sorry
     rw [EQ'']
