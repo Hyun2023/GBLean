@@ -127,12 +127,32 @@ lemma Spol_help_lemma5_help_help [DecidableEq σ] [DecidableEq R] [Field R] [ord
       rw [MDEG1 k]
       rw [LCM_idem]
       rw [Monomial.div_same]
-      sorry
+      unfold p
+      rw [MvPolynomial.smul_eq_C_mul (f j)]
+      unfold d
+      rw [MvPolynomial.C_apply]
+      simp
     . rw [MDEG1 j]
       rw [MDEG1 k]
       rw [LCM_idem]
       rw [Monomial.div_same]
-      sorry
+      unfold p
+      rw [MvPolynomial.smul_eq_C_mul (f k)]
+      unfold d
+      rw [MvPolynomial.C_apply]
+      simp
+  have NE0 : n ≠ 0 := by
+    intro H
+    apply NE2
+    subst H
+    simp
+  have NE0' : ∃ n_p, n = n_p + 1 := by
+    exact Nat.exists_eq_succ_of_ne_zero NE0
+  clear NE0
+  obtain ⟨n_p, nP⟩ := NE0'
+  subst n
+  have SMEQ : ∑ (n' : Fin (n_p + 1)), (c n') • f n' = (∑ (n' : { k : Fin (n_p + 1) | k < n_p }), (∑ (n'' : { k : Fin (n_p + 1) | k ≤ n' }), c n'' * d n'') • (MvPolynomial.instSub.sub (p n') (p (n' + 1)))) + (∑ (n'' : { k : Fin (n_p + 1) | k < n_p + 1 }), c n'' * d n'') • (p n_p) := by
+    sorry
   sorry
 
 
