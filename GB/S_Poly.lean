@@ -144,22 +144,40 @@ lemma Spol_help_lemma5_help [DecidableEq σ] [DecidableEq R] [Field R] [ord : Mo
     apply MDEG1
   let NE2' : (∑ (n' : Fin (Fn.card)), ((c ∘ EQUIV.toFun) n') • ((f ∘ EQUIV.toFun) n')) ≠ 0 := by
     have EQ' : ∑ n' : Fin Fn.card, (c ∘ EQUIV.toFun) n' • (f ∘ EQUIV.toFun) n' = ∑ n' : { x // x ∈ Fn }, c n' • f n' := by
-      sorry
+      apply (@Function.Bijective.sum_comp _ _ _ _ _ _ _ BJ (fun n' => (c n') • (f n')))
     rw [EQ']
     apply NE2
   let MDEG2' : (leading_monomial (∑ (n' : Fin (Fn.card)), ((c ∘ EQUIV.toFun) n') • ((f ∘ EQUIV.toFun) n')) NE2') < m := by
     have EQ' : leading_monomial (∑ (n' : Fin (Fn.card)), ((c ∘ EQUIV.toFun) n') • ((f ∘ EQUIV.toFun) n')) NE2' = leading_monomial (∑ n' : { x // x ∈ Fn }, c n' • f n') NE2 := by
-      sorry
+      have EQ2' := (@Function.Bijective.sum_comp _ _ _ _ _ _ _ BJ (fun n' => (c n') • (f n')))
+      congr!
     rw [EQ']
     assumption
   have HLP := (Spol_help_lemma5_help_help Fn.card (c ∘ EQUIV.toFun) (f ∘ EQUIV.toFun) m NE0' NE1' MDEG1' NE2' MDEG2')
   obtain ⟨c', cPR⟩ := HLP
-  have c'' : Fn -> Fn -> R := (fun n' n'' => c' (EQUIV.invFun n') (EQUIV.invFun n''))
+  let c'' : Fn -> Fn -> R := (fun n' n'' => c' (EQUIV.invFun n') (EQUIV.invFun n''))
   use c''
   have EQ1 : ∑ n' : { x // x ∈ Fn }, c n' • f n' = ∑ n' : Fin Fn.card, (c ∘ EQUIV.toFun) n' • (f ∘ EQUIV.toFun) n' := by
-    sorry
+    symm
+    apply (@Function.Bijective.sum_comp _ _ _ _ _ _ _ BJ (fun n' => (c n') • (f n')))
   have EQ2 : ∑ n' : { x // x ∈ Fn }, ∑ n'' : { x // x ∈ Fn }, c'' n' n'' • Spol_help (f n') (f n'') (NE1 n') (NE1 n'') = ∑ n' : Fin Fn.card, ∑ n'' : Fin Fn.card, c' n' n'' • Spol_help ((f ∘ EQUIV.toFun) n') ((f ∘ EQUIV.toFun) n'') (NE1' n') (NE1' n'') := by
-    sorry
+    symm
+    unfold c''
+    have EQ'' : ∑ n' : Fin Fn.card, ∑ n'' : Fin Fn.card, c' n' n'' • Spol_help ((f ∘ EQUIV.toFun) n') ((f ∘ EQUIV.toFun) n'') (NE1' n') (NE1' n'') = ∑ n' : Fin Fn.card, ∑ n'' : Fin Fn.card, c' (EQUIV.invFun (EQUIV.toFun n')) (EQUIV.invFun (EQUIV.toFun n'')) • Spol_help ((f ∘ EQUIV.toFun) n') ((f ∘ EQUIV.toFun) n'') (NE1' n') (NE1' n'') := by
+      apply Finset.sum_congr; simp
+      intro x H
+      apply Finset.sum_congr; simp
+      intro x' H'
+      simp
+    rw [EQ'']
+    clear EQ''
+    have EQ2' := (@Function.Bijective.sum_comp _ _ _ _ _ _ _ BJ (fun n' => ∑ n'' : Fin Fn.card, c' (EQUIV.invFun n') (EQUIV.invFun (EQUIV.toFun n'')) • Spol_help (f n') ((f ∘ EQUIV.toFun) n'') (NE1 n') (NE1' n'')))
+    trans
+    . apply EQ2'
+    . apply Finset.sum_congr; simp
+      intro x H
+      have EQ2'' := (@Function.Bijective.sum_comp _ _ _ _ _ _ _ BJ (fun n'' => c' (EQUIV.invFun x) (EQUIV.invFun n'') • Spol_help (f x) (f n'') (NE1 x) (NE1 n'')))
+      apply EQ2''
   rw [EQ1]
   rw [EQ2]
   assumption
