@@ -5,6 +5,7 @@ import GB.S_Poly
 import Mathlib.Data.Finset.Basic
 import Mathlib.Algebra.MvPolynomial.Basic
 import Mathlib.Algebra.MvPolynomial.Division
+import Mathlib.Algebra.MvPolynomial.CommRing
 
 
 section Reduction
@@ -120,15 +121,17 @@ lemma MvPolynomial.divMonomial'_correct [DecidableEq σ] [ord : MonomialOrder σ
 -- Opaque
 attribute [irreducible] MvPolynomial.divMonomial'
 
+noncomputable def MvPolynomial.div [DecidableEq σ] [DecidableEq R] [Field R] [MonomialOrder σ] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_nonzero : g ≠ 0) : (MvPolynomial σ R) × (MvPolynomial σ R) :=
+  let glt := leading_monomial g g_nonzero
+  let h := f.divMonomial glt
+  (h, f - h*g)
 
-noncomputable def MvPolynomial.div [DecidableEq σ] [DecidableEq R] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_nonzero : g ≠ 0) : (MvPolynomial σ R) × (MvPolynomial σ R) := sorry
-
-lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [DecidableEq R] [Field R] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_nonzero : g ≠ 0):
+lemma MvPolynomial.div_correct [DecidableEq σ] [ord : MonomialOrder σ] [DecidableEq R] [Field R] [MonomialOrder σ] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_nonzero : g ≠ 0):
   let (h,r) := f.div g g_nonzero;
   f = g*h+r ∧
   (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (@leading_monomial σ _ _ _ ord g g_nonzero) m) := by sorry
 
-noncomputable def MvPolynomial.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] (s : MvPolynomial σ R) (F : List (MvPolynomial σ R)) (F_isNonzero : ∀ f ∈ F, f ≠ 0): (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
+noncomputable def MvPolynomial.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] [MonomialOrder σ] (s : MvPolynomial σ R) (F : List (MvPolynomial σ R)) (F_isNonzero : ∀ f ∈ F, f ≠ 0): (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
   match F with
   | [] => (0, s)
   | f :: F' =>
@@ -141,7 +144,7 @@ lemma FList_isNonzero [CommRing R] {F : Finset (MvPolynomial σ R)} (F_isNonzero
   rw [Finset.mem_toList] at fIn
   apply F_isNonzero f fIn
 
-noncomputable def MvPolynomial.multidiv [DecidableEq σ] [DecidableEq R] [LinearOrder σ]  [Field R] (s : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_isNonzero : ∀ f ∈ F, f ≠ 0) :
+noncomputable def MvPolynomial.multidiv [DecidableEq σ] [DecidableEq R] [LinearOrder σ]  [Field R] [MonomialOrder σ](s : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_isNonzero : ∀ f ∈ F, f ≠ 0) :
     (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
   MvPolynomial.multidiv_help s (F.toList) (FList_isNonzero F_isNonzero)
 
