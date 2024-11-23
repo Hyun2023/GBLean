@@ -86,6 +86,48 @@ def MvPolynomial.instSub_sound [CommRing R] : ∀ (f t : MvPolynomial σ R), f =
   rw [coeff, coeff]; simp
   exact Eq.symm (add_eq_of_eq_sub' rfl)
 
+def MvPolynomial.instSub_sound' [CommRing R] : ∀ (f t : MvPolynomial σ R), f = (MvPolynomial.instSub.sub f t) + t := by
+  intro f t
+  have EQ' : (MvPolynomial.instSub.sub f t) + t = t + (MvPolynomial.instSub.sub f t) := by
+    symm
+    apply AddCommMagma.add_comm
+  rw [EQ']
+  apply MvPolynomial.instSub_sound
+
+def MvPolynomial.instSub_sound'' [CommRing R] : ∀ (f g : MvPolynomial σ R), MvPolynomial.instSub.sub f g = f + (MvPolynomial.instSub.sub 0 g) := by
+  intro f g
+  have EQ : MvPolynomial.instSub.sub f g + g = (f + (MvPolynomial.instSub.sub 0 g)) + g := by
+    rw [<- MvPolynomial.instSub_sound']
+    have EQ' : f + MvPolynomial.instSub.sub 0 g + g = f + (MvPolynomial.instSub.sub 0 g + g) := by
+      apply add_assoc
+    rw [EQ']
+    rw [<- MvPolynomial.instSub_sound' 0 g]
+    exact Eq.symm (AddMonoid.add_zero f)
+  have RCA : IsRightCancelAdd (MvPolynomial σ R) := by
+    apply Finsupp.instIsRightCancelAdd
+  have AC := (@add_right_cancel _ _ _ (MvPolynomial.instSub.sub f g) g (f + (MvPolynomial.instSub.sub 0 g)))
+  exact AC EQ
+
+def MvPolynomial.instSub_smul [CommRing R] : ∀ (f g : MvPolynomial σ R) (c : R), c • (MvPolynomial.instSub.sub f g) = MvPolynomial.instSub.sub (c • f) (c • g) := by
+  intro f g c
+  rw [MvPolynomial.instSub_sound'']
+  nth_rewrite 2 [MvPolynomial.instSub_sound'']
+  have EQ : c • (f + MvPolynomial.instSub.sub 0 g) = c • f + c • (MvPolynomial.instSub.sub 0 g) := by
+    apply DistribSMul.smul_add
+  rw [EQ]
+  clear EQ
+  have EQ : c • MvPolynomial.instSub.sub 0 g = MvPolynomial.instSub.sub 0 (c • g) := by
+    have EQ' : c • MvPolynomial.instSub.sub 0 g + c • g = MvPolynomial.instSub.sub 0 (c • g) + c • g := by
+      rw [<- MvPolynomial.instSub_sound']
+      rw [<- DistribSMul.smul_add]
+      rw [<- MvPolynomial.instSub_sound']
+      exact DistribMulAction.smul_zero c
+    have RCA : IsRightCancelAdd (MvPolynomial σ R) := by
+      apply Finsupp.instIsRightCancelAdd
+    have AC := (@add_right_cancel _ _ _ (c • MvPolynomial.instSub.sub 0 g) (c • g) (MvPolynomial.instSub.sub 0 (c • g)))
+    exact AC EQ'
+  rw [EQ]
+
 def MvPolynomial.toMonomial [CommRing R] [DecidableEq R] (p : MvPolynomial σ R) (h : is_monomial p) :=
   Finset.choose (fun _ => True) p.support (is_monomial_fst h)
 
