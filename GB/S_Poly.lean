@@ -125,9 +125,13 @@ lemma Spol_help_lemma5_help_help [DecidableEq σ] [DecidableEq R] [Field R] [ord
     congr
     . rw [MDEG1 j]
       rw [MDEG1 k]
+      rw [LCM_idem]
+      rw [Monomial.div_same]
       sorry
     . rw [MDEG1 j]
       rw [MDEG1 k]
+      rw [LCM_idem]
+      rw [Monomial.div_same]
       sorry
   sorry
 

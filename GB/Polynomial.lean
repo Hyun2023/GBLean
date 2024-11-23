@@ -64,7 +64,7 @@ lemma is_monomial_nonzero [CommRing R] {p : MvPolynomial σ R} :
 --     -- rw [this] at h
 --     sorry
 
-noncomputable def MvPolynomial.instSub  [CommRing R] : Sub (MvPolynomial σ R) where
+noncomputable def MvPolynomial.instSub [CommRing R] : Sub (MvPolynomial σ R) where
   sub := fun a b => Finsupp.instSub.sub a b
 
 def MvPolynomial.instSub_sound [CommRing R] : ∀ (f t : MvPolynomial σ R), f = t + (MvPolynomial.instSub.sub f t) := by

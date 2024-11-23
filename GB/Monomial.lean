@@ -54,6 +54,12 @@ lemma LCM_idem (m : Monomial σ) : LCM m m = m := by
 noncomputable instance Monomial.instDiv [DecidableEq σ] : Div (Monomial σ) where
   div m1 m2 := Finsupp.zipWith (Nat.sub) (by rfl) m1 m2
 
+lemma Monomial.div_same [DecidableEq σ] (m : Monomial σ) : m / m = 0 := by
+  rw [Monomial.instDiv, HDiv.hDiv, instHDiv]; simp
+  apply Finsupp.ext
+  intro a
+  simp
+
 instance Monomial.instDvd [DecidableEq σ] : Dvd (Monomial σ) where
   dvd f g :=
     ∃ k, g= f*k
