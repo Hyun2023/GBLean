@@ -199,9 +199,8 @@ lemma Spol_help_lemma5_help_help [DecidableEq σ] [DecidableEq R] [Field R] [ord
     rw [EQ'']
     clear EQ''
     have EQ'' : ∑ n' : Fin (n_p + 1), (∑ n'' : Fin ↑n', c ↑↑n'' * d ↑↑n'') • p n' = ∑ n' : Fin n_p, (∑ n'' : Fin (↑n' + 1), c ↑↑n'' * d ↑↑n'') • p (↑↑n' + 1) := by
-      -- rw [Fin.sum_univ_castSucc]
-      -- simp
-      sorry
+      rw [Fin.sum_univ_succ]
+      simp
     rw [EQ'']
     clear EQ''
     apply add_sub_right_comm
@@ -503,28 +502,6 @@ lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : Monomia
   rw [<-EQ6]
   apply EQ4
 
-
-
-
--- lemma func_sum_distr_gen [DecidableEq σ] [DecidableEq R] [CommRing R] {T : Type}
---   (Fn : Finset T)
---   (f : Fn -> MvPolynomial σ R)
---   (m : Monomial σ) :
---   (∑ n' : Fn, f n') m = ∑ n' : Fn, (f n') m := by
---   have EQUIV := Equiv.symm (@Finset.equivFinOfCardEq _ Fn _ rfl)
---   have BJ := Equiv.bijective EQUIV
---   have FIN := (func_sum_distr_gen_fin Fn.card (f ∘ EQUIV.toFun) m)
---   have EQ1 : (∑ n' : { x // x ∈ Fn }, f n') m = (∑ n' : Fin Fn.card, (f ∘ EQUIV.toFun) n') m := by
---     clear FIN
---     have EQ1' := (@Function.Bijective.sum_comp _ _ _ _ _ _ _ BJ (fun n' => f n' m))
---     sorry
---   have EQ2 : ∑ n' : { x // x ∈ Fn }, (f n') m = ∑ n' : Fin Fn.card, ((f ∘ EQUIV.toFun) n') m := by
---     clear FIN
---     have EQ2' := (@Function.Bijective.sum_comp _ _ _ _ _ _ _ BJ (fun n' => f n' m))
---     sorry
---   rw [EQ1]
---   rw [EQ2]
---   exact FIN
 
 
 -- lemma Spol_help_lemma5 [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ ] n (c : Fin n -> R) (f : Fin n -> MvPolynomial σ R)
