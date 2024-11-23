@@ -181,21 +181,15 @@ lemma leading_monomial_sound [DecidableEq σ] [CommRing R] [ord : MonomialOrder 
 lemma leading_monomial_smul_nonzero [DecidableEq σ] [Field R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0)
   (c : R) (NE : c ≠ 0) :
   c • p ≠ 0 := by
-  sorry
-  -- have NEQ : MvPolynomial.coeff (leading_monomial p p_nonzero) (c • p) ≠ 0 := by
-  --   have NE := leading_monomial_nonzero p p_nonzero
-  --   have EQ' := (MvPolynomial.coeff_smul (leading_monomial p p_nonzero) (1 / leading_coeff p p_nonzero) p)
-  --   rw [EQ']
-  --   clear EQ'
-  --   have NE' := leading_coeff_nonzero p p_nonzero
-  --   have NE'' : (1 / leading_coeff p p_nonzero) ≠ 0 := by
-  --     exact one_div_ne_zero NE
-  --   exact smul_ne_zero NE'' NE
-  -- exact Ne.symm (ne_of_apply_ne (MvPolynomial.coeff (leading_monomial p p_nonzero)) fun a ↦ NEQ (id (Eq.symm a)))
+  apply smul_ne_zero <;> assumption
 
-lemma leading_monomial_smul [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0)
+lemma leading_monomial_smul [DecidableEq σ] [Field R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0)
   (c : R) (NE : c ≠ 0) :
   leading_monomial (c • p) (leading_monomial_smul_nonzero p p_nonzero c NE) = leading_monomial p p_nonzero := by
+  rw [leading_monomial, leading_monomial]
+  unfold monomials
+  have EQ := (MvPolynomial.support_smul_eq NE p)
+  -- rw [EQ]
   sorry
 
 def leading_coeff [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : R :=
@@ -223,4 +217,18 @@ lemma leading_coeff_div [DecidableEq σ] [Field R] [MonomialOrder σ ] (p : MvPo
   leading_coeff ((1 / leading_coeff p p_nonzero) • p) (leading_coeff_div_nonzero p p_nonzero) = 1 := by
   nth_rewrite 1 [leading_coeff]
   rw [MvPolynomial.coeff_smul]
-  sorry
+  rw [leading_monomial_smul p p_nonzero]
+  . have EQ : MvPolynomial.coeff (leading_monomial p p_nonzero) p = leading_coeff p p_nonzero := by
+      rfl
+    rw [EQ]
+    rw [HSMul.hSMul, instHSMul]; simp
+    rw [SMul.smul, SMulZeroClass.toSMul, SMulWithZero.toSMulZeroClass, MulActionWithZero.toSMulWithZero]; simp
+    rw [MulAction.toSMul, MulActionWithZero.toMulAction, Module.toMulActionWithZero]; simp
+    unfold inferInstance
+    rw [DistribMulAction.toMulAction, Module.toDistribMulAction, Algebra.toModule]; simp
+    rw [Algebra.toSMul, Algebra.id]; simp
+    rw [Mul.toSMul]; simp
+    refine inv_mul_cancel₀ ?h
+    exact leading_coeff_nonzero p p_nonzero
+  . apply one_div_ne_zero
+    apply leading_coeff_nonzero
