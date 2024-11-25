@@ -40,26 +40,43 @@ noncomputable instance Monomial.instMul : Mul (Monomial σ) where
 noncomputable def LCM : Monomial σ → Monomial σ → Monomial σ :=
   fun m1 m2 => Finsupp.zipWith (Nat.max) (by rfl) m1 m2
 
+lemma LCM_idem (m : Monomial σ) : LCM m m = m := by
+  unfold LCM
+  rw [Finsupp.zipWith]
+  rw [Finsupp.onFinset]; simp
+  apply Finsupp.ext
+  intro a
+  simp
+
 -- def LCM_computable [DecidableEq σ] : Computable₂ (@LCM σ) := by
 --   sorry
 
 noncomputable instance Monomial.instDiv [DecidableEq σ] : Div (Monomial σ) where
   div m1 m2 := Finsupp.zipWith (Nat.sub) (by rfl) m1 m2
 
+lemma Monomial.div_same [DecidableEq σ] (m : Monomial σ) : m / m = 0 := by
+  rw [Monomial.instDiv, HDiv.hDiv, instHDiv]; simp
+  apply Finsupp.ext
+  intro a
+  simp
+
 instance Monomial.instDvd [DecidableEq σ] : Dvd (Monomial σ) where
   dvd f g :=
-    ∃ k, f= g*k
+    ∃ k, g= f*k
 
 -- f is divisible by g
 def Monomial.instDvd' [DecidableEq σ] (f g : Monomial σ) : Prop :=
-  (g.support ⊆ f.support) ∧ (∀ (x : σ) (GS : x ∈ g.support), g.toFun x <= f.toFun x)
+  (f.support ⊆ g.support) ∧ (∀ (x : σ) (GS : x ∈ f.support), f.toFun x <= g.toFun x)
+
+def Monomial.instDvd'' [DecidableEq σ] (f g : Monomial σ) : Prop :=
+  f.toFun <= g.toFun
 
 instance Monomial.instDvd'_decidable [DecidableEq σ] (f g : Monomial σ) : Decidable (Monomial.instDvd' f g) := by
   rw [instDvd']
   apply instDecidableAnd
 
 def Monomial.instDvd'_div [DecidableEq σ] (f g : Monomial σ) (Dvd' : Monomial.instDvd' f g):
-  f = g * (f / g) := by
+  g = f * (g / f) := by
   rw [instDvd'] at Dvd'
   obtain ⟨_, H2⟩ := Dvd'
   rw [HDiv.hDiv, instHDiv]; simp
@@ -69,10 +86,10 @@ def Monomial.instDvd'_div [DecidableEq σ] (f g : Monomial σ) (Dvd' : Monomial.
   rw [Add.add, Finsupp.instAdd]; simp
   apply Finsupp.ext
   intro a; simp
-  rcases em (a ∈ g.support) with h|h
+  rcases em (a ∈ f.support) with h|h
   . exact Eq.symm (Nat.add_sub_of_le (H2 a h))
   . simp at h; rw [h]
-    exact Eq.symm (Nat.zero_add (f.toFun a - 0))
+    exact Eq.symm (Nat.zero_add (g.toFun a - 0))
 
 def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
   f ∣ g <-> Monomial.instDvd' f g := by
@@ -88,21 +105,36 @@ def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
       intro x GS
       simp
       constructor
-      . have SUPP := (Finsupp.mem_support_toFun g x)
+      . have SUPP := (Finsupp.mem_support_toFun f x)
         rw [SUPP] at GS
         left
         intro H
         exact GS H
       . intro H
         exfalso
-        have SUPP := (Finsupp.mem_support_toFun g x)
+        have SUPP := (Finsupp.mem_support_toFun f x)
         rw [SUPP] at GS
         exact GS H
     . intro x _
       apply Nat.le_add_right
-  . use (f / g)
+  . use (g / f)
     apply Monomial.instDvd'_div
     exact H
+
+def Monomial.instDvd_equiv' [DecidableEq σ] (f g : Monomial σ) :
+  Monomial.instDvd' f g <-> Monomial.instDvd'' f g := by
+  rw [instDvd', instDvd'']; simp
+  constructor <;> intro H
+  . apply Pi.le_def.mpr
+    intro x
+    rcases em (f.toFun x = 0) with p|p
+    . exact StrictMono.minimal_preimage_bot (fun ⦃a b⦄ a ↦ a) p (g.toFun x)
+    . obtain ⟨SUP, LE⟩ := H
+      apply LE _ p
+  . constructor
+    . exact Finsupp.support_mono H
+    . intro x H'
+      apply H
 
 -- Monomial Order
 class MonomialOrder (σ : Type) [DecidableEq σ] extends (LinearOrder (Monomial σ)) where
@@ -140,5 +172,74 @@ def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p 
 def leading_monomial_unsafe [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
   @Option.get! _ MonomialExists (@Finset.max _ ord.toLinearOrder (monomials p))
 
--- def leading_coeff [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0): R :=
---   MvPolynomial.coeff (leading_monomial p p_nonzero) p
+lemma leading_monomial_in [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
+  leading_monomial p p_nonzero ∈ p.support := by
+  unfold leading_monomial
+  unfold monomials
+  apply Finset.max'_mem
+
+lemma leading_monomial_nonzero [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
+  MvPolynomial.coeff (leading_monomial p p_nonzero) p ≠ 0 := by
+  have MEM := leading_monomial_in p p_nonzero
+  apply (@Finsupp.mem_support_iff _ _ _ p (leading_monomial p p_nonzero)).mp at MEM
+  apply MEM
+
+lemma leading_monomial_sound [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0)
+  (m : Monomial σ) (m_in : m ∈ p.support) :
+  m ≤ leading_monomial p p_nonzero := by
+  unfold leading_monomial
+  unfold monomials
+  apply Finset.le_max'
+  assumption
+
+lemma leading_monomial_smul_nonzero [DecidableEq σ] [Field R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0)
+  (c : R) (NE : c ≠ 0) :
+  c • p ≠ 0 := by
+  apply smul_ne_zero <;> assumption
+
+lemma leading_monomial_smul [DecidableEq σ] [Field R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0)
+  (c : R) (NE : c ≠ 0) :
+  leading_monomial (c • p) (leading_monomial_smul_nonzero p p_nonzero c NE) = leading_monomial p p_nonzero := by
+  rw [leading_monomial, leading_monomial]
+  unfold monomials
+  have EQ := (MvPolynomial.support_smul_eq NE p)
+  apply LE.le.antisymm'
+  . apply Finset.max'_subset
+    rw [EQ]
+  . apply Finset.max'_subset
+    rw [EQ]
+
+def leading_coeff [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : R :=
+  MvPolynomial.coeff (leading_monomial p p_nonzero) p
+
+lemma leading_coeff_nonzero [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
+  leading_coeff p p_nonzero ≠ 0 := by
+  unfold leading_coeff
+  apply leading_monomial_nonzero
+
+lemma leading_coeff_div_nonzero [DecidableEq σ] [Field R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
+  (1 / leading_coeff p p_nonzero) • p ≠ 0 := by
+  apply leading_monomial_smul_nonzero
+  . assumption
+  . apply one_div_ne_zero
+    apply leading_coeff_nonzero
+
+lemma leading_coeff_div [DecidableEq σ] [Field R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
+  leading_coeff ((1 / leading_coeff p p_nonzero) • p) (leading_coeff_div_nonzero p p_nonzero) = 1 := by
+  nth_rewrite 1 [leading_coeff]
+  rw [MvPolynomial.coeff_smul]
+  rw [leading_monomial_smul p p_nonzero]
+  . have EQ : MvPolynomial.coeff (leading_monomial p p_nonzero) p = leading_coeff p p_nonzero := by
+      rfl
+    rw [EQ]
+    rw [HSMul.hSMul, instHSMul]; simp
+    rw [SMul.smul, SMulZeroClass.toSMul, SMulWithZero.toSMulZeroClass, MulActionWithZero.toSMulWithZero]; simp
+    rw [MulAction.toSMul, MulActionWithZero.toMulAction, Module.toMulActionWithZero]; simp
+    unfold inferInstance
+    rw [DistribMulAction.toMulAction, Module.toDistribMulAction, Algebra.toModule]; simp
+    rw [Algebra.toSMul, Algebra.id]; simp
+    rw [Mul.toSMul]; simp
+    refine inv_mul_cancel₀ ?h
+    exact leading_coeff_nonzero p p_nonzero
+  . apply one_div_ne_zero
+    apply leading_coeff_nonzero
