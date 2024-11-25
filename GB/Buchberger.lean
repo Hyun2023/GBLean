@@ -75,13 +75,37 @@ def buchberger_step_monotone
 
 def buchberger_step_keep_nonzero
   (G: Finset (MvPolynomial σ R))
-  (G_queue : Finset (MvPolynomial σ R))
-  (G_nonzero : ∀ g ∈ G, g ≠ 0)
-  (G_queue_nonzero : ∀ g ∈ G_queue, g ≠ 0  ) :
-  ∀ g ∈ (buchberger_step (G.product G).toList G_queue G (G_nonzero)), g ≠ 0 := by
-  induction (G.product G).toList generalizing G_queue with
-  |nil => sorry
-  |cons hd tl ih => sorry
+  (G_nonzero : ∀ g ∈ G, g ≠ 0) :
+  ∀ g ∈ (buchberger_step (G.product G).toList G G (G_nonzero)), g ≠ 0 := by
+  let G' := G
+  have G'eq : G' = G := by rfl;
+  clear_value G'
+  have G'_nonzero : ∀ g ∈ G', g ≠ 0 := by rw [G'eq];assumption
+  nth_rewrite 3 [<-G'eq];clear G'eq
+  induction (G.product G).toList generalizing G' with
+  |nil => unfold buchberger_step;simp;exact fun a ↦ G'_nonzero 0 a rfl
+  |cons hd tl ih => {
+    simp at ih
+    have (p,q):=hd;unfold buchberger_step;by_cases pqeq : p=q
+    {
+      simp [pqeq];apply ih;exact fun a ↦ G'_nonzero 0 a rfl
+    }
+    {
+      unfold buchberger_step;simp [pqeq]
+      by_cases red0 : s_red p q G G_nonzero = 0
+      {
+        simp [red0];unfold buchberger_step at ih;apply ih;exact fun a ↦ G'_nonzero 0 a rfl
+      }
+      {
+        simp [pqeq,red0]
+        unfold buchberger_step at ih;simp at ih
+        simp [<- Finset.union_assoc]
+        apply (ih (G' ∪ {s_red p q G G_nonzero}))
+        simp;constructor;exact fun a ↦ G'_nonzero 0 a rfl
+        exact fun a ↦ red0 (id (Eq.symm a))
+      }
+    }
+  }
 
 def buchberger_step_keep_nonempty
   (G: Finset (MvPolynomial σ R))
@@ -243,7 +267,7 @@ noncomputable def buchberger_algorithm [Finite σ] [IsNoetherianRing R]
   if h : G' = G then
     G
   else
-    buchberger_algorithm G' (by { apply buchberger_step_keep_nonzero G;assumption }) (
+    buchberger_algorithm G' (by { apply buchberger_step_keep_nonzero G }) (
       by { apply buchberger_step_keep_nonempty; all_goals assumption}
     )
   termination_by (Ideal.span (toMvPolynomial_Finset (@leading_monomial_finset σ R _ _ ord G)).toSet : Ideal (MvPolynomial σ R))
@@ -391,21 +415,29 @@ lemma buchberger_correct
     have GB_nonzero : ∀g ∈ GB, g ≠ 0 := buchberger_algorithm_nonzero G G_nonzero G_nonempty
     have GB_nonempty : Nonempty GB := buchberger_algorithm_nonempty G G_nonzero G_nonempty
     have GB_basis : (Ideal.span GB : Ideal (MvPolynomial σ R) )  = Ideal.span G := buchberger_algorithm_same_span G G_nonzero G_nonempty
-    rw [BuchbergerCriterion (G_nonzero := GB_nonzero)]
-    any_goals trivial
+    clear_value GB
+    rw [BuchbergerCriterion (G_nonzero := GB_nonzero) (G_basis := GB_basis)]
     have H := buchberger_fixpoint G G_nonzero G_nonempty
     simp at H
     have GB_fix := H
     contrapose! H
-    rw [<-GB_def]
+    -- rw doesn't work
+    -- rw [<-GB_def]
+    -- simp only or simp_rw works
+    simp only [<-GB_def]
+    simp_rw [<-GB_def] at GB_fix
     unfold buchberger_step
 
     have ⟨ p, q, pin, qin, pneq , S_zero⟩ := H
 
-    induction ((GB.product GB).toList) with
+    have BuchbergerInvariant : (p,q) ∈ (GB.product GB).toList := sorry
+    revert BuchbergerInvariant
+    induction (GB.product GB).toList with
     |nil =>{
-      -- GB가 Nonempty인데 모순
-      sorry
+      intros H;contradiction
+      -- intros H pair_list_nonempty;
+      -- GB가 Nonempty인데 GB X GB가 [] 인게 모순
+      -- sorry -- using Nonempty
     }
     |cons hd tl ih =>{
       -- (hd = (p,q) 이거나 tl에 (p,q)가 있음)
@@ -417,32 +449,37 @@ lemma buchberger_correct
         intros H
         have monotone := buchberger_step_monotone tl (GB ∪ {s_red p q GB GB_nonzero}) GB GB_nonzero
         unfold s_red at monotone
+
         rw [H] at monotone
         by_cases Sin : ((S p q).multidiv GB GB_nonzero).2 ∈ GB
         {
           have : (GB ∪ {((S p q).multidiv GB GB_nonzero).2}) = GB := by {
           simp [<- Finset.insert_eq];assumption
           }
-          rw [this] at H;unfold buchberger_step at H; contradiction
+
+          -- We need to prove that Sin is not true!
+          sorry
         }
         {
           -- Because S is not in GB, GB ∪ S is larger than GB, which is contradict to monotone
+
           sorry
         }
       }
       |inr pq => {
+          intros pairprop
           have (p',q') := hd;simp
           by_cases pqeq' : p' = q'
-          · simp [pqeq'];unfold buchberger_step;assumption
+          · simp [pqeq'];unfold buchberger_step;apply ih;assumption
           simp [pqeq']
           by_cases name : s_red p' q' GB GB_nonzero = 0
-          · simp [name];unfold buchberger_step;assumption
+          · simp [name];unfold buchberger_step;apply ih;assumption
           simp [name]
           -- 위와 같은 증명, buchberger_step에서 G_queue 위치에 있는게 작아질수는 없다는걸 증명하면 됨
           sorry
       }
     }
-    sorry
+
   }
 
 
