@@ -35,7 +35,11 @@ variable {σ: Type} {R: Type}
 
 -- def Spoly (f g : MvPolynomial σ R) : MvPolynomial σ R := sorry
 
-def s_red [MonomialOrder σ] (p q : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_nonzero : ∀ f ∈ F, f ≠ 0): MvPolynomial σ R :=
+noncomputable def s_red
+    [MonomialOrder σ]
+    (p q : MvPolynomial σ R)
+    (F : Finset (MvPolynomial σ R))
+    (F_nonzero : ∀ f ∈ F, f ≠ 0): MvPolynomial σ R :=
   ((S p q).multidiv F F_nonzero).snd
 
 lemma s_red_nin (f g : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_nonzero : ∀ f ∈ F, f ≠ 0) :
