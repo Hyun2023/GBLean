@@ -40,7 +40,7 @@ noncomputable def s_red
     (p q : MvPolynomial σ R)
     (F : Finset (MvPolynomial σ R))
     (F_nonzero : ∀ f ∈ F, f ≠ 0): MvPolynomial σ R :=
-  ((S p q).multidiv F F_nonzero).snd
+  ((Spol p q).multidiv F F_nonzero).snd
 
 lemma s_red_nin (f g : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_nonzero : ∀ f ∈ F, f ≠ 0) :
  s_red f g G G_nonzero ∉ Ideal.span (toMvPolynomial_Finset (leading_monomial_finset G)).toSet := sorry
@@ -455,9 +455,9 @@ lemma buchberger_correct
         unfold s_red at monotone
 
         rw [H] at monotone
-        by_cases Sin : ((S p q).multidiv GB GB_nonzero).2 ∈ GB
+        by_cases Sin : ((Spol p q).multidiv GB GB_nonzero).2 ∈ GB
         {
-          have : (GB ∪ {((S p q).multidiv GB GB_nonzero).2}) = GB := by {
+          have : (GB ∪ {((Spol p q).multidiv GB GB_nonzero).2}) = GB := by {
           simp [<- Finset.insert_eq];assumption
           }
 
