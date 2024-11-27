@@ -243,3 +243,9 @@ lemma leading_coeff_div [DecidableEq σ] [Field R] [MonomialOrder σ ] (p : MvPo
     exact leading_coeff_nonzero p p_nonzero
   . apply one_div_ne_zero
     apply leading_coeff_nonzero
+
+lemma monomial_leading_monomial [DecidableEq σ] [Field R] [MonomialOrder σ ] (g : MvPolynomial σ R) (g_nonzero : g ≠ 0)
+  (l_nonzero : (MvPolynomial.monomial (leading_monomial g g_nonzero)) (1 : R) ≠ 0) :
+  leading_monomial ((MvPolynomial.monomial (leading_monomial g g_nonzero)) (1 : R)) l_nonzero = leading_monomial g g_nonzero := by
+  unfold leading_monomial monomials
+  sorry
