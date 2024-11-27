@@ -71,7 +71,9 @@ lemma MonomialGen (m : MvPolynomial σ R) (mons : Finset (Monomial σ))
   (is_monomial m) → ∃ mi : mons, ∃ k_poly : (MvPolynomial σ R), m = k_poly * mi :=
   by
     intro mon; have ismon := mon
-    rw [is_monomial] at mon; rcases mon with ⟨mon, ⟨⟨min, _⟩, munique⟩⟩
+    rw [is_monomial] at mon
+    rcases mon with ⟨⟨mon, ⟨⟨min, _⟩, munique⟩⟩, _⟩
+    simp at munique
     rw [Ideal.span, Finsupp.mem_span_iff_linearCombination] at m_mem
     rcases m_mem with ⟨l, hm⟩
     rw [Finsupp.linearCombination_apply (MvPolynomial σ R)] at hm; simp
@@ -126,13 +128,12 @@ lemma MonomialGen (m : MvPolynomial σ R) (mons : Finset (Monomial σ))
     have meq :
       m = (monomial mon) (m.coeff mon) := by {
         apply m.ext; intros m_1; simp
-        rcases (eq_or_ne mon m_1) with ⟨eq, neq⟩; simp
-        split_ifs
-        congr; symm; trivial
-        rw [← m.not_mem_support_iff]
-        rintro ins; have ttmp : (m_1 = mon) := by { apply munique; trivial }
-        have triv : (m_1 ≠ mon) := by { symm; assumption }
-        apply triv; assumption
+        split_ifs with neq_m_m1
+        rw [neq_m_m1]
+        specialize (munique m_1)
+        contrapose! munique
+        constructor; trivial
+        symm; trivial
       }
     rw [meq]
     exists (monomial xs (coeff mon m))
@@ -191,8 +192,6 @@ def Reduction_unique  (s : MvPolynomial σ R) (G : Finset (MvPolynomial σ R)) (
     sorry
 }
 
-def S (f g : MvPolynomial σ R) : MvPolynomial σ R := sorry
-
 lemma GB_multidiv (G : Finset (MvPolynomial σ R))  (G_nonzero : ∀ g ∈ G, g ≠ 0) (I : Ideal (MvPolynomial σ R)) (f  : MvPolynomial σ R) :
   Groebner G I -> (
     f ∈ I ↔ (f.multidiv G G_nonzero).snd = 0
@@ -203,11 +202,11 @@ lemma GB_multidiv (G : Finset (MvPolynomial σ R))  (G_nonzero : ∀ g ∈ G, g 
     {
       intros
       have H : ReductionProp f G G_nonzero I 0 := by {
-        unfold ReductionProp;exists f;constructor;assumption
-        constructor;simp
-        left;simp
+        unfold ReductionProp; exists f; constructor; assumption
+        constructor; simp
+        left; simp
       }
-      have H2 : ReductionProp f G G_nonzero I (f.multidiv G G_nonzero).snd := by{
+      have H2 : ReductionProp f G G_nonzero I (f.multidiv G G_nonzero).snd := by {
         unfold ReductionProp
         exists (∑ (g ∈ G), ((f.multidiv G G_nonzero).fst g)*(g))
         constructor
@@ -215,35 +214,37 @@ lemma GB_multidiv (G : Finset (MvPolynomial σ R))  (G_nonzero : ∀ g ∈ G, g 
           apply Ideal.mul_mem_left
           rw [<-G_span]
           apply Ideal.subset_span;assumption
-        · apply (f.multidiv_correct G G_nonzero)
+        -- · apply (f.multidiv_correct G G_nonzero)
+        · sorry
       }
       have H3 := (Reduction_unique f G GB G_nonzero H H2)
       exact id (Eq.symm H3)
     }
     {
       intros r_prop
-      have ⟨H,_⟩ := f.multidiv_correct G G_nonzero
-      rw [H, <- G_span, r_prop]
-      simp
-      apply Ideal.sum_mem
-      intros c cin
-      apply Ideal.mul_mem_left
-      apply Ideal.subset_span;assumption
+      sorry
+      -- have ⟨H, _⟩ := f.multidiv_correct G G_nonzero
+      -- rw [H, <- G_span, r_prop]
+      -- simp
+      -- apply Ideal.sum_mem
+      -- intros c cin
+      -- apply Ideal.mul_mem_left
+      -- apply Ideal.subset_span;assumption
     }
 
 theorem BuchbergerCriterion :
   forall (G : Finset (MvPolynomial σ R)) (I : Ideal (MvPolynomial σ R))
   (G_basis : Ideal.span G = I)
   (G_nonzero : ∀ g ∈ G, g ≠ 0 ),
-    ( Groebner G I ) ↔ (∀ fi fj, fi∈ G -> fj ∈ G -> fi ≠ fj → ((S fi fj).multidiv G G_nonzero).2 = 0 ) := by
+    ( Groebner G I ) ↔ (∀ fi fj, fi∈ G -> fj ∈ G -> fi ≠ fj → ((Spol fi fj).multidiv G G_nonzero).2 = 0 ) := by
     intros G I G_basis G_nonzero
     constructor
     {
       -- (==>)
       intros GB fi fj neq
-      have Sin: (S fi fj) ∈ I := by sorry
+      have Sin: (Spol fi fj) ∈ I := by sorry
       intros
-      exact (GB_multidiv G G_nonzero I (S fi fj) GB).mp Sin
+      exact (GB_multidiv G G_nonzero I (Spol fi fj) GB).mp Sin
     }
     {
       -- (<==)
