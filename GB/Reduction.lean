@@ -158,9 +158,14 @@ lemma MvPolynomial.div_correct [DecidableEq σ] [DecidableEq R] [Field R] [ord :
     obtain ⟨EQ0, EQ1⟩ := EQ
     have EQ' : f - f.divMonomial (leading_monomial g g_nonzero) * g = f.modMonomial (((monomial (leading_monomial g g_nonzero)) 1).toMonomial gm) := by
       clear EQ1
-      rw [EQ0]
+      have EQ2 : f = f.divMonomial (leading_monomial g g_nonzero) * g + f.modMonomial (((monomial (leading_monomial g g_nonzero)) 1).toMonomial gm) := by
+        have EQ3 : (monomial (leading_monomial g g_nonzero)) 1 * f.divMonomial (((monomial (leading_monomial g g_nonzero)) 1).toMonomial gm) = f.divMonomial (leading_monomial g g_nonzero) * g := by
+          sorry
+        rw [<-EQ3]
+        exact EQ0
       clear EQ0
-      sorry
+      symm
+      apply eq_sub_of_add_eq'
     rw [EQ']
     clear EQ'
     have EQ' : leading_monomial ((monomial (leading_monomial g g_nonzero)) 1) (is_monomial_nonzero gm) = leading_monomial g g_nonzero := by
