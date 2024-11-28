@@ -324,6 +324,7 @@ lemma fundamental_thm_of_buchberger_step
           -- clear X'
           -- absurd member
           -- apply s_red_nin
+          sorry
 
         }
 
