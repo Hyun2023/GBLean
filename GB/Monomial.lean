@@ -247,5 +247,17 @@ lemma leading_coeff_div [DecidableEq σ] [Field R] [MonomialOrder σ ] (p : MvPo
 lemma monomial_leading_monomial [DecidableEq σ] [Field R] [MonomialOrder σ ] (g : MvPolynomial σ R) (g_nonzero : g ≠ 0)
   (l_nonzero : (MvPolynomial.monomial (leading_monomial g g_nonzero)) (1 : R) ≠ 0) :
   leading_monomial ((MvPolynomial.monomial (leading_monomial g g_nonzero)) (1 : R)) l_nonzero = leading_monomial g g_nonzero := by
-  unfold leading_monomial monomials
-  sorry
+  let p := (MvPolynomial.monomial (leading_monomial g g_nonzero)) (1 : R)
+  have EQ : leading_monomial p l_nonzero = leading_monomial g g_nonzero := by
+    have EQ' : p = Finsupp.single (leading_monomial g g_nonzero) 1 := by
+      rw [MvPolynomial.single_eq_monomial]
+    rw [Finsupp.single] at EQ'; simp at EQ'
+    have EQ'' : p.support = {leading_monomial g g_nonzero} := by
+      rw [EQ']
+      rfl
+    have EQ''' := (leading_monomial_in p l_nonzero)
+    rw [EQ''] at EQ'''
+    rw [<-Set.mem_singleton_iff]
+    exact Set.mem_toFinset.mp EQ'''
+  unfold p at EQ
+  exact EQ
