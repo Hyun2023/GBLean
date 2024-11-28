@@ -150,29 +150,46 @@ lemma MvPolynomial.div_correct [DecidableEq σ] [DecidableEq R] [Field R] [ord :
     clear EQ
     symm
     apply add_sub_cancel_right
-  . have gm : is_monomial ((monomial (leading_monomial g g_nonzero)) (1 : R)) := by
-      apply is_monomial_monomial
-    have EQ := (MvPolynomial.divMonomial'_correct f (leading_monomial g g_nonzero) gm)
-    unfold divMonomial' at EQ
-    simp at EQ
-    obtain ⟨EQ0, EQ1⟩ := EQ
-    have EQ' : f - f.divMonomial (leading_monomial g g_nonzero) * g = f.modMonomial (((monomial (leading_monomial g g_nonzero)) 1).toMonomial gm) := by
-      clear EQ1
-      have EQ2 : f = f.divMonomial (leading_monomial g g_nonzero) * g + f.modMonomial (((monomial (leading_monomial g g_nonzero)) 1).toMonomial gm) := by
-        have EQ3 : (monomial (leading_monomial g g_nonzero)) 1 * f.divMonomial (((monomial (leading_monomial g g_nonzero)) 1).toMonomial gm) = f.divMonomial (leading_monomial g g_nonzero) * g := by
-          sorry
-        rw [<-EQ3]
-        exact EQ0
-      clear EQ0
-      symm
-      apply eq_sub_of_add_eq'
-    rw [EQ']
-    clear EQ'
-    have EQ' : leading_monomial ((monomial (leading_monomial g g_nonzero)) 1) (is_monomial_nonzero gm) = leading_monomial g g_nonzero := by
-      clear EQ0 EQ1
-      apply monomial_leading_monomial
-    rw [EQ'] at EQ1
-    exact EQ1
+  . symm
+    apply or_iff_not_imp_right.mpr
+    intro H
+    have NEX : (¬ ∃ m ∈ monomials (f - f.divMonomial (leading_monomial g g_nonzero) * g), leading_monomial g g_nonzero ∣ m) := by
+      intro H'
+      obtain ⟨m, ⟨mP1, mP2⟩⟩ := H'
+      rw [Monomial.instDvd_equiv] at mP2
+      rw [Monomial.instDvd_equiv'] at mP2
+      rw [Monomial.instDvd''] at mP2
+
+      sorry
+    intro m H' X
+    apply NEX
+    use m
+    -- have gm : is_monomial ((monomial (leading_monomial g g_nonzero)) (1 : R)) := by
+    --   apply is_monomial_monomial
+    -- have EQ := (MvPolynomial.divMonomial'_correct f (leading_monomial g g_nonzero) gm)
+    -- unfold divMonomial' at EQ
+    -- simp at EQ
+    -- obtain ⟨EQ0, EQ1⟩ := EQ
+    -- sorry
+    -- have EQ' : f - f.divMonomial (leading_monomial g g_nonzero) * g = f.modMonomial (((monomial (leading_monomial g g_nonzero)) 1).toMonomial gm) := by
+    --   clear EQ1
+    --   have EQ2 : f = f.divMonomial (leading_monomial g g_nonzero) * g + f.modMonomial (((monomial (leading_monomial g g_nonzero)) 1).toMonomial gm) := by
+    --     have EQ3 : (monomial (leading_monomial g g_nonzero)) 1 * f.divMonomial (((monomial (leading_monomial g g_nonzero)) 1).toMonomial gm) = f.divMonomial (leading_monomial g g_nonzero) * g := by
+    --       sorry
+    --     rw [<-EQ3]
+    --     exact EQ0
+    --   clear EQ0
+    --   symm
+    --   apply eq_sub_of_add_eq'
+    --   symm
+    --   exact EQ2
+    -- rw [EQ']
+    -- clear EQ'
+    -- have EQ' : leading_monomial ((monomial (leading_monomial g g_nonzero)) 1) (is_monomial_nonzero gm) = leading_monomial g g_nonzero := by
+    --   clear EQ0 EQ1
+    --   apply monomial_leading_monomial
+    -- rw [EQ'] at EQ1
+    -- exact EQ1
 
 noncomputable def MvPolynomial.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] [MonomialOrder σ] (s : MvPolynomial σ R) (F : List (MvPolynomial σ R)) (F_isNonzero : ∀ f ∈ F, f ≠ 0): (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
   match F with
