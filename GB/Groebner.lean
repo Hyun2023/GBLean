@@ -192,6 +192,8 @@ def Reduction_unique  (s : MvPolynomial σ R) (G : Finset (MvPolynomial σ R)) (
     sorry
 }
 
+def S (f g : MvPolynomial σ R) : MvPolynomial σ R := sorry
+
 lemma GB_multidiv (G : Finset (MvPolynomial σ R))  (G_nonzero : ∀ g ∈ G, g ≠ 0) (I : Ideal (MvPolynomial σ R)) (f  : MvPolynomial σ R) :
   Groebner G I -> (
     f ∈ I ↔ (f.multidiv G G_nonzero).snd = 0
@@ -202,11 +204,11 @@ lemma GB_multidiv (G : Finset (MvPolynomial σ R))  (G_nonzero : ∀ g ∈ G, g 
     {
       intros
       have H : ReductionProp f G G_nonzero I 0 := by {
-        unfold ReductionProp; exists f; constructor; assumption
-        constructor; simp
-        left; simp
+        unfold ReductionProp;exists f;constructor;assumption
+        constructor;simp
+        left;simp
       }
-      have H2 : ReductionProp f G G_nonzero I (f.multidiv G G_nonzero).snd := by {
+      have H2 : ReductionProp f G G_nonzero I (f.multidiv G G_nonzero).snd := by{
         unfold ReductionProp
         exists (∑ (g ∈ G), ((f.multidiv G G_nonzero).fst g)*(g))
         constructor
@@ -232,24 +234,88 @@ lemma GB_multidiv (G : Finset (MvPolynomial σ R))  (G_nonzero : ∀ g ∈ G, g 
       -- apply Ideal.subset_span;assumption
     }
 
+noncomputable def linearcomb_measure (G : Finset (MvPolynomial σ R)) (l : ↑↑G →₀ MvPolynomial σ R) : Monomial σ
+  := @Finset.max' _ ord.toLinearOrder (Finset.image (fun x => leading_monomial ((Subtype.val x) * l x) sorry) (l.support)) sorry
+
+instance wf : WellFoundedRelation (Monomial σ) where
+  rel := fun x y => x < y
+  wf := by {
+    cases ord.isWellOrder with
+    | @mk A B C =>
+      cases C with
+      | @mk WF => trivial
+  }
+
 theorem BuchbergerCriterion :
   forall (G : Finset (MvPolynomial σ R)) (I : Ideal (MvPolynomial σ R))
   (G_basis : Ideal.span G = I)
   (G_nonzero : ∀ g ∈ G, g ≠ 0 ),
-    ( Groebner G I ) ↔ (∀ fi fj, fi∈ G -> fj ∈ G -> fi ≠ fj → ((Spol fi fj).multidiv G G_nonzero).2 = 0 ) := by
+    ( Groebner G I ) ↔ (∀ fi fj, fi∈ G -> fj ∈ G -> fi ≠ fj → ((S fi fj).multidiv G G_nonzero).2 = 0 ) := by
     intros G I G_basis G_nonzero
     constructor
     {
       -- (==>)
       intros GB fi fj neq
-      have Sin: (Spol fi fj) ∈ I := by sorry
+      have Sin: (S fi fj) ∈ I := by sorry
       intros
-      exact (GB_multidiv G G_nonzero I (Spol fi fj) GB).mp Sin
+      exact (GB_multidiv G G_nonzero I (S fi fj) GB).mp Sin
     }
     {
       -- (<==)
       intros cond
-      sorry
+      unfold Groebner
+      constructor; trivial
+      apply le_antisymm
+      · apply Ideal.span_mono
+        /-
+        prove
+        ↑(toMvPolynomial_Finset (leading_monomial_finset G)) ⊆ toMvPolynomial_Set (leading_monomial_set ↑I)
+        -/
+        sorry
+      · rw [Ideal.span_le]
+        intros x L
+        unfold toMvPolynomial_Set at L
+        rw [Set.mem_image] at L
+        obtain ⟨x_1, L, L'⟩ := L
+        rw [← L']; clear L'
+        unfold leading_monomial_set at L
+        rw [Set.mem_setOf_eq] at L
+        obtain ⟨p, p_nonzero, L, L'⟩ := L
+        rw [L']; clear L'
+        rw [← G_basis] at L
+        rw [SetLike.mem_coe] at L
+        rw [SetLike.mem_coe]
+        rw [Ideal.span, Finsupp.mem_span_iff_linearCombination] at L
+        obtain ⟨l, comb⟩ := L
+        rw [Finsupp.linearCombination_apply (MvPolynomial σ R)] at comb
+        clear x x_1
+        generalize H : linearcomb_measure G l = measure
+        revert p H l
+        apply (@WellFounded.induction _ ((wf).rel) ((wf).wf) _ measure)
+        intros measure IH p p_nonzero l l_sum l_measure
+        rw [← (Finsupp.sum_filter_add_sum_filter_not (fun x => leading_monomial (l x * x.val) sorry = measure))] at l_sum
+        have l_filter := Finsupp.support_filter (fun x ↦ leading_monomial (l x * x.val) sorry = measure) l
+        generalize h : (Finsupp.filter (fun x ↦ leading_monomial (l x * x.val) sorry = measure) l) = l' at l_sum l_filter
+        clear h
+        let l'' := Finsupp.onFinset l'.support (fun x => (monomial (leading_monomial (l x * x.val) sorry)) (leading_coeff (l x * x.val) sorry)) sorry
+        have E : l' = l'' + (l' - l'') := by sorry
+        rw [E] at l_sum
+        rw [Finsupp.sum_add_index] at l_sum
+        · nth_rewrite 1 [Finsupp.sum] at l_sum
+          generalize EE : ∑ a ∈ l''.support, l'' a • a.val = I
+
+          sorry
+        · sorry
+        · sorry
+        --rw [← (Finsupp.sum_filter_add_sum_filter_not (fun x => leading_monomial (lx * ↑x) = measure))] at l_sum
+        -- unfold Finsupp.sum at comb; simp at comb
+-- Finsupp.sum_filter_add_sum_filter_not
+-- Finsupp.support_add_eq
+-- Finset.sum_disjUnion
+-- Finset.sum_union_inter
+-- Finset.sum_union
+        -- rw [Finset.sum_congr rfl] at comb
+        -- any_goals intro x xin; rw [MvPolynomial.as_sum (l x)]
     }
 
 end Groebner
