@@ -509,7 +509,7 @@ instance opMonomialWellFounded [DecidableEq σ] [ord : MonomialOrder σ] : WellF
         (some a'))
       a')
     -- apply IND'
-
+    -- seems lean bug
     sorry
 
 instance opMonomialWellFoundedRelation [DecidableEq σ] [ord : MonomialOrder σ] : WellFoundedRelation (Option (Monomial σ)) where
