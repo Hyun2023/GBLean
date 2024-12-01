@@ -276,7 +276,11 @@ lemma fundamental_thm_of_buchberger_step
             trivial
           }
           have empty_or_not: ∀ G: Finset σ, G = ∅ ∨ (∃ g, g ∈ G) := by {
-            sorry
+            intro G
+            rw [Classical.or_iff_not_imp_left]
+            intro EMPTY
+            refine Finset.Nonempty.exists_mem ?h
+            exact Finset.nonempty_iff_ne_empty.mpr EMPTY
           }
 
           have exg: ∃ g, g ∈ G := by {
