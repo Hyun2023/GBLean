@@ -480,3 +480,6 @@ instance opLinearOrder {T : Type} [LE : LinearOrder T] : LinearOrder (Option T) 
         unfold Option.lt
         unfold compareOfLessAndEq
         simp
+
+instance opMonomialLinearOrder [DecidableEq σ] [ord : MonomialOrder σ] : LinearOrder (Option (Monomial σ)) :=
+  opLinearOrder
