@@ -333,7 +333,9 @@ theorem BuchbergerCriterion :
         generalize h : (Finsupp.filter (fun x ↦ leading_monomial (l x * x.val) sorry = measure) l) = l' at l_sum l_filter
         clear h
         let l'' := Finsupp.onFinset l'.support (fun x => (monomial (leading_monomial (l x * x.val) sorry)) (leading_coeff (l x * x.val) sorry)) sorry
-        have E : l' = l'' + (l' - l'') := by sorry
+        have E : l' = l'' + (l' - l'') := by
+          symm
+          apply add_sub_cancel
         rw [E] at l_sum
         rw [Finsupp.sum_add_index] at l_sum
         · nth_rewrite 1 [Finsupp.sum] at l_sum
