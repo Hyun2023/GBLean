@@ -129,32 +129,39 @@ def thd [CommSemiring R] {σ n} (t : (Fin (n+1) → MvPolynomial σ R) × (MvPol
   let ⟨_, _, c⟩ := t
   c
 
-noncomputable def multidiv_subsubalgo [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
+noncomputable def multidiv_subsubalgo_once [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R)
   (as : Fin (n+1) → MvPolynomial σ R) (r : MvPolynomial σ R) (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) (i : ℕ) (DO : Bool) :
   (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × { p' : MvPolynomial σ R // p' ≠ 0 } × ℕ × Bool := by
     sorry
 
+noncomputable def multidiv_subsubalgo [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
+  (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R)
+  (as : Fin (n+1) → MvPolynomial σ R) (r : MvPolynomial σ R) (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) (i : ℕ) (DO : Bool) :
+  (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) := by
+    sorry
+    -- let i : ℕ := 0
+    -- let DO : Bool := false
+    -- if i_LE : i < n
+    -- then sorry
+    -- else if DO = true then
+    --   constructor
+    --   . exact as
+    --   . constructor
+    --     . exact r
+    --     . exact p
+    -- else
+    --   constructor
+    --   . exact as
+    --   . constructor
+    --     . exact r
+    --     . exact p
+
 noncomputable def multidiv_subalgo_once [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R)
   (as : Fin (n+1) → MvPolynomial σ R) (r : MvPolynomial σ R) (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
   (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) := by
-    let i : ℕ := 0
-    let DO : Bool := false
-    if i_LE : i < n
-    then sorry
-    else if DO = true then
-      constructor
-      . exact as
-      . constructor
-        . exact r
-        . exact p
-    else
-      constructor
-      . exact as
-      . constructor
-        . exact r
-        . exact p
+    multidiv_subsubalgo n f fs as r p p_nonzero 0 false
 
 noncomputable def multidiv_subalgo [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R)
