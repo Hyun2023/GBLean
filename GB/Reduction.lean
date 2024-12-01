@@ -125,11 +125,19 @@ lemma MvPolynomial.divMonomial'_correct [DecidableEq σ] [ord : MonomialOrder σ
 attribute [irreducible] MvPolynomial.divMonomial'
 
 
+noncomputable def multidiv_algo [DecidableEq R] [LinearOrder σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
+  (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) :=
+  by sorry
 
+noncomputable def multidiv_subalgo [DecidableEq R] [LinearOrder σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
+  (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R)
+  (old_tuple : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R)) : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) :=
+  by sorry
 
-
-
-
+noncomputable def multidiv_subsubalgo [DecidableEq R] [LinearOrder σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
+  (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R)
+  (old_tuple : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) × (Fin (n+1)) × Bool) : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) × (Fin (n+1)) × Bool :=
+  by sorry
 
 
 
@@ -203,21 +211,23 @@ attribute [irreducible] MvPolynomial.divMonomial'
 --     -- exact EQ1
 
 noncomputable def MvPolynomial.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] [MonomialOrder σ] (s : MvPolynomial σ R) (F : List (MvPolynomial σ R)) (F_isNonzero : ∀ f ∈ F, f ≠ 0): (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
-  match F with
-  | [] => (0, s)
-  | f :: F' =>
-    let (h₁,r) := div s f (by simp at F_isNonzero; rcases F_isNonzero; assumption)
-    let (h₂,r) := multidiv_help r F' (by intro f; simp at F_isNonzero; rcases F_isNonzero with ⟨_,h⟩ ; apply h)
-    (h₂ + Finsupp.single f h₁, r)
+  sorry
+  -- match F with
+  -- | [] => (0, s)
+  -- | f :: F' =>
+  --   let (h₁,r) := div s f (by simp at F_isNonzero; rcases F_isNonzero; assumption)
+  --   let (h₂,r) := multidiv_help r F' (by intro f; simp at F_isNonzero; rcases F_isNonzero with ⟨_,h⟩ ; apply h)
+  --   (h₂ + Finsupp.single f h₁, r)
 
-lemma FList_isNonzero [CommRing R] {F : Finset (MvPolynomial σ R)} (F_isNonzero : ∀ f ∈ F, f ≠ 0) : ∀ f ∈ F.toList, f ≠ 0 := by
-  intro f fIn
-  rw [Finset.mem_toList] at fIn
-  apply F_isNonzero f fIn
+-- lemma FList_isNonzero [CommRing R] {F : Finset (MvPolynomial σ R)} (F_isNonzero : ∀ f ∈ F, f ≠ 0) : ∀ f ∈ F.toList, f ≠ 0 := by
+--   intro f fIn
+--   rw [Finset.mem_toList] at fIn
+--   apply F_isNonzero f fIn
 
 noncomputable def MvPolynomial.multidiv [DecidableEq σ] [DecidableEq R] [LinearOrder σ]  [Field R] [MonomialOrder σ](s : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_isNonzero : ∀ f ∈ F, f ≠ 0) :
     (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
-  MvPolynomial.multidiv_help s (F.toList) (FList_isNonzero F_isNonzero)
+  sorry
+  -- MvPolynomial.multidiv_help s (F.toList) (FList_isNonzero F_isNonzero)
 
 -- lemma Finset.sumEQ [CommRing R] (s: Finset (MvPolynomial σ R)) (f: (MvPolynomial σ R) -> (MvPolynomial σ R)): s.sum f = (s.toList.map f).sum := by
 --   unfold Finset.sum
