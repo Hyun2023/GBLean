@@ -168,7 +168,22 @@ def Reduction_unique  (s : MvPolynomial σ R) (G : Finset (MvPolynomial σ R)) (
     have ⟨ f1, ⟨ H11,H12,H13 ⟩ ⟩ := H1
     have ⟨ f2, ⟨ H21,H22,H23 ⟩ ⟩ := H2
 
-    have sub_in : r1 - r2 ∈ I := by sorry
+    have sub_in : r1 - r2 ∈ I := by
+      have EQ : r1 - r2 = f2 - f1 := by
+        rw [H12] at H22
+        have EQ' : r1 + f1 - r2 = f2 := by
+          exact Eq.symm (eq_sub_of_add_eq' (id (Eq.symm H22)))
+        have EQ'' : r1 + f1 - r2 = r1 - r2 + f1 := by
+          exact add_sub_right_comm r1 f1 r2
+        rw [EQ''] at EQ'
+        clear EQ''
+        symm
+        apply sub_eq_iff_eq_add.mpr
+        symm
+        exact EQ'
+      rw [EQ]
+      clear EQ
+      exact (Submodule.sub_mem_iff_left I H11).mpr H21
     have sub_nonzero : r1 -r2 ≠ 0 := by {
       contrapose!;intros;exact sub_ne_zero_of_ne eq
     }
