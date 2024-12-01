@@ -311,5 +311,26 @@ instance opLinearOrder {T : Type} [LE : LinearOrder T] : LinearOrder (Option T) 
         have EQ : a' = b' := by
           apply LE.le_antisymm <;> assumption
         rw [EQ]
-  le_total := by sorry
-  decidableLE := by sorry
+  le_total := by
+    intro a b
+    cases a with
+    | none =>
+      left
+      simp
+    | some a' =>
+      cases b with
+      | none =>
+        right
+        simp
+      | some b' =>
+        simp
+        apply LE.le_total
+  decidableLE := by
+    exact
+      Classical.decRel fun x1 x2 ↦
+        match x1 with
+        | none => True
+        | some p1' =>
+          match x2 with
+          | none => False
+          | some p2' => p1' ≤ p2'
