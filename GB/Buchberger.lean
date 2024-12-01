@@ -164,8 +164,16 @@ def buchberger_step_keep_membership
         apply LEMMA.mpr at sin
         have SS := (@Set.union_subset _ (@Finset.toSet (MvPolynomial σ R) G') {s_red p q G G_nonzero} (↑(@Ideal.span (MvPolynomial σ R) CommSemiring.toSemiring ↑F)) G'_membership sin)
         have SS' : ↑(G' ∪ {s_red p q G G_nonzero}) ⊆ (@Union.union (Set (MvPolynomial σ R)) Set.instUnion ↑G' {s_red p q G G_nonzero}) := by
-          -- almost trivial
-          sorry
+          rw [Set.subset_def]
+          intro x H
+          simp at H
+          obtain ⟨H1, H2⟩ := H
+          . rw [Set.mem_union]
+            right
+            simp
+          . rw [Set.mem_union]
+            left
+            assumption
         trans
         . apply SS'
         . apply SS
