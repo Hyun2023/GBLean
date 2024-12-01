@@ -160,8 +160,15 @@ def buchberger_step_keep_membership
         simp [pqeq,red0]
         apply ih
         have sin : s_red p q G G_nonzero ∈ (Ideal.span ↑F) := by sorry
-        -- almost trivial
-        sorry
+        have LEMMA := (@Set.singleton_subset_iff _ (s_red p q G G_nonzero) (↑(@Ideal.span (MvPolynomial σ R) CommSemiring.toSemiring ↑F)))
+        apply LEMMA.mpr at sin
+        have SS := (@Set.union_subset _ (@Finset.toSet (MvPolynomial σ R) G') {s_red p q G G_nonzero} (↑(@Ideal.span (MvPolynomial σ R) CommSemiring.toSemiring ↑F)) G'_membership sin)
+        have SS' : ↑(G' ∪ {s_red p q G G_nonzero}) ⊆ (@Union.union (Set (MvPolynomial σ R)) Set.instUnion ↑G' {s_red p q G G_nonzero}) := by
+          -- almost trivial
+          sorry
+        trans
+        . apply SS'
+        . apply SS
       }
     }
   }

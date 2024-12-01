@@ -197,7 +197,8 @@ def Reduction_unique  (s : MvPolynomial σ R) (G : Finset (MvPolynomial σ R)) (
     }
 
     have lm_in' : ( @toMvPolynomial R _ _ (leading_monomial (r1 -r2) sub_nonzero) ) ∈
-      Ideal.span ((fun a ↦ (monomial a) 1) '' (leading_monomial_finset G).toSet) := by sorry
+      Ideal.span ((fun a ↦ (monomial a) 1) '' (leading_monomial_finset G).toSet) := by
+      sorry
     have ⟨ mi, ⟨ mi_in, mi_dvd⟩  ⟩  := @MonomialGen _ R _ _ _ _ _ _
       (toMvPolynomial (leading_monomial (r1 - r2) sub_nonzero))
       (leading_monomial_finset G) lm_in' (mono_poly_mono _)
