@@ -268,8 +268,30 @@ theorem BuchbergerCriterion :
     constructor
     {
       -- (==>)
-      intros GB fi fj neq
-      have Sin: (Spol fi fj) ∈ I := by sorry
+      intros GB fi fj neq neq'
+      have Sin: (Spol fi fj) ∈ I := by
+        let fi_nonzero := G_nonzero fi neq
+        let fj_nonzero := G_nonzero fj neq'
+        unfold Spol
+        have EQ : (if f_NE : fi = 0 then 0 else if g_NE : fj = 0 then 0 else Spol_help fi fj f_NE g_NE) = Spol_help fi fj fi_nonzero fj_nonzero := by
+          rw [dif_neg]
+          rw [dif_neg]
+        rw [EQ]
+        clear EQ
+        unfold Spol_help
+        have G_in_I := (@Ideal.subset_span (MvPolynomial σ R) _ G)
+        rw [G_basis] at G_in_I
+        have in1_o : fi ∈ I := by
+          exact G_in_I neq
+        have in2_o : fj ∈ I := by
+          exact G_in_I neq'
+        have in1 : (monomial (LCM (leading_monomial fi fi_nonzero) (leading_monomial fj fj_nonzero) / leading_monomial fi fi_nonzero)) (leading_coeff fi fi_nonzero)⁻¹ * fi ∈ I := by
+          apply Ideal.mul_mem_left
+          assumption
+        have in2 : (monomial (LCM (leading_monomial fi fi_nonzero) (leading_monomial fj fj_nonzero) / leading_monomial fj fj_nonzero)) (leading_coeff fj fj_nonzero)⁻¹ * fj ∈ I := by
+          apply Ideal.mul_mem_left
+          assumption
+        exact (Submodule.sub_mem_iff_left I in2).mpr in1
       intros
       exact (GB_multidiv G G_nonzero I (Spol fi fj) GB).mp Sin
     }
