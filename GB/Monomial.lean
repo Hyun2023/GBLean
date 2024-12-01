@@ -265,7 +265,7 @@ lemma monomial_leading_monomial [DecidableEq σ] [Field R] [MonomialOrder σ ] (
   unfold p at EQ
   exact EQ
 
-instance opLinearOrder {T : Type} [LE : LinearOrder T] : LinearOrder (Option T) where
+instance opLinearOrder [LE : LinearOrder T] : LinearOrder (Option T) where
   le  p₁ p₂ := match p₁ with | none => True | some p1' => match p₂ with | none => False | some p2' => LE.le p1' p2'
   le_refl := by
     intro a
@@ -482,4 +482,4 @@ instance opLinearOrder {T : Type} [LE : LinearOrder T] : LinearOrder (Option T) 
         simp
 
 instance opMonomialLinearOrder [DecidableEq σ] [ord : MonomialOrder σ] : LinearOrder (Option (Monomial σ)) :=
-  opLinearOrder
+  @opLinearOrder _ ord.toLinearOrder

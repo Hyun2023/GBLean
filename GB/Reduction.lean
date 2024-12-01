@@ -148,8 +148,10 @@ noncomputable def multidiv_subalgo [DecidableEq R] [DecidableEq σ] [ord : Monom
   if p_nonzero : p ≠ 0
   then multidiv_subalgo n f fs (multidiv_subalgo_once n f fs as r p p_nonzero)
   else ⟨as, r, p⟩
-  termination_by (@leading_monomial_opt σ R _ _ _ ord (thd old_tuple))
-  decreasing_by sorry
+  termination_by (leading_monomial_opt (thd old_tuple))
+  decreasing_by
+    -- unfold Option._sizeOf_inst
+    sorry
 
 noncomputable def multidiv_algo [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) :=
