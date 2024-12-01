@@ -125,6 +125,10 @@ lemma MvPolynomial.divMonomial'_correct [DecidableEq σ] [ord : MonomialOrder σ
 attribute [irreducible] MvPolynomial.divMonomial'
 
 
+def thd {A B C : Type} (t : A × B × C) : C :=
+  let ⟨_, _, c⟩ := t
+  c
+
 noncomputable def multidiv_subsubalgo [DecidableEq R] [LinearOrder σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R)
   (old_tuple : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) × (Fin (n+1)) × Bool) : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) × (Fin (n+1)) × Bool :=
@@ -142,8 +146,10 @@ noncomputable def multidiv_subalgo [DecidableEq R] [LinearOrder σ] [ord : Monom
   (old_tuple : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R)) : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) :=
   let ⟨as, r, p⟩ := old_tuple
   if p_nonzero : p ≠ 0
-  then multidiv_subalgo_once n f fs as r p p_nonzero
+  then sorry -- multidiv_subalgo n f fs (multidiv_subalgo_once n f fs as r p p_nonzero)
   else ⟨as, r, p⟩
+  -- termination_by (leading_monomial_opt (thd old_tuple))
+  -- decreasing_by sorry
 
 noncomputable def multidiv_algo [DecidableEq R] [LinearOrder σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) :=
