@@ -133,7 +133,10 @@ noncomputable def multidiv_subsubalgo [DecidableEq R] [LinearOrder σ] [ord : Mo
 noncomputable def multidiv_subalgo [DecidableEq R] [LinearOrder σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R)
   (old_tuple : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R)) : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) :=
-  by sorry
+  let ⟨as, r, p⟩ := old_tuple
+  if p_nonzero : p ≠ 0
+  then sorry
+  else ⟨as, r, p⟩
 
 noncomputable def multidiv_algo [DecidableEq R] [LinearOrder σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) :=
