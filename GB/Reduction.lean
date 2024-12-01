@@ -137,15 +137,29 @@ noncomputable def multidiv_subsubalgo [DecidableEq R] [DecidableEq σ] [ord : Mo
 
 noncomputable def multidiv_subalgo_once [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R)
-  (as : Fin (n+1) → MvPolynomial σ R) (r : MvPolynomial σ R) (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) := by
+  (as : Fin (n+1) → MvPolynomial σ R) (r : MvPolynomial σ R) (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
+  (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) := by
     let i : ℕ := 0
     let DO : Bool := false
-    if i_LE : i < n then sorry
-    else if DO then sorry else sorry
+    if i_LE : i < n
+    then sorry
+    else if DO = true then
+      constructor
+      . exact as
+      . constructor
+        . exact r
+        . exact p
+    else
+      constructor
+      . exact as
+      . constructor
+        . exact r
+        . exact p
 
 noncomputable def multidiv_subalgo [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R)
-  (old_tuple : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R)) : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) :=
+  (old_tuple : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R)) :
+  (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) :=
   let ⟨as, r, p⟩ := old_tuple
   if p_nonzero : p ≠ 0
   then multidiv_subalgo n f fs (multidiv_subalgo_once n f fs as r p p_nonzero)
