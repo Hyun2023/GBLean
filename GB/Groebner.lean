@@ -341,9 +341,12 @@ theorem BuchbergerCriterion :
         · nth_rewrite 1 [Finsupp.sum] at l_sum
           generalize EE : ∑ a ∈ l''.support, l'' a • a.val = I
 
+
           sorry
-        · sorry
-        · sorry
+        · intro a' H
+          apply zero_smul
+        · intro a' H b1 b2
+          apply Module.add_smul
         --rw [← (Finsupp.sum_filter_add_sum_filter_not (fun x => leading_monomial (lx * ↑x) = measure))] at l_sum
         -- unfold Finsupp.sum at comb; simp at comb
 -- Finsupp.sum_filter_add_sum_filter_not
