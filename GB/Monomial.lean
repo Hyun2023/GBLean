@@ -343,8 +343,52 @@ instance opLinearOrder {T : Type} [LE : LinearOrder T] : LinearOrder (Option T) 
   lt_iff_le_not_le := by
     intro a b
     constructor <;> intro H
-    . sorry
-    . sorry
+    . cases a with
+      | none =>
+        simp
+        cases b with
+        | none =>
+          unfold LT.lt instLTOption at H; simp at H
+          unfold Option.lt at H
+          simp at H
+        | some b' =>
+          simp
+      | some a' =>
+        cases b with
+        | none =>
+          unfold LT.lt instLTOption at H; simp at H
+          unfold Option.lt at H
+          simp at H
+        | some b' =>
+          unfold LT.lt instLTOption at H; simp at H
+          unfold Option.lt at H
+          simp at H
+          simp
+          constructor
+          . exact le_of_lt H
+          . assumption
+    . have ⟨H1, H2⟩ := H
+      cases a with
+      | none =>
+        simp
+        cases b with
+        | none =>
+          simp at H2
+        | some b' =>
+          unfold LT.lt instLTOption; simp
+          unfold Option.lt
+          simp
+      | some a' =>
+        cases b with
+        | none =>
+          simp at H1
+        | some b' =>
+          simp at H1 H2
+          unfold LT.lt instLTOption; simp
+          unfold Option.lt
+          simp
+          apply (LE.lt_iff_le_not_le a' b').mpr
+          exact H
   min_def := by
     sorry
   max_def := by
