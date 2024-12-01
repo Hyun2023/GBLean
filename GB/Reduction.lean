@@ -129,67 +129,67 @@ noncomputable def MvPolynomial.div [DecidableEq σ] [DecidableEq R] [Field R] [M
   let h := f.divMonomial glt
   (h, f - h*g)
 
-lemma MvPolynomial.div_correct [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_nonzero : g ≠ 0):
-  let (h,r) := f.div g g_nonzero;
-  f = g*h+r ∧
-  (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (@leading_monomial σ _ _ _ ord g g_nonzero) m) := by
-  constructor
-  . have EQ : g * f.divMonomial (leading_monomial g g_nonzero) + (f - f.divMonomial (leading_monomial g g_nonzero) * g) = (g * f.divMonomial (leading_monomial g g_nonzero) + f) - f.divMonomial (leading_monomial g g_nonzero) * g := by
-      apply add_sub_assoc'
-    rw [EQ]
-    clear EQ
-    have EQ : g * f.divMonomial (leading_monomial g g_nonzero) + f - f.divMonomial (leading_monomial g g_nonzero) * g = f + g * f.divMonomial (leading_monomial g g_nonzero) - f.divMonomial (leading_monomial g g_nonzero) * g := by
-      have EQ' : g * f.divMonomial (leading_monomial g g_nonzero) + f = f + g * f.divMonomial (leading_monomial g g_nonzero) := by
-        apply add_comm
-      rw [EQ']
-    rw [EQ]
-    clear EQ
-    have EQ : g * f.divMonomial (leading_monomial g g_nonzero) = f.divMonomial (leading_monomial g g_nonzero) * g := by
-      apply mul_comm
-    rw [EQ]
-    clear EQ
-    symm
-    apply add_sub_cancel_right
-  . symm
-    apply or_iff_not_imp_right.mpr
-    intro H
-    have NEX : (¬ ∃ m ∈ monomials (f - f.divMonomial (leading_monomial g g_nonzero) * g), leading_monomial g g_nonzero ∣ m) := by
-      intro H'
-      obtain ⟨m, ⟨mP1, mP2⟩⟩ := H'
-      rw [Monomial.instDvd_equiv] at mP2
-      rw [Monomial.instDvd_equiv'] at mP2
-      rw [Monomial.instDvd''] at mP2
+-- lemma MvPolynomial.div_correct [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_nonzero : g ≠ 0):
+--   let (h,r) := f.div g g_nonzero;
+--   f = g*h+r ∧
+--   (r = 0 ∨ ∀m ∈ monomials r, ¬ Monomial.instDvd.dvd (@leading_monomial σ _ _ _ ord g g_nonzero) m) := by
+--   constructor
+--   . have EQ : g * f.divMonomial (leading_monomial g g_nonzero) + (f - f.divMonomial (leading_monomial g g_nonzero) * g) = (g * f.divMonomial (leading_monomial g g_nonzero) + f) - f.divMonomial (leading_monomial g g_nonzero) * g := by
+--       apply add_sub_assoc'
+--     rw [EQ]
+--     clear EQ
+--     have EQ : g * f.divMonomial (leading_monomial g g_nonzero) + f - f.divMonomial (leading_monomial g g_nonzero) * g = f + g * f.divMonomial (leading_monomial g g_nonzero) - f.divMonomial (leading_monomial g g_nonzero) * g := by
+--       have EQ' : g * f.divMonomial (leading_monomial g g_nonzero) + f = f + g * f.divMonomial (leading_monomial g g_nonzero) := by
+--         apply add_comm
+--       rw [EQ']
+--     rw [EQ]
+--     clear EQ
+--     have EQ : g * f.divMonomial (leading_monomial g g_nonzero) = f.divMonomial (leading_monomial g g_nonzero) * g := by
+--       apply mul_comm
+--     rw [EQ]
+--     clear EQ
+--     symm
+--     apply add_sub_cancel_right
+--   . symm
+--     apply or_iff_not_imp_right.mpr
+--     intro H
+--     have NEX : (¬ ∃ m ∈ monomials (f - f.divMonomial (leading_monomial g g_nonzero) * g), leading_monomial g g_nonzero ∣ m) := by
+--       intro H'
+--       obtain ⟨m, ⟨mP1, mP2⟩⟩ := H'
+--       rw [Monomial.instDvd_equiv] at mP2
+--       rw [Monomial.instDvd_equiv'] at mP2
+--       rw [Monomial.instDvd''] at mP2
 
-      sorry
-    intro m H' X
-    apply NEX
-    use m
-    -- have gm : is_monomial ((monomial (leading_monomial g g_nonzero)) (1 : R)) := by
-    --   apply is_monomial_monomial
-    -- have EQ := (MvPolynomial.divMonomial'_correct f (leading_monomial g g_nonzero) gm)
-    -- unfold divMonomial' at EQ
-    -- simp at EQ
-    -- obtain ⟨EQ0, EQ1⟩ := EQ
-    -- sorry
-    -- have EQ' : f - f.divMonomial (leading_monomial g g_nonzero) * g = f.modMonomial (((monomial (leading_monomial g g_nonzero)) 1).toMonomial gm) := by
-    --   clear EQ1
-    --   have EQ2 : f = f.divMonomial (leading_monomial g g_nonzero) * g + f.modMonomial (((monomial (leading_monomial g g_nonzero)) 1).toMonomial gm) := by
-    --     have EQ3 : (monomial (leading_monomial g g_nonzero)) 1 * f.divMonomial (((monomial (leading_monomial g g_nonzero)) 1).toMonomial gm) = f.divMonomial (leading_monomial g g_nonzero) * g := by
-    --       sorry
-    --     rw [<-EQ3]
-    --     exact EQ0
-    --   clear EQ0
-    --   symm
-    --   apply eq_sub_of_add_eq'
-    --   symm
-    --   exact EQ2
-    -- rw [EQ']
-    -- clear EQ'
-    -- have EQ' : leading_monomial ((monomial (leading_monomial g g_nonzero)) 1) (is_monomial_nonzero gm) = leading_monomial g g_nonzero := by
-    --   clear EQ0 EQ1
-    --   apply monomial_leading_monomial
-    -- rw [EQ'] at EQ1
-    -- exact EQ1
+--       sorry
+--     intro m H' X
+--     apply NEX
+--     use m
+--     -- have gm : is_monomial ((monomial (leading_monomial g g_nonzero)) (1 : R)) := by
+--     --   apply is_monomial_monomial
+--     -- have EQ := (MvPolynomial.divMonomial'_correct f (leading_monomial g g_nonzero) gm)
+--     -- unfold divMonomial' at EQ
+--     -- simp at EQ
+--     -- obtain ⟨EQ0, EQ1⟩ := EQ
+--     -- sorry
+--     -- have EQ' : f - f.divMonomial (leading_monomial g g_nonzero) * g = f.modMonomial (((monomial (leading_monomial g g_nonzero)) 1).toMonomial gm) := by
+--     --   clear EQ1
+--     --   have EQ2 : f = f.divMonomial (leading_monomial g g_nonzero) * g + f.modMonomial (((monomial (leading_monomial g g_nonzero)) 1).toMonomial gm) := by
+--     --     have EQ3 : (monomial (leading_monomial g g_nonzero)) 1 * f.divMonomial (((monomial (leading_monomial g g_nonzero)) 1).toMonomial gm) = f.divMonomial (leading_monomial g g_nonzero) * g := by
+--     --       sorry
+--     --     rw [<-EQ3]
+--     --     exact EQ0
+--     --   clear EQ0
+--     --   symm
+--     --   apply eq_sub_of_add_eq'
+--     --   symm
+--     --   exact EQ2
+--     -- rw [EQ']
+--     -- clear EQ'
+--     -- have EQ' : leading_monomial ((monomial (leading_monomial g g_nonzero)) 1) (is_monomial_nonzero gm) = leading_monomial g g_nonzero := by
+--     --   clear EQ0 EQ1
+--     --   apply monomial_leading_monomial
+--     -- rw [EQ'] at EQ1
+--     -- exact EQ1
 
 noncomputable def MvPolynomial.multidiv_help [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] [MonomialOrder σ] (s : MvPolynomial σ R) (F : List (MvPolynomial σ R)) (F_isNonzero : ∀ f ∈ F, f ≠ 0): (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
   match F with
@@ -218,26 +218,27 @@ lemma MvPolynomial.multidiv_correct [DecidableEq R] [LinearOrder σ] [ord : Mono
     -- let (a,r) := (MvPolynomial.multidiv s F F_isNonzero);
     s = (s.multidiv F F_isNonzero).snd + (∑ (f ∈ F), ((s.multidiv F F_isNonzero).fst f)*(f)) /\
     ((s.multidiv F F_isNonzero).snd = 0 ∨ ∀m ∈ monomials (s.multidiv F F_isNonzero).snd, ∀ f (inF : f ∈ F), ¬ Monomial.instDvd.dvd (leading_monomial f (F_isNonzero f inF)) m) := by
-  unfold multidiv; constructor
-  . have : ∀ l (s : MvPolynomial σ R) F F_isNonzero (EQ: l = F.toList),
-    s = (multidiv_help s l (by rw[EQ]; exact FList_isNonzero F_isNonzero)).2 + (∑ (f ∈ F), ((multidiv_help s l (by rw[EQ]; exact FList_isNonzero F_isNonzero)).1 f)*(f)) := by
-      clear s F F_isNonzero
-      intro l s F F_isNonzero EQ
-      have F_isNonzero' := FList_isNonzero F_isNonzero
-      rw [← EQ] at F_isNonzero'
-      have EQ' : F = l.toFinset := by rw [EQ]; simp
-      have G : ∀ l (s : MvPolynomial σ R) (l_isNonzero : ∀ f ∈ l, f ≠ 0), s = (s.multidiv_help l l_isNonzero).2 + (l.map (fun f => (s.multidiv_help l l_isNonzero).1 f * f)).sum := by
-        intro l; induction' l with f F' IH
-        <;> intro s l_isNonzero
-        . unfold multidiv_help; simp
-        . simp [multidiv_help]
-          have IH' := IH (div s f (by apply l_isNonzero; apply List.mem_cons_self)).2 (by intros; apply l_isNonzero; apply List.mem_cons_of_mem; assumption)
-          have div_correct := (MvPolynomial.div_correct s f (by apply l_isNonzero; apply List.mem_cons_self)).1
-          nth_rewrite 1 [div_correct]
-          nth_rewrite 1 [IH']
-          -- rw [IH']
-          sorry
-      nth_rewrite 1 [G l s F_isNonzero'];
-      rw [Finset.sumEQ]; congr!
-    apply this; rfl; assumption
-  . sorry
+  sorry
+  -- unfold multidiv; constructor
+  -- . have : ∀ l (s : MvPolynomial σ R) F F_isNonzero (EQ: l = F.toList),
+  --   s = (multidiv_help s l (by rw[EQ]; exact FList_isNonzero F_isNonzero)).2 + (∑ (f ∈ F), ((multidiv_help s l (by rw[EQ]; exact FList_isNonzero F_isNonzero)).1 f)*(f)) := by
+  --     clear s F F_isNonzero
+  --     intro l s F F_isNonzero EQ
+  --     have F_isNonzero' := FList_isNonzero F_isNonzero
+  --     rw [← EQ] at F_isNonzero'
+  --     have EQ' : F = l.toFinset := by rw [EQ]; simp
+  --     have G : ∀ l (s : MvPolynomial σ R) (l_isNonzero : ∀ f ∈ l, f ≠ 0), s = (s.multidiv_help l l_isNonzero).2 + (l.map (fun f => (s.multidiv_help l l_isNonzero).1 f * f)).sum := by
+  --       intro l; induction' l with f F' IH
+  --       <;> intro s l_isNonzero
+  --       . unfold multidiv_help; simp
+  --       . simp [multidiv_help]
+  --         have IH' := IH (div s f (by apply l_isNonzero; apply List.mem_cons_self)).2 (by intros; apply l_isNonzero; apply List.mem_cons_of_mem; assumption)
+  --         have div_correct := (MvPolynomial.div_correct s f (by apply l_isNonzero; apply List.mem_cons_self)).1
+  --         nth_rewrite 1 [div_correct]
+  --         nth_rewrite 1 [IH']
+  --         -- rw [IH']
+  --         sorry
+  --     nth_rewrite 1 [G l s F_isNonzero'];
+  --     rw [Finset.sumEQ]; congr!
+  --   apply this; rfl; assumption
+  -- . sorry
