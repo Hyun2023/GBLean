@@ -265,32 +265,51 @@ lemma monomial_leading_monomial [DecidableEq σ] [Field R] [MonomialOrder σ ] (
   unfold p at EQ
   exact EQ
 
--- instance opLinearOrder {T : Type} [LE : LinearOrder T] : LinearOrder (Option T) where
---   le  p₁ p₂ := match p₁ with | none => True | some p1' => match p₂ with | none => False | some p2' => LE.le p1' p2'
---   le_refl := by
---     intro a
---     simp
---     cases a with
---     | none => simp
---     | some a' => simp
---   le_trans := by
---     simp
---     intro a b c H1 H2
---     cases a with
---     | none => simp
---     | some a' =>
---       simp
---       cases b with
---       | none =>
---         simp at H1
---       | some b' =>
---         cases c with
---         | none =>
---           simp at H2
---         | some c' =>
---           simp at H1 H2
---           simp
---           apply LE.le_trans <;> assumption
---   le_antisymm := by sorry
---   le_total := by sorry
---   decidableLE := by sorry
+instance opLinearOrder {T : Type} [LE : LinearOrder T] : LinearOrder (Option T) where
+  le  p₁ p₂ := match p₁ with | none => True | some p1' => match p₂ with | none => False | some p2' => LE.le p1' p2'
+  le_refl := by
+    intro a
+    simp
+    cases a with
+    | none => simp
+    | some a' => simp
+  le_trans := by
+    simp
+    intro a b c H1 H2
+    cases a with
+    | none => simp
+    | some a' =>
+      simp
+      cases b with
+      | none =>
+        simp at H1
+      | some b' =>
+        cases c with
+        | none =>
+          simp at H2
+        | some c' =>
+          simp at H1 H2
+          simp
+          apply LE.le_trans <;> assumption
+  le_antisymm := by
+    simp
+    intro a b H1 H2
+    cases a with
+    | none =>
+      cases b with
+      | none =>
+        simp at H1 H2
+        rfl
+      | some b' =>
+        simp at H1 H2
+    | some a' =>
+      cases b with
+      | none =>
+        simp at H1 H2
+      | some b' =>
+        simp at H1 H2
+        have EQ : a' = b' := by
+          apply LE.le_antisymm <;> assumption
+        rw [EQ]
+  le_total := by sorry
+  decidableLE := by sorry
