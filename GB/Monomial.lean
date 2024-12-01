@@ -389,24 +389,40 @@ instance opLinearOrder {T : Type} [LE : LinearOrder T] : LinearOrder (Option T) 
           simp
           apply (LE.lt_iff_le_not_le a' b').mpr
           exact H
+  min p₁ p₂ := match p₁ with | none => none | some p1' => match p₂ with | none => none | some p2' => LE.min p1' p2'
   min_def := by
     intro a b
-    unfold min Option.instMin; simp
-    unfold Option.min
-    sorry
-    -- cases a with
-    -- | none =>
-    --   cases b with
-    --   | none =>
-    --     simp
-    --   | some b' =>
-    --     simp
-    -- | some a' =>
-    --   cases b with
-    --   | none =>
-    --     simp
-    --   | some b' =>
-    --     simp
+    unfold min; simp
+    cases a with
+    | none =>
+      cases b with
+      | none =>
+        simp
+      | some b' =>
+        simp
+    | some a' =>
+      cases b with
+      | none =>
+        simp
+      | some b' =>
+        simp
+        rcases em (a' ≤ b') with h | h
+        . rw [if_pos]
+          . congr
+            unfold LinearOrder.toMin
+            have MNDF := LE.min_def a' b'
+            rw [if_pos] at MNDF
+            . exact MNDF
+            . assumption
+          . assumption
+        . rw [if_neg]
+          . congr
+            unfold LinearOrder.toMin
+            have MNDF := LE.min_def a' b'
+            rw [if_neg] at MNDF
+            . exact MNDF
+            . assumption
+          . assumption
   max_def := by
     intro a b
     unfold max Option.instMax; simp
