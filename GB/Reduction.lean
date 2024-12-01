@@ -124,10 +124,21 @@ lemma MvPolynomial.divMonomial'_correct [DecidableEq σ] [ord : MonomialOrder σ
 -- Opaque
 attribute [irreducible] MvPolynomial.divMonomial'
 
-noncomputable def MvPolynomial.div [DecidableEq σ] [DecidableEq R] [Field R] [MonomialOrder σ] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_nonzero : g ≠ 0) : (MvPolynomial σ R) × (MvPolynomial σ R) :=
-  let glt := leading_monomial g g_nonzero
-  let h := f.divMonomial glt
-  (h, f - h*g)
+
+
+
+
+
+
+
+
+
+
+
+-- noncomputable def MvPolynomial.div [DecidableEq σ] [DecidableEq R] [Field R] [MonomialOrder σ] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_nonzero : g ≠ 0) : (MvPolynomial σ R) × (MvPolynomial σ R) :=
+--   let glt := leading_monomial g g_nonzero
+--   let h := f.divMonomial glt
+--   (h, f - h*g)
 
 -- lemma MvPolynomial.div_correct [DecidableEq σ] [DecidableEq R] [Field R] [ord : MonomialOrder σ] (f : MvPolynomial σ R) (g : MvPolynomial σ R) (g_nonzero : g ≠ 0):
 --   let (h,r) := f.div g g_nonzero;
@@ -208,11 +219,11 @@ noncomputable def MvPolynomial.multidiv [DecidableEq σ] [DecidableEq R] [Linear
     (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
   MvPolynomial.multidiv_help s (F.toList) (FList_isNonzero F_isNonzero)
 
-lemma Finset.sumEQ [CommRing R] (s: Finset (MvPolynomial σ R)) (f: (MvPolynomial σ R) -> (MvPolynomial σ R)): s.sum f = (s.toList.map f).sum := by
-  unfold Finset.sum
-  rw [← Multiset.sum_toList]
-  have := Multiset.map_coe f s.toList
-  simp at this; rw [this]; clear this; simp
+-- lemma Finset.sumEQ [CommRing R] (s: Finset (MvPolynomial σ R)) (f: (MvPolynomial σ R) -> (MvPolynomial σ R)): s.sum f = (s.toList.map f).sum := by
+--   unfold Finset.sum
+--   rw [← Multiset.sum_toList]
+--   have := Multiset.map_coe f s.toList
+--   simp at this; rw [this]; clear this; simp
 
 lemma MvPolynomial.multidiv_correct [DecidableEq R] [LinearOrder σ] [ord : MonomialOrder σ] [Field R] (s : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_isNonzero : ∀ f ∈ F, f ≠ 0):
     -- let (a,r) := (MvPolynomial.multidiv s F F_isNonzero);
