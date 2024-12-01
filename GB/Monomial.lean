@@ -484,24 +484,34 @@ instance opLinearOrder [LE : LinearOrder T] : LinearOrder (Option T) where
 instance opMonomialLinearOrder [DecidableEq σ] [ord : MonomialOrder σ] : LinearOrder (Option (Monomial σ)) :=
   @opLinearOrder _ ord.toLinearOrder
 
-instance opMonomialWellFounded [DecidableEq σ] [ord : MonomialOrder σ] : WellFounded (@opMonomialLinearOrder _ _ ord).le := by
+instance opMonomialWellFounded [DecidableEq σ] [ord : MonomialOrder σ] : WellFounded (@opMonomialLinearOrder _ _ ord).lt := by
   have WF := ord.isWellOrder.wf
-  unfold LE.le Preorder.toLE PartialOrder.toPreorder LinearOrder.toPartialOrder opMonomialLinearOrder opLinearOrder; simp
+  unfold LT.lt Preorder.toLT PartialOrder.toPreorder LinearOrder.toPartialOrder opMonomialLinearOrder opLinearOrder; simp
+  unfold instLTOption; simp
+  unfold Option.lt
   refine WellFounded.intro ?h
   intro a
   cases a with
   | none =>
     apply Acc.intro
     intro b H
-    cases b with
-    | none =>
-      simp at H
-      sorry
-    | some b' =>
-      simp at H
+    simp at H
   | some a' =>
+    simp
+    have IND := (@WellFounded.induction (Monomial σ) _ WF)
+    have IND' := (@IND
+      (fun a' => Acc
+        (fun x x_1 ↦
+        match x, x_1 with
+        | none, some val => True
+        | some x, some y => x < y
+        | x, x_2 => False)
+        (some a'))
+      a')
+    -- apply IND'
+
     sorry
 
 instance opMonomialWellFoundedRelation [DecidableEq σ] [ord : MonomialOrder σ] : WellFoundedRelation (Option (Monomial σ)) where
-  rel := opMonomialLinearOrder.le
+  rel := opMonomialLinearOrder.lt
   wf := opMonomialWellFounded
