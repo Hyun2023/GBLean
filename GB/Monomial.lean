@@ -430,4 +430,37 @@ instance opLinearOrder {T : Type} [LE : LinearOrder T] : LinearOrder (Option T) 
         . rw [if_pos, if_pos] <;> assumption
         . rw [if_neg, if_neg] <;> assumption
   compare_eq_compareOfLessAndEq := by
-    sorry
+    intro a b
+    unfold compare instOrdOption; simp
+    unfold compareOfLessAndEq
+    cases a with
+    | none =>
+      cases b with
+      | none =>
+        simp
+        rw [if_neg]
+        unfold LT.lt instLTOption; simp
+        unfold Option.lt
+        simp
+      | some b' =>
+        simp
+        rw [if_pos]
+        unfold LT.lt instLTOption; simp
+        unfold Option.lt
+        simp
+    | some a' =>
+      cases b with
+      | none =>
+        simp
+        rw [if_neg]
+        unfold LT.lt instLTOption; simp
+        unfold Option.lt
+        simp
+      | some b' =>
+        simp
+        have CEC := LE.compare_eq_compareOfLessAndEq a' b'
+        rw [CEC]
+        unfold LT.lt instLTOption; simp
+        unfold Option.lt
+        unfold compareOfLessAndEq
+        simp
