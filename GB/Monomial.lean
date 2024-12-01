@@ -326,11 +326,28 @@ instance opLinearOrder {T : Type} [LE : LinearOrder T] : LinearOrder (Option T) 
         simp
         apply LE.le_total
   decidableLE := by
-    exact
-      Classical.decRel fun x1 x2 ↦
-        match x1 with
-        | none => True
-        | some p1' =>
-          match x2 with
-          | none => False
-          | some p2' => p1' ≤ p2'
+    intro a b
+    simp
+    cases a with
+    | none =>
+      simp
+      exact instDecidableTrue
+    | some a' =>
+      cases b with
+      | none =>
+        simp
+        exact instDecidableFalse
+      | some b' =>
+        simp
+        apply LE.decidableLE
+  lt_iff_le_not_le := by
+    intro a b
+    constructor <;> intro H
+    . sorry
+    . sorry
+  min_def := by
+    sorry
+  max_def := by
+    sorry
+  compare_eq_compareOfLessAndEq := by
+    sorry
