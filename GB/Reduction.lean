@@ -150,7 +150,6 @@ noncomputable def multidiv_subalgo [DecidableEq R] [DecidableEq σ] [ord : Monom
   else ⟨as, r, p⟩
   termination_by (leading_monomial_opt (thd old_tuple))
   decreasing_by
-    -- unfold Option._sizeOf_inst
     sorry
 
 noncomputable def multidiv_algo [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
