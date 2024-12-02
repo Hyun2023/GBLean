@@ -147,7 +147,7 @@ noncomputable def multidiv_subsubalgo [DecidableEq R] [DecidableEq σ] [ord : Mo
   then if (leading_monomial (fs i) (fs_nonzero i) ∣ leading_monomial p p_nonzero)
     then
       let as' : Fin (n+1) → MvPolynomial σ R := fun i => as i + toMvPolynomial (leading_monomial p p_nonzero / leading_monomial (fs i) (fs_nonzero i))
-      let p' : MvPolynomial σ R := p - toMvPolynomial (leading_monomial p p_nonzero / leading_monomial (fs i) (fs_nonzero i))
+      let p' : MvPolynomial σ R := p - toMvPolynomial (leading_monomial p p_nonzero / leading_monomial (fs i) (fs_nonzero i)) * (fs i)
       ⟨as', r, p', i, false⟩
     else ⟨as, r, p, i+1, true⟩
   else ⟨as, r, p, i, false⟩
@@ -167,10 +167,13 @@ lemma multidiv_subsubalgo_lm [DecidableEq R] [DecidableEq σ] [ord : MonomialOrd
       unfold thrd ffth; simp
       unfold leading_monomial_opt
       rw [dif_pos H]
-      rcases em (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) ≠ 0) with h' | h'
+      rcases em (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * (fs i) ≠ 0) with h' | h'
       . rw [dif_pos h']
         unfold LT.lt instLTOption; simp
         unfold Option.lt; simp
+        generalize EQ : leading_monomial (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * fs ↑i) h' = m
+        symm at EQ
+
         sorry
       . rw [dif_neg h']
         unfold LT.lt instLTOption; simp
