@@ -139,7 +139,7 @@ def ffth [CommSemiring R] {σ n} (t : (Fin (n+1) → MvPolynomial σ R) × (MvPo
   let ⟨_, _, _, _, c⟩ := t
   c
 
-noncomputable def multidiv_subsubalgo [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
+noncomputable def multidiv_nestedwhile [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) (fs_nonzero : ∀ m, fs m ≠ 0)
   (as : Fin (n+1) → MvPolynomial σ R) (r : MvPolynomial σ R) (p : MvPolynomial σ R) (i : ℕ) (NDO : Bool) :
   (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) × ℕ × Bool :=
@@ -152,34 +152,34 @@ noncomputable def multidiv_subsubalgo [DecidableEq R] [DecidableEq σ] [ord : Mo
     else ⟨as, r, p, i+1, true⟩
   else ⟨as, r, p, i, false⟩
 
-lemma multidiv_subsubalgo_lm [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
+lemma multidiv_nestedwhile_lm [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) (fs_nonzero : ∀ m, fs m ≠ 0)
   (as : Fin (n+1) → MvPolynomial σ R) (r : MvPolynomial σ R) (p : MvPolynomial σ R) (i : ℕ) (NDO : Bool) :
-  p = 0 ∨ p ≠ 0 ∧ (leading_monomial_opt (thrd (multidiv_subsubalgo n f fs fs_nonzero as r p i NDO)) < leading_monomial_opt p ∨ (ffth (multidiv_subsubalgo n f fs fs_nonzero as r p i NDO)) = true) := by
+  p = 0 ∨ p ≠ 0 ∧ (leading_monomial_opt (thrd (multidiv_nestedwhile n f fs fs_nonzero as r p i NDO)) < leading_monomial_opt p ∨ (ffth (multidiv_nestedwhile n f fs fs_nonzero as r p i NDO)) = true) := by
   rw [Classical.or_iff_not_imp_left]
   intro H
-  unfold multidiv_subsubalgo
+  unfold multidiv_nestedwhile
   rw [dif_pos H]
   constructor
   . apply H
-  . rcases em (leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i) ∣ leading_monomial p H) with h | h
+  . rcases em (leading_monomial (fs ↑i) (multidiv_nestedwhile.proof_1 n fs fs_nonzero i) ∣ leading_monomial p H) with h | h
     . rw [if_pos h]
       unfold thrd ffth; simp
       unfold leading_monomial_opt
       rw [dif_pos H]
-      rcases em (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * (fs i) ≠ 0) with h' | h'
+      rcases em (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_nestedwhile.proof_1 n fs fs_nonzero i)) * (fs i) ≠ 0) with h' | h'
       . rw [dif_pos h']
         unfold LT.lt instLTOption; simp
         unfold Option.lt; simp
-        generalize EQ : leading_monomial (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * fs ↑i) h' = m
+        generalize EQ : leading_monomial (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_nestedwhile.proof_1 n fs fs_nonzero i)) * fs ↑i) h' = m
         symm at EQ
-        have MEM : m ∈ (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * fs ↑i).support := by
+        have MEM : m ∈ (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_nestedwhile.proof_1 n fs fs_nonzero i)) * fs ↑i).support := by
           subst EQ
           apply leading_monomial_in
-        have SP := Finsupp.mem_support_toFun (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * fs ↑i) m
+        have SP := Finsupp.mem_support_toFun (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_nestedwhile.proof_1 n fs fs_nonzero i)) * fs ↑i) m
         apply SP.mp at MEM
-        have NEQ : p m - (toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * fs ↑i).toFun m ≠ 0 := by
-          have EQ'' : (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * fs ↑i).toFun m = p m - (toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * fs ↑i).toFun m := by
+        have NEQ : p m - (toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_nestedwhile.proof_1 n fs fs_nonzero i)) * fs ↑i).toFun m ≠ 0 := by
+          have EQ'' : (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_nestedwhile.proof_1 n fs fs_nonzero i)) * fs ↑i).toFun m = p m - (toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_nestedwhile.proof_1 n fs fs_nonzero i)) * fs ↑i).toFun m := by
             rfl
           rw [<-EQ'']
           assumption
@@ -195,13 +195,15 @@ lemma multidiv_subsubalgo_lm [DecidableEq R] [DecidableEq σ] [ord : MonomialOrd
             apply (leading_monomial_sound p H) at H'
             apply LE.le.not_lt at H'
             exact H' LMLT
-          have EQ2 : (toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * fs ↑i).toFun m = 0 := by
+          have EQ2 : (toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_nestedwhile.proof_1 n fs fs_nonzero i)) * fs ↑i).toFun m = 0 := by
             sorry
           rw [EQ1, EQ2]
           simp
         | inr LMEQ =>
           apply NEQ
           rw [LMEQ]
+          rw [LMEQ] at h
+          have DVML := (leading_monomial_divmul _ _ _ h)
           sorry
       . rw [dif_neg h']
         unfold LT.lt instLTOption; simp
@@ -232,7 +234,7 @@ instance boolWellFoundedRelation : WellFoundedRelation Bool where
   rel := Bool.linearOrder.lt
   wf := boolWellFounded
 
-noncomputable def multidiv_subalgo_once [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
+noncomputable def multidiv_while_once [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) (fs_nonzero : ∀ m, fs m ≠ 0)
   (old_tuple : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) × ℕ × Bool) :
   (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) :=
@@ -240,7 +242,7 @@ noncomputable def multidiv_subalgo_once [DecidableEq R] [DecidableEq σ] [ord : 
   if p_nonzero : p ≠ 0
   then if NDO_false : NDO = true then
     if i_LE : i <= n
-      then multidiv_subalgo_once n f fs fs_nonzero (multidiv_subsubalgo n f fs fs_nonzero as r p i NDO)
+      then multidiv_while_once n f fs fs_nonzero (multidiv_nestedwhile n f fs fs_nonzero as r p i NDO)
       else ⟨as, r + leading_monomial p p_nonzero, p - leading_monomial p p_nonzero⟩
     else ⟨as, r, p⟩
   else ⟨as, r, p⟩
@@ -250,7 +252,7 @@ noncomputable def multidiv_subalgo_once [DecidableEq R] [DecidableEq σ] [ord : 
     unfold Bool.instLT; simp
     apply Prod.lex_iff.mpr
     simp
-    generalize EQ : multidiv_subsubalgo n f fs fs_nonzero as r p i NDO = otp
+    generalize EQ : multidiv_nestedwhile n f fs fs_nonzero as r p i NDO = otp
     cases otp with
     | mk as' otp' =>
       cases otp' with
@@ -260,10 +262,10 @@ noncomputable def multidiv_subalgo_once [DecidableEq R] [DecidableEq σ] [ord : 
           cases otp''' with
           | mk i' NDO' =>
             unfold frth ffth; simp
-            unfold multidiv_subsubalgo at EQ
+            unfold multidiv_nestedwhile at EQ
             rw [dif_pos p_nonzero] at EQ
             simp at EQ
-            rcases em (leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i) ∣ leading_monomial p p_nonzero) with h | h
+            rcases em (leading_monomial (fs ↑i) (multidiv_nestedwhile.proof_1 n fs fs_nonzero i) ∣ leading_monomial p p_nonzero) with h | h
             . rw [if_pos h] at EQ
               simp at EQ
               left
@@ -285,36 +287,36 @@ noncomputable def multidiv_subalgo_once [DecidableEq R] [DecidableEq σ] [ord : 
                 rw [EQ']
                 exact lt_add_one (n - i)
 
-noncomputable def multidiv_subalgo_once_wrap [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
+noncomputable def multidiv_while_once_wrap [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) (fs_nonzero : ∀ m, fs m ≠ 0)
   (as : Fin (n+1) → MvPolynomial σ R) (r : MvPolynomial σ R) (p : MvPolynomial σ R) :
   (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) :=
-    multidiv_subalgo_once n f fs fs_nonzero ⟨as, r, p, 0, true⟩
+    multidiv_while_once n f fs fs_nonzero ⟨as, r, p, 0, true⟩
 
-noncomputable def multidiv_subalgo [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
+noncomputable def multidiv_while [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) (fs_nonzero : ∀ m, fs m ≠ 0)
   (old_tuple : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R)) :
   (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) :=
   let ⟨as, r, p⟩ := old_tuple
   if p_nonzero : p ≠ 0
-  then multidiv_subalgo n f fs fs_nonzero (multidiv_subalgo_once_wrap n f fs fs_nonzero as r p)
+  then multidiv_while n f fs fs_nonzero (multidiv_while_once_wrap n f fs fs_nonzero as r p)
   else ⟨as, r, p⟩
   termination_by (leading_monomial_opt (thd old_tuple))
   decreasing_by
-    generalize EQ : multidiv_subalgo_once_wrap n f fs fs_nonzero as r p = otp
+    generalize EQ : multidiv_while_once_wrap n f fs fs_nonzero as r p = otp
     cases otp with
     | mk as' otp' =>
       cases otp' with
       | mk r' p' =>
         unfold thd; simp
-        unfold multidiv_subalgo_once_wrap at EQ
-        -- unfold multidiv_subalgo_once at EQ
+        unfold multidiv_while_once_wrap at EQ
+        -- unfold multidiv_while_once at EQ
         sorry
 
 noncomputable def multidiv_algo [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) (fs_nonzero : ∀ m, fs m ≠ 0) :
   (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) :=
-  let ⟨as, r, _⟩ := multidiv_subalgo n f fs fs_nonzero ⟨fun _ => 0, 0, f⟩
+  let ⟨as, r, _⟩ := multidiv_while n f fs fs_nonzero ⟨fun _ => 0, 0, f⟩
   ⟨as, r⟩
 
 noncomputable def MvPolynomial.multidiv [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] [MonomialOrder σ]
