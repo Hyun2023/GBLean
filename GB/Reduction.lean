@@ -186,7 +186,20 @@ noncomputable def multidiv_subalgo_once [DecidableEq R] [DecidableEq σ] [ord : 
   else ⟨as, r, p⟩
   termination_by (ffth old_tuple, n - frth old_tuple)
   decreasing_by
-    sorry
+    rw [LT.lt, Preorder.toLT, PartialOrder.toPreorder, LinearOrder.toPartialOrder, Bool.linearOrder]; simp
+    unfold Bool.instLT; simp
+    apply Prod.lex_iff.mpr
+    simp
+    generalize EQ : multidiv_subsubalgo n f fs fs_nonzero as r p i NDO = otp
+    cases otp with
+    | mk as' otp' =>
+      cases otp' with
+      | mk r' otp'' =>
+        cases otp'' with
+        | mk p' otp''' =>
+          cases otp''' with
+          | mk i' NDO' =>
+            sorry
 
 noncomputable def multidiv_subalgo_once_wrap [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) (fs_nonzero : ∀ m, fs m ≠ 0)
