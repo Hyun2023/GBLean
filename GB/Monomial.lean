@@ -216,6 +216,16 @@ lemma leading_monomial_smul [DecidableEq σ] [Field R] [ord : MonomialOrder σ ]
   . apply Finset.max'_subset
     rw [EQ]
 
+def leading_monomial_divmul_before [DecidableEq σ] [Field R] [ord : MonomialOrder σ ] (m : Monomial σ) (f : MvPolynomial σ R) (f_nonzero : f ≠ 0)
+  (lead_dvd : leading_monomial f f_nonzero ∣ m) :
+  toMvPolynomial (m / leading_monomial f f_nonzero) * f ≠ 0 := by
+  sorry
+
+def leading_monomial_divmul [DecidableEq σ] [Field R] [ord : MonomialOrder σ ] (m : Monomial σ) (f : MvPolynomial σ R) (f_nonzero : f ≠ 0)
+  (lead_dvd : leading_monomial f f_nonzero ∣ m) :
+  leading_monomial (toMvPolynomial (m / leading_monomial f f_nonzero) * f) (leading_monomial_divmul_before m f f_nonzero lead_dvd) = m := by
+  sorry
+
 def leading_coeff [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : R :=
   MvPolynomial.coeff (leading_monomial p p_nonzero) p
 

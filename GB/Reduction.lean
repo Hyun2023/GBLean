@@ -201,6 +201,7 @@ lemma multidiv_subsubalgo_lm [DecidableEq R] [DecidableEq σ] [ord : MonomialOrd
           simp
         | inr LMEQ =>
           apply NEQ
+          rw [LMEQ]
           sorry
       . rw [dif_neg h']
         unfold LT.lt instLTOption; simp
