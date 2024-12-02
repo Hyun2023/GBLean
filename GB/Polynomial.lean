@@ -23,6 +23,34 @@ def is_monomial'  [CommRing R] (p : MvPolynomial σ R)  :=
 def is_monomial  [CommRing R] (p : MvPolynomial σ R)  :=
   (∃! m, m ∈ p.support ∧ True) ∧ (∀ m, m ∈ p.support -> p m = 1)
 
+lemma is_monomial_monomial [DecidableEq σ] [CommRing R] (m : Monomial σ) : is_monomial (@MvPolynomial.monomial R _ _ m (1 : R)) := by
+  unfold is_monomial
+  constructor
+  . simp
+    use m
+    constructor
+    . simp
+      have ZNO : NeZero (1 : R) := by
+        sorry
+      have EQ : ¬ (@Eq R 0 (1 : R)) := by
+        refine zero_ne_one
+      intro H
+      apply EQ
+      symm
+      apply H
+    . intro y
+      simp
+      intro H H'
+      exact (Eq.symm H)
+  . intro m_1 H
+    simp at H
+    obtain ⟨H0, H1⟩ := H
+    subst H0
+    have H' := (MvPolynomial.coeff_monomial m m (1 : R))
+    unfold MvPolynomial.coeff at H'
+    simp at H'
+    exact H'
+
 def mono_poly_mono [CommRing R] [Nontrivial R] : ∀(m : Monomial σ), is_monomial (@toMvPolynomial R _ _ m) := by {
   intros m; unfold is_monomial; unfold toMvPolynomial
   rw [<-MvPolynomial.single_eq_monomial]; unfold MvPolynomial.support; unfold Finsupp.single; simp

@@ -160,8 +160,23 @@ def buchberger_step_keep_membership
         simp [pqeq,red0]
         apply ih
         have sin : s_red p q G G_nonzero ∈ (Ideal.span ↑F) := by sorry
-        -- almost trivial
-        sorry
+        have LEMMA := (@Set.singleton_subset_iff _ (s_red p q G G_nonzero) (↑(@Ideal.span (MvPolynomial σ R) CommSemiring.toSemiring ↑F)))
+        apply LEMMA.mpr at sin
+        have SS := (@Set.union_subset _ (@Finset.toSet (MvPolynomial σ R) G') {s_red p q G G_nonzero} (↑(@Ideal.span (MvPolynomial σ R) CommSemiring.toSemiring ↑F)) G'_membership sin)
+        have SS' : ↑(G' ∪ {s_red p q G G_nonzero}) ⊆ (@Union.union (Set (MvPolynomial σ R)) Set.instUnion ↑G' {s_red p q G G_nonzero}) := by
+          rw [Set.subset_def]
+          intro x H
+          simp at H
+          obtain ⟨H1, H2⟩ := H
+          . rw [Set.mem_union]
+            right
+            simp
+          . rw [Set.mem_union]
+            left
+            assumption
+        trans
+        . apply SS'
+        . apply SS
       }
     }
   }
@@ -269,7 +284,11 @@ lemma fundamental_thm_of_buchberger_step
             trivial
           }
           have empty_or_not: ∀ G: Finset σ, G = ∅ ∨ (∃ g, g ∈ G) := by {
-            sorry
+            intro G
+            rw [Classical.or_iff_not_imp_left]
+            intro EMPTY
+            refine Finset.Nonempty.exists_mem ?h
+            exact Finset.nonempty_iff_ne_empty.mpr EMPTY
           }
 
           have exg: ∃ g, g ∈ G := by {

@@ -168,7 +168,22 @@ def Reduction_unique  (s : MvPolynomial σ R) (G : Finset (MvPolynomial σ R)) (
     have ⟨ f1, ⟨ H11,H12,H13 ⟩ ⟩ := H1
     have ⟨ f2, ⟨ H21,H22,H23 ⟩ ⟩ := H2
 
-    have sub_in : r1 - r2 ∈ I := by sorry
+    have sub_in : r1 - r2 ∈ I := by
+      have EQ : r1 - r2 = f2 - f1 := by
+        rw [H12] at H22
+        have EQ' : r1 + f1 - r2 = f2 := by
+          exact Eq.symm (eq_sub_of_add_eq' (id (Eq.symm H22)))
+        have EQ'' : r1 + f1 - r2 = r1 - r2 + f1 := by
+          exact add_sub_right_comm r1 f1 r2
+        rw [EQ''] at EQ'
+        clear EQ''
+        symm
+        apply sub_eq_iff_eq_add.mpr
+        symm
+        exact EQ'
+      rw [EQ]
+      clear EQ
+      exact (Submodule.sub_mem_iff_left I H11).mpr H21
     have sub_nonzero : r1 -r2 ≠ 0 := by {
       contrapose!;intros;exact sub_ne_zero_of_ne eq
     }
@@ -182,7 +197,8 @@ def Reduction_unique  (s : MvPolynomial σ R) (G : Finset (MvPolynomial σ R)) (
     }
 
     have lm_in' : ( @toMvPolynomial R _ _ (leading_monomial (r1 -r2) sub_nonzero) ) ∈
-      Ideal.span ((fun a ↦ (monomial a) 1) '' (leading_monomial_finset G).toSet) := by sorry
+      Ideal.span ((fun a ↦ (monomial a) 1) '' (leading_monomial_finset G).toSet) := by
+      sorry
     have ⟨ mi, ⟨ mi_in, mi_dvd⟩  ⟩  := @MonomialGen _ R _ _ _ _ _ _
       (toMvPolynomial (leading_monomial (r1 - r2) sub_nonzero))
       (leading_monomial_finset G) lm_in' (mono_poly_mono _)
@@ -191,8 +207,6 @@ def Reduction_unique  (s : MvPolynomial σ R) (G : Finset (MvPolynomial σ R)) (
   -- no term of r1 is divided by any g except r is 0. Complete proof is left as excercise :)
     sorry
 }
-
-def S (f g : MvPolynomial σ R) : MvPolynomial σ R := sorry
 
 lemma GB_multidiv (G : Finset (MvPolynomial σ R))  (G_nonzero : ∀ g ∈ G, g ≠ 0) (I : Ideal (MvPolynomial σ R)) (f  : MvPolynomial σ R) :
   Groebner G I -> (
@@ -250,15 +264,37 @@ theorem BuchbergerCriterion :
   forall (G : Finset (MvPolynomial σ R)) (I : Ideal (MvPolynomial σ R))
   (G_basis : Ideal.span G = I)
   (G_nonzero : ∀ g ∈ G, g ≠ 0 ),
-    ( Groebner G I ) ↔ (∀ fi fj, fi∈ G -> fj ∈ G -> fi ≠ fj → ((S fi fj).multidiv G G_nonzero).2 = 0 ) := by
+    ( Groebner G I ) ↔ (∀ fi fj, fi∈ G -> fj ∈ G -> fi ≠ fj → ((Spol fi fj).multidiv G G_nonzero).2 = 0 ) := by
     intros G I G_basis G_nonzero
     constructor
     {
       -- (==>)
-      intros GB fi fj neq
-      have Sin: (S fi fj) ∈ I := by sorry
+      intros GB fi fj neq neq'
+      have Sin: (Spol fi fj) ∈ I := by
+        let fi_nonzero := G_nonzero fi neq
+        let fj_nonzero := G_nonzero fj neq'
+        unfold Spol
+        have EQ : (if f_NE : fi = 0 then 0 else if g_NE : fj = 0 then 0 else Spol_help fi fj f_NE g_NE) = Spol_help fi fj fi_nonzero fj_nonzero := by
+          rw [dif_neg]
+          rw [dif_neg]
+        rw [EQ]
+        clear EQ
+        unfold Spol_help
+        have G_in_I := (@Ideal.subset_span (MvPolynomial σ R) _ G)
+        rw [G_basis] at G_in_I
+        have in1_o : fi ∈ I := by
+          exact G_in_I neq
+        have in2_o : fj ∈ I := by
+          exact G_in_I neq'
+        have in1 : (monomial (LCM (leading_monomial fi fi_nonzero) (leading_monomial fj fj_nonzero) / leading_monomial fi fi_nonzero)) (leading_coeff fi fi_nonzero)⁻¹ * fi ∈ I := by
+          apply Ideal.mul_mem_left
+          assumption
+        have in2 : (monomial (LCM (leading_monomial fi fi_nonzero) (leading_monomial fj fj_nonzero) / leading_monomial fj fj_nonzero)) (leading_coeff fj fj_nonzero)⁻¹ * fj ∈ I := by
+          apply Ideal.mul_mem_left
+          assumption
+        exact (Submodule.sub_mem_iff_left I in2).mpr in1
       intros
-      exact (GB_multidiv G G_nonzero I (S fi fj) GB).mp Sin
+      exact (GB_multidiv G G_nonzero I (Spol fi fj) GB).mp Sin
     }
     {
       -- (<==)
@@ -298,15 +334,20 @@ theorem BuchbergerCriterion :
         generalize h : (Finsupp.filter (fun x ↦ leading_monomial (l x * x.val) sorry = measure) l) = l' at l_sum l_filter
         clear h
         let l'' := Finsupp.onFinset l'.support (fun x => (monomial (leading_monomial (l x * x.val) sorry)) (leading_coeff (l x * x.val) sorry)) sorry
-        have E : l' = l'' + (l' - l'') := by sorry
+        have E : l' = l'' + (l' - l'') := by
+          symm
+          apply add_sub_cancel
         rw [E] at l_sum
         rw [Finsupp.sum_add_index] at l_sum
         · nth_rewrite 1 [Finsupp.sum] at l_sum
           generalize EE : ∑ a ∈ l''.support, l'' a • a.val = I
 
+
           sorry
-        · sorry
-        · sorry
+        · intro a' H
+          apply zero_smul
+        · intro a' H b1 b2
+          apply Module.add_smul
         --rw [← (Finsupp.sum_filter_add_sum_filter_not (fun x => leading_monomial (lx * ↑x) = measure))] at l_sum
         -- unfold Finsupp.sum at comb; simp at comb
 -- Finsupp.sum_filter_add_sum_filter_not

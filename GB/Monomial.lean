@@ -121,6 +121,10 @@ def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
     apply Monomial.instDvd'_div
     exact H
 
+instance Monomial.instDvd_decidable [DecidableEq σ] (f g : Monomial σ) : Decidable (f ∣ g) := by
+  rw [Monomial.instDvd_equiv]
+  exact f.instDvd'_decidable g
+
 def Monomial.instDvd_equiv' [DecidableEq σ] (f g : Monomial σ) :
   Monomial.instDvd' f g <-> Monomial.instDvd'' f g := by
   rw [instDvd', instDvd'']; simp
@@ -172,6 +176,9 @@ def leading_monomial [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p 
 def leading_monomial_unsafe [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : (Monomial σ) :=
   @Option.get! _ MonomialExists (@Finset.max _ ord.toLinearOrder (monomials p))
 
+noncomputable def leading_monomial_opt [DecidableEq σ] [CommRing R] [DecidableEq R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) : Option (Monomial σ) :=
+  if p_nonzero : p ≠ 0 then some (leading_monomial p p_nonzero) else none
+
 lemma leading_monomial_in [DecidableEq σ] [CommRing R] [ord : MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) :
   leading_monomial p p_nonzero ∈ p.support := by
   unfold leading_monomial
@@ -209,6 +216,65 @@ lemma leading_monomial_smul [DecidableEq σ] [Field R] [ord : MonomialOrder σ ]
   . apply Finset.max'_subset
     rw [EQ]
 
+def leading_monomial_divmul_before [DecidableEq σ] [Field R] [ord : MonomialOrder σ ] (m : Monomial σ) (f : MvPolynomial σ R) (f_nonzero : f ≠ 0)
+  (lead_dvd : leading_monomial f f_nonzero ∣ m) :
+  toMvPolynomial (m / leading_monomial f f_nonzero) * f ≠ 0 := by
+  let ⟨k, kProp⟩ := lead_dvd
+  have EQ : m / leading_monomial f f_nonzero = k := by
+    rw [kProp]
+    rw [HMul.hMul, instHMul, HDiv.hDiv, instHDiv]; simp
+    rw [Mul.mul, Monomial.instMul, Div.div, Monomial.instDiv]; simp
+    rw [Finsupp.zipWith, Finsupp.onFinset]; simp
+    apply Finsupp.ext
+    intro a; simp
+    rw [Add.add, Finsupp.instAdd]; simp
+  rw [EQ]
+  have NE : (toMvPolynomial k * f).toFun m ≠ 0 := by
+    rw [HMul.hMul, instHMul]; simp
+    rw [Mul.mul, NonUnitalNonAssocSemiring.toMul, NonAssocSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonAssocSemiring]; simp
+    rw [NonUnitalSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonUnitalSemiring]
+    unfold CommSemiring.toSemiring MvPolynomial.commSemiring AddMonoidAlgebra.commSemiring; simp
+    unfold NonUnitalCommSemiring.toNonUnitalSemiring AddMonoidAlgebra.nonUnitalCommSemiring; simp
+    unfold AddMonoidAlgebra.nonUnitalSemiring; simp
+    unfold AddMonoidAlgebra.nonUnitalNonAssocSemiring; simp
+    unfold AddMonoidAlgebra.hasMul; simp
+    unfold MonoidAlgebra.mul'; simp
+    intro H
+    unfold Finsupp.sum at H; simp at H
+    have EQ' : (∑ x ∈ (@toMvPolynomial R σ Field.toCommRing k).support,
+      ∑ x_1 ∈ f.support, Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) ((toMvPolynomial k).toFun x) * Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) (f.toFun x_1)).toFun m =
+      ∑ x ∈ (@toMvPolynomial R σ Field.toCommRing k).support,
+      (∑ x_1 ∈ f.support, Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) ((toMvPolynomial k).toFun x) * Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) (f.toFun x_1)).toFun m := by
+      apply MvPolynomial.coeff_sum
+    have EQ'' : ∑ x ∈ (@toMvPolynomial R σ Field.toCommRing k).support,
+      (∑ x_1 ∈ f.support, Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) ((toMvPolynomial k).toFun x) * Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) (f.toFun x_1)).toFun m =
+      ∑ x ∈ (@toMvPolynomial R σ Field.toCommRing k).support,
+      ∑ x_1 ∈ f.support, (Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) ((toMvPolynomial k).toFun x) * Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) (f.toFun x_1)).toFun m := by
+      apply Finset.sum_congr; simp
+      intro x H
+      apply MvPolynomial.coeff_sum
+    rw [EQ''] at EQ'
+    clear EQ''
+    have EQ'' : ∑ x ∈ (@toMvPolynomial R σ Field.toCommRing k).support,
+      ∑ x_1 ∈ f.support, (Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) ((toMvPolynomial k).toFun x) * Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) (f.toFun x_1)).toFun m = 0 := by
+      rw [<- EQ']
+      clear EQ'
+      rw [<- H]
+      clear H
+      congr
+    clear EQ'
+    clear H
+
+    -- apply mul_ne_zero
+    sorry
+  exact Ne.symm (ne_of_apply_ne Finsupp.toFun fun a ↦ NE (congrFun (id (Eq.symm a)) m))
+
+
+def leading_monomial_divmul [DecidableEq σ] [Field R] [ord : MonomialOrder σ ] (m : Monomial σ) (f : MvPolynomial σ R) (f_nonzero : f ≠ 0)
+  (lead_dvd : leading_monomial f f_nonzero ∣ m) :
+  leading_monomial (toMvPolynomial (m / leading_monomial f f_nonzero) * f) (leading_monomial_divmul_before m f f_nonzero lead_dvd) = m := by
+  sorry
+
 def leading_coeff [DecidableEq σ] [CommRing R] [MonomialOrder σ ] (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) : R :=
   MvPolynomial.coeff (leading_monomial p p_nonzero) p
 
@@ -243,3 +309,277 @@ lemma leading_coeff_div [DecidableEq σ] [Field R] [MonomialOrder σ ] (p : MvPo
     exact leading_coeff_nonzero p p_nonzero
   . apply one_div_ne_zero
     apply leading_coeff_nonzero
+
+lemma monomial_leading_monomial [DecidableEq σ] [Field R] [MonomialOrder σ ] (g : MvPolynomial σ R) (g_nonzero : g ≠ 0)
+  (l_nonzero : (MvPolynomial.monomial (leading_monomial g g_nonzero)) (1 : R) ≠ 0) :
+  leading_monomial ((MvPolynomial.monomial (leading_monomial g g_nonzero)) (1 : R)) l_nonzero = leading_monomial g g_nonzero := by
+  let p := (MvPolynomial.monomial (leading_monomial g g_nonzero)) (1 : R)
+  have EQ : leading_monomial p l_nonzero = leading_monomial g g_nonzero := by
+    have EQ' : p = Finsupp.single (leading_monomial g g_nonzero) 1 := by
+      rw [MvPolynomial.single_eq_monomial]
+    rw [Finsupp.single] at EQ'; simp at EQ'
+    have EQ'' : p.support = {leading_monomial g g_nonzero} := by
+      rw [EQ']
+      rfl
+    have EQ''' := (leading_monomial_in p l_nonzero)
+    rw [EQ''] at EQ'''
+    rw [<-Set.mem_singleton_iff]
+    exact Set.mem_toFinset.mp EQ'''
+  unfold p at EQ
+  exact EQ
+
+def leading_coeff_divmul [DecidableEq σ] [Field R] [ord : MonomialOrder σ ] (m : Monomial σ) (f : MvPolynomial σ R) (f_nonzero : f ≠ 0)
+  (lead_dvd : leading_monomial f f_nonzero ∣ m) :
+  leading_coeff (toMvPolynomial (m / leading_monomial f f_nonzero) * f) (leading_monomial_divmul_before m f f_nonzero lead_dvd) = 1 := by
+  sorry
+
+instance opLinearOrder [LE : LinearOrder T] : LinearOrder (Option T) where
+  le  p₁ p₂ := match p₁ with | none => True | some p1' => match p₂ with | none => False | some p2' => LE.le p1' p2'
+  le_refl := by
+    intro a
+    simp
+    cases a with
+    | none => simp
+    | some a' => simp
+  le_trans := by
+    simp
+    intro a b c H1 H2
+    cases a with
+    | none => simp
+    | some a' =>
+      simp
+      cases b with
+      | none =>
+        simp at H1
+      | some b' =>
+        cases c with
+        | none =>
+          simp at H2
+        | some c' =>
+          simp at H1 H2
+          simp
+          apply LE.le_trans <;> assumption
+  le_antisymm := by
+    simp
+    intro a b H1 H2
+    cases a with
+    | none =>
+      cases b with
+      | none =>
+        simp at H1 H2
+        rfl
+      | some b' =>
+        simp at H1 H2
+    | some a' =>
+      cases b with
+      | none =>
+        simp at H1 H2
+      | some b' =>
+        simp at H1 H2
+        have EQ : a' = b' := by
+          apply LE.le_antisymm <;> assumption
+        rw [EQ]
+  le_total := by
+    intro a b
+    cases a with
+    | none =>
+      left
+      simp
+    | some a' =>
+      cases b with
+      | none =>
+        right
+        simp
+      | some b' =>
+        simp
+        apply LE.le_total
+  decidableLE := by
+    intro a b
+    simp
+    cases a with
+    | none =>
+      simp
+      exact instDecidableTrue
+    | some a' =>
+      cases b with
+      | none =>
+        simp
+        exact instDecidableFalse
+      | some b' =>
+        simp
+        apply LE.decidableLE
+  lt_iff_le_not_le := by
+    intro a b
+    constructor <;> intro H
+    . cases a with
+      | none =>
+        simp
+        cases b with
+        | none =>
+          unfold LT.lt instLTOption at H; simp at H
+          unfold Option.lt at H
+          simp at H
+        | some b' =>
+          simp
+      | some a' =>
+        cases b with
+        | none =>
+          unfold LT.lt instLTOption at H; simp at H
+          unfold Option.lt at H
+          simp at H
+        | some b' =>
+          unfold LT.lt instLTOption at H; simp at H
+          unfold Option.lt at H
+          simp at H
+          simp
+          constructor
+          . exact le_of_lt H
+          . assumption
+    . have ⟨H1, H2⟩ := H
+      cases a with
+      | none =>
+        simp
+        cases b with
+        | none =>
+          simp at H2
+        | some b' =>
+          unfold LT.lt instLTOption; simp
+          unfold Option.lt
+          simp
+      | some a' =>
+        cases b with
+        | none =>
+          simp at H1
+        | some b' =>
+          simp at H1 H2
+          unfold LT.lt instLTOption; simp
+          unfold Option.lt
+          simp
+          apply (LE.lt_iff_le_not_le a' b').mpr
+          exact H
+  min p₁ p₂ := match p₁ with | none => none | some p1' => match p₂ with | none => none | some p2' => LE.min p1' p2'
+  min_def := by
+    intro a b
+    unfold min; simp
+    cases a with
+    | none =>
+      cases b with
+      | none =>
+        simp
+      | some b' =>
+        simp
+    | some a' =>
+      cases b with
+      | none =>
+        simp
+      | some b' =>
+        simp
+        rcases em (a' ≤ b') with h | h
+        . rw [if_pos]
+          . congr
+            unfold LinearOrder.toMin
+            have MNDF := LE.min_def a' b'
+            rw [if_pos] at MNDF
+            . exact MNDF
+            . assumption
+          . assumption
+        . rw [if_neg]
+          . congr
+            unfold LinearOrder.toMin
+            have MNDF := LE.min_def a' b'
+            rw [if_neg] at MNDF
+            . exact MNDF
+            . assumption
+          . assumption
+  max_def := by
+    intro a b
+    unfold max Option.instMax; simp
+    unfold Option.max
+    cases a with
+    | none =>
+      cases b with
+      | none =>
+        simp
+      | some b' =>
+        simp
+    | some a' =>
+      cases b with
+      | none =>
+        simp
+      | some b' =>
+        simp
+        have MXDF := LE.max_def a' b'
+        rw [MXDF]
+        rcases em (a' ≤ b') with h | h
+        . rw [if_pos, if_pos] <;> assumption
+        . rw [if_neg, if_neg] <;> assumption
+  compare_eq_compareOfLessAndEq := by
+    intro a b
+    unfold compare instOrdOption; simp
+    unfold compareOfLessAndEq
+    cases a with
+    | none =>
+      cases b with
+      | none =>
+        simp
+        rw [if_neg]
+        unfold LT.lt instLTOption; simp
+        unfold Option.lt
+        simp
+      | some b' =>
+        simp
+        rw [if_pos]
+        unfold LT.lt instLTOption; simp
+        unfold Option.lt
+        simp
+    | some a' =>
+      cases b with
+      | none =>
+        simp
+        rw [if_neg]
+        unfold LT.lt instLTOption; simp
+        unfold Option.lt
+        simp
+      | some b' =>
+        simp
+        have CEC := LE.compare_eq_compareOfLessAndEq a' b'
+        rw [CEC]
+        unfold LT.lt instLTOption; simp
+        unfold Option.lt
+        unfold compareOfLessAndEq
+        simp
+
+instance opMonomialLinearOrder [DecidableEq σ] [ord : MonomialOrder σ] : LinearOrder (Option (Monomial σ)) :=
+  @opLinearOrder _ ord.toLinearOrder
+
+instance opMonomialWellFounded [DecidableEq σ] [ord : MonomialOrder σ] : WellFounded (@opMonomialLinearOrder _ _ ord).lt := by
+  have WF := ord.isWellOrder.wf
+  unfold LT.lt Preorder.toLT PartialOrder.toPreorder LinearOrder.toPartialOrder opMonomialLinearOrder opLinearOrder; simp
+  unfold instLTOption; simp
+  unfold Option.lt
+  refine WellFounded.intro ?h
+  intro a
+  cases a with
+  | none =>
+    apply Acc.intro
+    intro b H
+    simp at H
+  | some a' =>
+    simp
+    have IND := (@WellFounded.induction (Monomial σ) _ WF)
+    have IND' := (@IND
+      (fun a' => Acc
+        (fun x x_1 ↦
+        match x, x_1 with
+        | none, some val => True
+        | some x, some y => x < y
+        | x, x_2 => False)
+        (some a'))
+      a')
+    -- apply IND'
+    -- seems lean bug
+    sorry
+
+instance opMonomialWellFoundedRelation [DecidableEq σ] [ord : MonomialOrder σ] : WellFoundedRelation (Option (Monomial σ)) where
+  rel := opMonomialLinearOrder.lt
+  wf := opMonomialWellFounded
