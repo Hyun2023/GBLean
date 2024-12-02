@@ -138,23 +138,17 @@ noncomputable def multidiv_subsubalgo [DecidableEq R] [DecidableEq σ] [ord : Mo
 noncomputable def multidiv_subalgo_once [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R)
   (as : Fin (n+1) → MvPolynomial σ R) (r : MvPolynomial σ R) (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) (i : ℕ) (DO : Bool) :
-  (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) := by
-    let i : ℕ := 0
-    let DO : Bool := false
+  (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) :=
+  if DO = false then
     if i_LE : i < n
-    then sorry
-    else if DO = true then
-      constructor
-      . exact as
-      . constructor
-        . exact r
-        . exact p
-    else
-      constructor
-      . exact as
-      . constructor
-        . exact r
-        . exact p
+    then
+      let ⟨as', r', ⟨p', p'_nonzero⟩, i', DO'⟩ := multidiv_subsubalgo n f fs as r p p_nonzero i DO
+      multidiv_subalgo_once n f fs as' r' p' p'_nonzero i' DO'
+    else ⟨as, r + leading_monomial p p_nonzero, p - leading_monomial p p_nonzero⟩
+  else ⟨as, r, p⟩
+  termination_by (n - i)
+  decreasing_by
+    sorry
 
 noncomputable def multidiv_subalgo_once_wrap [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R)
