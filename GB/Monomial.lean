@@ -229,18 +229,46 @@ def leading_monomial_divmul_before [DecidableEq σ] [Field R] [ord : MonomialOrd
     intro a; simp
     rw [Add.add, Finsupp.instAdd]; simp
   rw [EQ]
-  -- rw [HMul.hMul, instHMul]; simp
-  -- rw [Mul.mul, NonUnitalNonAssocSemiring.toMul, NonAssocSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonAssocSemiring]; simp
-  -- rw [NonUnitalSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonUnitalSemiring, CommSemiring.toSemiring, MvPolynomial.commSemiring, AddMonoidAlgebra.commSemiring]; simp
-  -- unfold NonUnitalCommSemiring.toNonUnitalSemiring AddMonoidAlgebra.nonUnitalCommSemiring; simp
-  -- unfold AddMonoidAlgebra.nonUnitalSemiring; simp
-  -- unfold AddMonoidAlgebra.nonUnitalNonAssocSemiring; simp
-  -- unfold AddMonoidAlgebra.hasMul; simp
-  -- unfold MonoidAlgebra.mul'; simp
-  -- intro H
-  -- unfold Finsupp.sum at H; simp at H
-  -- apply mul_ne_zero
-  sorry
+  have NE : (toMvPolynomial k * f).toFun m ≠ 0 := by
+    rw [HMul.hMul, instHMul]; simp
+    rw [Mul.mul, NonUnitalNonAssocSemiring.toMul, NonAssocSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonAssocSemiring]; simp
+    rw [NonUnitalSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonUnitalSemiring]
+    unfold CommSemiring.toSemiring MvPolynomial.commSemiring AddMonoidAlgebra.commSemiring; simp
+    unfold NonUnitalCommSemiring.toNonUnitalSemiring AddMonoidAlgebra.nonUnitalCommSemiring; simp
+    unfold AddMonoidAlgebra.nonUnitalSemiring; simp
+    unfold AddMonoidAlgebra.nonUnitalNonAssocSemiring; simp
+    unfold AddMonoidAlgebra.hasMul; simp
+    unfold MonoidAlgebra.mul'; simp
+    intro H
+    unfold Finsupp.sum at H; simp at H
+    have EQ' : (∑ x ∈ (@toMvPolynomial R σ Field.toCommRing k).support,
+      ∑ x_1 ∈ f.support, Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) ((toMvPolynomial k).toFun x) * Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) (f.toFun x_1)).toFun m =
+      ∑ x ∈ (@toMvPolynomial R σ Field.toCommRing k).support,
+      (∑ x_1 ∈ f.support, Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) ((toMvPolynomial k).toFun x) * Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) (f.toFun x_1)).toFun m := by
+      apply MvPolynomial.coeff_sum
+    have EQ'' : ∑ x ∈ (@toMvPolynomial R σ Field.toCommRing k).support,
+      (∑ x_1 ∈ f.support, Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) ((toMvPolynomial k).toFun x) * Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) (f.toFun x_1)).toFun m =
+      ∑ x ∈ (@toMvPolynomial R σ Field.toCommRing k).support,
+      ∑ x_1 ∈ f.support, (Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) ((toMvPolynomial k).toFun x) * Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) (f.toFun x_1)).toFun m := by
+      apply Finset.sum_congr; simp
+      intro x H
+      apply MvPolynomial.coeff_sum
+    rw [EQ''] at EQ'
+    clear EQ''
+    have EQ'' : ∑ x ∈ (@toMvPolynomial R σ Field.toCommRing k).support,
+      ∑ x_1 ∈ f.support, (Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) ((toMvPolynomial k).toFun x) * Finsupp.single (@HMul.hMul (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) (Multiplicative (σ →₀ ℕ)) instHMul x x_1) (f.toFun x_1)).toFun m = 0 := by
+      rw [<- EQ']
+      clear EQ'
+      rw [<- H]
+      clear H
+      congr
+    clear EQ'
+    clear H
+
+    -- apply mul_ne_zero
+    sorry
+  exact Ne.symm (ne_of_apply_ne Finsupp.toFun fun a ↦ NE (congrFun (id (Eq.symm a)) m))
+
 
 def leading_monomial_divmul [DecidableEq σ] [Field R] [ord : MonomialOrder σ ] (m : Monomial σ) (f : MvPolynomial σ R) (f_nonzero : f ≠ 0)
   (lead_dvd : leading_monomial f f_nonzero ∣ m) :
@@ -299,6 +327,11 @@ lemma monomial_leading_monomial [DecidableEq σ] [Field R] [MonomialOrder σ ] (
     exact Set.mem_toFinset.mp EQ'''
   unfold p at EQ
   exact EQ
+
+def leading_coeff_divmul [DecidableEq σ] [Field R] [ord : MonomialOrder σ ] (m : Monomial σ) (f : MvPolynomial σ R) (f_nonzero : f ≠ 0)
+  (lead_dvd : leading_monomial f f_nonzero ∣ m) :
+  leading_coeff (toMvPolynomial (m / leading_monomial f f_nonzero) * f) (leading_monomial_divmul_before m f f_nonzero lead_dvd) = 1 := by
+  sorry
 
 instance opLinearOrder [LE : LinearOrder T] : LinearOrder (Option T) where
   le  p₁ p₂ := match p₁ with | none => True | some p1' => match p₂ with | none => False | some p2' => LE.le p1' p2'
