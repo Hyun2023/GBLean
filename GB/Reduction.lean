@@ -149,14 +149,34 @@ noncomputable def multidiv_subsubalgo [DecidableEq R] [DecidableEq σ] [ord : Mo
       let as' : Fin (n+1) → MvPolynomial σ R := fun i => as i + toMvPolynomial (leading_monomial p p_nonzero / leading_monomial (fs i) (fs_nonzero i))
       let p' : MvPolynomial σ R := p - toMvPolynomial (leading_monomial p p_nonzero / leading_monomial (fs i) (fs_nonzero i))
       ⟨as', r, p', i, false⟩
-    else ⟨as, r, p, i+1, NDO⟩
+    else ⟨as, r, p, i+1, true⟩
   else ⟨as, r, p, i, false⟩
 
 lemma multidiv_subsubalgo_lm [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) (fs_nonzero : ∀ m, fs m ≠ 0)
   (as : Fin (n+1) → MvPolynomial σ R) (r : MvPolynomial σ R) (p : MvPolynomial σ R) (i : ℕ) (NDO : Bool) :
-  p = 0 ∨ leading_monomial_opt (thrd (multidiv_subsubalgo n f fs fs_nonzero as r p i NDO)) < leading_monomial_opt p := by
-  sorry
+  p = 0 ∨ p ≠ 0 ∧ (leading_monomial_opt (thrd (multidiv_subsubalgo n f fs fs_nonzero as r p i NDO)) < leading_monomial_opt p ∨ (ffth (multidiv_subsubalgo n f fs fs_nonzero as r p i NDO)) = true) := by
+  rw [Classical.or_iff_not_imp_left]
+  intro H
+  unfold multidiv_subsubalgo
+  rw [dif_pos H]
+  constructor
+  . apply H
+  . rcases em (leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i) ∣ leading_monomial p H) with h | h
+    . rw [if_pos h]
+      unfold thrd ffth; simp
+      unfold leading_monomial_opt
+      rw [dif_pos H]
+      rcases em (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) ≠ 0) with h' | h'
+      . rw [dif_pos h']
+        unfold LT.lt instLTOption; simp
+        unfold Option.lt; simp
+        sorry
+      . rw [dif_neg h']
+        unfold LT.lt instLTOption; simp
+        unfold Option.lt; simp
+    . rw [if_neg h]
+      unfold thrd ffth; simp
 
 instance boolWellFounded : WellFounded Bool.linearOrder.lt := by
   unfold LT.lt Preorder.toLT PartialOrder.toPreorder LinearOrder.toPartialOrder Bool.linearOrder; simp
@@ -225,7 +245,8 @@ noncomputable def multidiv_subalgo_once [DecidableEq R] [DecidableEq σ] [ord : 
               right
               obtain ⟨_, _, _, EQ4, EQ5⟩ := EQ
               constructor
-              . symm; assumption
+              . rw [NDO_false]
+                assumption
               . rw [<-EQ4]
                 simp
                 have EQ' : n + 1 - i = n - i + 1 := by
