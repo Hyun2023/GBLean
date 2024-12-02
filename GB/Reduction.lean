@@ -129,6 +129,9 @@ def thd [CommSemiring R] {σ n} (t : (Fin (n+1) → MvPolynomial σ R) × (MvPol
   let ⟨_, _, c⟩ := t
   c
 
+def thrd [CommSemiring R] {σ n} (t : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) × ℕ × Bool) : (MvPolynomial σ R) :=
+  let ⟨_, _, c, _, _⟩ := t
+  c
 def frth [CommSemiring R] {σ n} (t : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) × ℕ × Bool) : ℕ :=
   let ⟨_, _, _, c, _⟩ := t
   c
@@ -148,6 +151,12 @@ noncomputable def multidiv_subsubalgo [DecidableEq R] [DecidableEq σ] [ord : Mo
       ⟨as', r, p', i, false⟩
     else ⟨as, r, p, i+1, NDO⟩
   else ⟨as, r, p, i, false⟩
+
+lemma multidiv_subsubalgo_lm [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
+  (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) (fs_nonzero : ∀ m, fs m ≠ 0)
+  (as : Fin (n+1) → MvPolynomial σ R) (r : MvPolynomial σ R) (p : MvPolynomial σ R) (i : ℕ) (NDO : Bool) :
+  p = 0 ∨ leading_monomial_opt (thrd (multidiv_subsubalgo n f fs fs_nonzero as r p i NDO)) < leading_monomial_opt p := by
+  sorry
 
 instance boolWellFounded : WellFounded Bool.linearOrder.lt := by
   unfold LT.lt Preorder.toLT PartialOrder.toPreorder LinearOrder.toPartialOrder Bool.linearOrder; simp
@@ -252,15 +261,18 @@ noncomputable def multidiv_subalgo [DecidableEq R] [DecidableEq σ] [ord : Monom
 
 noncomputable def multidiv_algo [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) (fs_nonzero : ∀ m, fs m ≠ 0) :
-  (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) :=
-  multidiv_subalgo n f fs fs_nonzero ⟨fun _ => 0, 0, f⟩
+  (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) :=
+  let ⟨as, r, _⟩ := multidiv_subalgo n f fs fs_nonzero ⟨fun _ => 0, 0, f⟩
+  ⟨as, r⟩
 
-noncomputable def MvPolynomial.multidiv [DecidableEq σ] [DecidableEq R] [LinearOrder σ]  [Field R] [MonomialOrder σ] (s : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_isNonzero : ∀ f ∈ F, f ≠ 0) :
+noncomputable def MvPolynomial.multidiv [DecidableEq σ] [DecidableEq R] [LinearOrder σ] [Field R] [MonomialOrder σ]
+  (s : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_isNonzero : ∀ f ∈ F, f ≠ 0) :
     (Finsupp (MvPolynomial σ R) (MvPolynomial σ R)) × (MvPolynomial σ R) :=
+  -- use multidiv_algo
   sorry
 
-lemma MvPolynomial.multidiv_correct [DecidableEq R] [LinearOrder σ] [ord : MonomialOrder σ] [Field R] (s : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_isNonzero : ∀ f ∈ F, f ≠ 0):
-    -- let (a,r) := (MvPolynomial.multidiv s F F_isNonzero);
+lemma MvPolynomial.multidiv_correct [DecidableEq R] [LinearOrder σ] [ord : MonomialOrder σ] [Field R]
+  (s : MvPolynomial σ R) (F : Finset (MvPolynomial σ R)) (F_isNonzero : ∀ f ∈ F, f ≠ 0):
     s = (s.multidiv F F_isNonzero).snd + (∑ (f ∈ F), ((s.multidiv F F_isNonzero).fst f)*(f)) /\
     ((s.multidiv F F_isNonzero).snd = 0 ∨ ∀m ∈ monomials (s.multidiv F F_isNonzero).snd, ∀ f (inF : f ∈ F), ¬ Monomial.instDvd.dvd (leading_monomial f (F_isNonzero f inF)) m) := by
   sorry
