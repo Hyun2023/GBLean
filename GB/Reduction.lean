@@ -208,19 +208,17 @@ noncomputable def multidiv_subalgo_once [DecidableEq R] [DecidableEq σ] [ord : 
               simp at EQ
               left
               constructor
-              . obtain ⟨EQ1, EQ2, EQ3, EQ4, EQ5⟩ := EQ
+              . obtain ⟨_, _, _, _, EQ5⟩ := EQ
                 assumption
               . assumption
             . rw [if_neg h] at EQ
               simp at EQ
               right
-              obtain ⟨EQ1, EQ2, EQ3, EQ4, EQ5⟩ := EQ
+              obtain ⟨_, _, _, EQ4, EQ5⟩ := EQ
               constructor
               . symm; assumption
               . rw [<-EQ4]
                 simp
-                have LE : 0 < n - i := by
-                  sorry
                 have EQ' : n + 1 - i = n - i + 1 := by
                   exact Nat.sub_add_comm i_LE
                 rw [EQ']
