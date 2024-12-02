@@ -184,7 +184,7 @@ noncomputable def multidiv_subalgo_once [DecidableEq R] [DecidableEq σ] [ord : 
       else ⟨as, r + leading_monomial p p_nonzero, p - leading_monomial p p_nonzero⟩
     else ⟨as, r, p⟩
   else ⟨as, r, p⟩
-  termination_by (ffth old_tuple, n - frth old_tuple)
+  termination_by (ffth old_tuple, n + 1 - frth old_tuple)
   decreasing_by
     rw [LT.lt, Preorder.toLT, PartialOrder.toPreorder, LinearOrder.toPartialOrder, Bool.linearOrder]; simp
     unfold Bool.instLT; simp
@@ -208,14 +208,23 @@ noncomputable def multidiv_subalgo_once [DecidableEq R] [DecidableEq σ] [ord : 
               simp at EQ
               left
               constructor
-              . sorry
+              . obtain ⟨EQ1, EQ2, EQ3, EQ4, EQ5⟩ := EQ
+                assumption
               . assumption
             . rw [if_neg h] at EQ
               simp at EQ
               right
+              obtain ⟨EQ1, EQ2, EQ3, EQ4, EQ5⟩ := EQ
               constructor
-              . sorry
-              . sorry
+              . symm; assumption
+              . rw [<-EQ4]
+                simp
+                have LE : 0 < n - i := by
+                  sorry
+                have EQ' : n + 1 - i = n - i + 1 := by
+                  exact Nat.sub_add_comm i_LE
+                rw [EQ']
+                exact lt_add_one (n - i)
 
 noncomputable def multidiv_subalgo_once_wrap [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) (fs_nonzero : ∀ m, fs m ≠ 0)
