@@ -173,8 +173,26 @@ lemma multidiv_subsubalgo_lm [DecidableEq R] [DecidableEq σ] [ord : MonomialOrd
         unfold Option.lt; simp
         generalize EQ : leading_monomial (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * fs ↑i) h' = m
         symm at EQ
-
-        sorry
+        have MEM : m ∈ (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * fs ↑i).support := by
+          subst EQ
+          apply leading_monomial_in
+        have SP := Finsupp.mem_support_toFun (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * fs ↑i) m
+        apply SP.mp at MEM
+        have NEQ : p m - (toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * fs ↑i).toFun m ≠ 0 := by
+          have EQ'' : (p - toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * fs ↑i).toFun m = p m - (toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * fs ↑i).toFun m := by
+            rfl
+          rw [<-EQ'']
+          assumption
+        rw [<-not_le]
+        intro LTEQ
+        rw [le_iff_lt_or_eq] at LTEQ
+        cases LTEQ with
+        | inl LMLT =>
+          apply NEQ
+          sorry
+        | inr LMEQ =>
+          apply NEQ
+          sorry
       . rw [dif_neg h']
         unfold LT.lt instLTOption; simp
         unfold Option.lt; simp
