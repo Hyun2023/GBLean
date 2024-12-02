@@ -189,7 +189,16 @@ lemma multidiv_subsubalgo_lm [DecidableEq R] [DecidableEq σ] [ord : MonomialOrd
         cases LTEQ with
         | inl LMLT =>
           apply NEQ
-          sorry
+          have EQ1 : p m = 0 := by
+            apply by_contradiction; intro H'
+            apply (Finsupp.mem_support_toFun p m).mpr at H'
+            apply (leading_monomial_sound p H) at H'
+            apply LE.le.not_lt at H'
+            exact H' LMLT
+          have EQ2 : (toMvPolynomial (leading_monomial p H / leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i)) * fs ↑i).toFun m = 0 := by
+            sorry
+          rw [EQ1, EQ2]
+          simp
         | inr LMEQ =>
           apply NEQ
           sorry
