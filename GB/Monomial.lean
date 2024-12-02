@@ -219,6 +219,27 @@ lemma leading_monomial_smul [DecidableEq σ] [Field R] [ord : MonomialOrder σ ]
 def leading_monomial_divmul_before [DecidableEq σ] [Field R] [ord : MonomialOrder σ ] (m : Monomial σ) (f : MvPolynomial σ R) (f_nonzero : f ≠ 0)
   (lead_dvd : leading_monomial f f_nonzero ∣ m) :
   toMvPolynomial (m / leading_monomial f f_nonzero) * f ≠ 0 := by
+  let ⟨k, kProp⟩ := lead_dvd
+  have EQ : m / leading_monomial f f_nonzero = k := by
+    rw [kProp]
+    rw [HMul.hMul, instHMul, HDiv.hDiv, instHDiv]; simp
+    rw [Mul.mul, Monomial.instMul, Div.div, Monomial.instDiv]; simp
+    rw [Finsupp.zipWith, Finsupp.onFinset]; simp
+    apply Finsupp.ext
+    intro a; simp
+    rw [Add.add, Finsupp.instAdd]; simp
+  rw [EQ]
+  -- rw [HMul.hMul, instHMul]; simp
+  -- rw [Mul.mul, NonUnitalNonAssocSemiring.toMul, NonAssocSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonAssocSemiring]; simp
+  -- rw [NonUnitalSemiring.toNonUnitalNonAssocSemiring, Semiring.toNonUnitalSemiring, CommSemiring.toSemiring, MvPolynomial.commSemiring, AddMonoidAlgebra.commSemiring]; simp
+  -- unfold NonUnitalCommSemiring.toNonUnitalSemiring AddMonoidAlgebra.nonUnitalCommSemiring; simp
+  -- unfold AddMonoidAlgebra.nonUnitalSemiring; simp
+  -- unfold AddMonoidAlgebra.nonUnitalNonAssocSemiring; simp
+  -- unfold AddMonoidAlgebra.hasMul; simp
+  -- unfold MonoidAlgebra.mul'; simp
+  -- intro H
+  -- unfold Finsupp.sum at H; simp at H
+  -- apply mul_ne_zero
   sorry
 
 def leading_monomial_divmul [DecidableEq σ] [Field R] [ord : MonomialOrder σ ] (m : Monomial σ) (f : MvPolynomial σ R) (f_nonzero : f ≠ 0)
