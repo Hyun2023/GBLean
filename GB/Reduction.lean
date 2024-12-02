@@ -199,7 +199,23 @@ noncomputable def multidiv_subalgo_once [DecidableEq R] [DecidableEq σ] [ord : 
         | mk p' otp''' =>
           cases otp''' with
           | mk i' NDO' =>
-            sorry
+            unfold frth ffth; simp
+            unfold multidiv_subsubalgo at EQ
+            rw [dif_pos p_nonzero] at EQ
+            simp at EQ
+            rcases em (leading_monomial (fs ↑i) (multidiv_subsubalgo.proof_1 n fs fs_nonzero i) ∣ leading_monomial p p_nonzero) with h | h
+            . rw [if_pos h] at EQ
+              simp at EQ
+              left
+              constructor
+              . sorry
+              . assumption
+            . rw [if_neg h] at EQ
+              simp at EQ
+              right
+              constructor
+              . sorry
+              . sorry
 
 noncomputable def multidiv_subalgo_once_wrap [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) (fs_nonzero : ∀ m, fs m ≠ 0)
