@@ -133,11 +133,11 @@ noncomputable def multidiv_subsubalgo [DecidableEq R] [DecidableEq σ] [ord : Mo
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) (fs_nonzero : ∀ m, fs m ≠ 0)
   (as : Fin (n+1) → MvPolynomial σ R) (r : MvPolynomial σ R) (p : MvPolynomial σ R) (p_nonzero : p ≠ 0) (i : ℕ) (DO : Bool) :
   (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × { p' : MvPolynomial σ R // p' ≠ 0 } × ℕ × Bool :=
-  if DIV : Monomial.instDvd.dvd (leading_monomial (fs i) (fs_nonzero i)) (leading_monomial p p_nonzero)
+  if DIV : (leading_monomial (fs i) (fs_nonzero i) ∣ leading_monomial p p_nonzero)
     then
-      let as' := as
-      let p' := p
-      let p'_nonzero := p_nonzero
+      let as' : Fin (n+1) → MvPolynomial σ R := fun i => as i + toMvPolynomial (leading_monomial p p_nonzero / leading_monomial (fs i) (fs_nonzero i))
+      let p' : MvPolynomial σ R := p - toMvPolynomial (leading_monomial p p_nonzero / leading_monomial (fs i) (fs_nonzero i))
+      let p'_nonzero := by sorry
       ⟨as', r, ⟨p', p'_nonzero⟩, i, true⟩
     else ⟨as, r, ⟨p, p_nonzero⟩, i+1, DO⟩
 

@@ -121,6 +121,10 @@ def Monomial.instDvd_equiv [DecidableEq σ] (f g : Monomial σ) :
     apply Monomial.instDvd'_div
     exact H
 
+instance Monomial.instDvd_decidable [DecidableEq σ] (f g : Monomial σ) : Decidable (f ∣ g) := by
+  rw [Monomial.instDvd_equiv]
+  exact f.instDvd'_decidable g
+
 def Monomial.instDvd_equiv' [DecidableEq σ] (f g : Monomial σ) :
   Monomial.instDvd' f g <-> Monomial.instDvd'' f g := by
   rw [instDvd', instDvd'']; simp
