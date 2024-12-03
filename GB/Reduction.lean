@@ -287,6 +287,28 @@ noncomputable def multidiv_while_once [DecidableEq R] [DecidableEq σ] [ord : Mo
                 rw [EQ']
                 exact lt_add_one (n - i)
 
+lemma multidiv_while_once_lm [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
+  (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) (fs_nonzero : ∀ m, fs m ≠ 0)
+  (old_tuple : (Fin (n+1) → MvPolynomial σ R) × (MvPolynomial σ R) × (MvPolynomial σ R) × ℕ × Bool) :
+  thrd old_tuple = 0 ∨ thrd old_tuple ≠ 0 ∧ (leading_monomial_opt (thd (multidiv_while_once n f fs fs_nonzero old_tuple)) < leading_monomial_opt (thrd old_tuple)) := by
+  rw [Classical.or_iff_not_imp_left]
+  intro H
+  constructor
+  . assumption
+  . generalize EQ : multidiv_while_once n f fs fs_nonzero old_tuple = otp
+    cases otp with
+    | mk as' otp' =>
+      cases otp' with
+      | mk r' p' =>
+        unfold thd; simp
+        let ⟨as, r, p⟩ := old_tuple
+        unfold thrd; simp
+        unfold thrd at H; simp at H
+        unfold multidiv_while_once at EQ
+        rw [dif_pos H] at EQ
+        simp at EQ
+        sorry
+
 noncomputable def multidiv_while_once_wrap [DecidableEq R] [DecidableEq σ] [ord : MonomialOrder σ] [Field R] (n : ℕ)
   (f : MvPolynomial σ R) (fs : Fin (n+1) → MvPolynomial σ R) (fs_nonzero : ∀ m, fs m ≠ 0)
   (as : Fin (n+1) → MvPolynomial σ R) (r : MvPolynomial σ R) (p : MvPolynomial σ R) :
