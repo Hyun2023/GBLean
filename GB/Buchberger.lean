@@ -274,7 +274,7 @@ lemma fundamental_thm_of_buchberger_step
           have mul_red := multidiv_reduction (Spol p q) G G_nonzero
             (Ideal.span (toMvPolynomial_Finset (leading_monomial_finset G)).toSet)
           unfold ReductionProp at mul_red
-          obtain ⟨_, ⟨_, ⟨g_sum, g_zero⟩⟩⟩ := mul_red
+          obtain ⟨w, ⟨w_ext, ⟨g_sum, g_zero⟩⟩⟩ := mul_red
           rcases g_zero with _ | h_ndvd
           trivial
           apply of_not_not; intros r_nonzero
@@ -283,43 +283,78 @@ lemma fundamental_thm_of_buchberger_step
             apply Finsupp.support_nonempty_iff.mpr
             trivial
           }
-          have empty_or_not: ∀ G: Finset σ, G = ∅ ∨ (∃ g, g ∈ G) := by {
-            intro G
-            rw [Classical.or_iff_not_imp_left]
-            intro EMPTY
-            refine Finset.Nonempty.exists_mem ?h
-            exact Finset.nonempty_iff_ne_empty.mpr EMPTY
-          }
 
-          have exg: ∃ g, g ∈ G := by {
-            -- TODO: divide case by G is empty set or net
-            sorry
-          }
           rcases exmon with ⟨m, inMon⟩
-          rcases exg with ⟨g, inG⟩
-          apply (h_ndvd m inMon g inG)
 
-          have mgen_dvd: ∃ k_poly : (MvPolynomial σ R), (toMvPolynomial m) =
-            (k_poly * (toMvPolynomial (leading_monomial g (G_nonzero g inG)))) := by {
-              -- MonomialGen (toMvPolynomial m)
+          by_cases exg: (∃ g, g ∈ G)
+          · rcases exg with ⟨g, inG⟩
+            apply (h_ndvd m inMon g inG)
+
+            have mgen_dvd: ∃ k_poly : (MvPolynomial σ R), (toMvPolynomial m) =
+              (k_poly * (toMvPolynomial (leading_monomial g (G_nonzero g inG)))) := by {
+                -- MonomialGen (toMvPolynomial m)
+                sorry
+            }
+            rcases mgen_dvd with ⟨k_poly, dvd_k_poly⟩
+            have mono_k: is_monomial k_poly := by {
               sorry
-          }
-          rcases mgen_dvd with ⟨k_poly, dvd_k_poly⟩
-          have mono_k: is_monomial k_poly := by {
+            }
+
+            exists (MvPolynomial.toMonomial k_poly mono_k)
+            rw [mul_comm] at dvd_k_poly
+
+            have lower_mul:
+              ∀ (p q r: MvPolynomial σ R)
+              (mp: is_monomial p)
+              (mq: is_monomial q)
+              (mr: is_monomial r)
+              (mul_mp: p = q * r), (p.toMonomial mp) = (q.toMonomial mq) * (r.toMonomial mr) := by {
+                sorry
+            }
             sorry
-          }
-
-          exists (MvPolynomial.toMonomial k_poly mono_k)
-          rw [mul_comm] at dvd_k_poly
-
-          have lower_mul:
-            ∀ (p q r: MvPolynomial σ R)
-            (mp: is_monomial p)
-            (mq: is_monomial q)
-            (mr: is_monomial r)
-            (mul_mp: p = q * r), (p.toMonomial mp) = (q.toMonomial mq) * (r.toMonomial mr) := by {
+          · -- G is an empty set
+            have g_empty: G = ∅ := by {
+              apply Finset.not_nonempty_iff_eq_empty.mp
+              trivial
+            }
+            have lmf_empty: leading_monomial_finset G = ∅ := by {
+              rw [g_empty]
+              unfold leading_monomial_finset
+              simp
+            }
+            contrapose w_ext
+            clear w_ext
+            rw [lmf_empty]
+            unfold toMvPolynomial_Finset
+            simp
+            intro w_zero
+            -- show contradiction: (X': spol = zero) vs. r_nonzero
+            rw [lmf_empty] at X'
+            unfold toMvPolynomial_Finset at X'
+            -- unfold leading_monomial_finset at X'
+            simp at X'
+            -- apply Ideal.span_eq_bot.mp at X'
+            have lead_singleton: ∃ x, (leading_monomial_finset {s_red p q G G_nonzero}) = {x} := by {
+              unfold leading_monomial_finset
+              simp
               sorry
-          }
+            }
+            rcases lead_singleton with ⟨wm, h_wm⟩
+            rw [h_wm] at X'
+            simp at X'
+            apply r_nonzero
+            unfold MvPolynomial.multidiv
+            unfold MvPolynomial.multidiv_help
+            split
+            · sorry
+            · case _ _ _ _ heq _ =>
+              contrapose heq
+              rw [g_empty]
+              simp
+
+            -- apply Ideal.span_singleton_eq_bot.mp at X'
+            -- Singleton
+            -- sorry
 
           -- have mp_eqq: ∀ m: Monomial σ, m = (toMvPolynomial m).toMonomial (mono_poly_mono m) := by {
           --   sorry
@@ -343,10 +378,7 @@ lemma fundamental_thm_of_buchberger_step
           -- clear X'
           -- absurd member
           -- apply s_red_nin
-          sorry
-
         }
-
         rw [gt_iff_lt]
         rw [lt_iff_le_and_ne]
         trivial
